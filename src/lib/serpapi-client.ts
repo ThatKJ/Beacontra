@@ -10,13 +10,14 @@ import type {
   CachedResponse,
 } from './types';
 import { createCacheKey, createTieredCache } from './cache';
+import * as fixtures from './fixtures';
 
 const DEFAULT_BASE_URL = 'https://serpapi.com/search.json';
 const DEFAULT_TIMEOUT = 30000;
 const MAX_RETRIES = 3;
 const RETRY_BASE_DELAY = 1000;
 
-const ADVANCED_ENGINES = new Set<SerpApiEngine>([
+const ADVANCED_ENGINES: Set<string> = new Set([
   'google_maps',
   'google_maps_reviews',
   'google_maps_directions',
@@ -39,6 +40,8 @@ const ADVANCED_ENGINES = new Set<SerpApiEngine>([
   'google_trends_trending_now',
 ]);
 
+
+
 export class SerpApiClient {
   private apiKey: string;
   private baseUrl: string;
@@ -46,7 +49,6 @@ export class SerpApiClient {
   private maxRetries: number;
   private cache: CacheAdapter;
   private fixtureMode: boolean;
-  private fixturesPath: string;
 
   private inFlightRequests = new Map<string, RequestDeduplicationEntry<unknown>>();
   private creditUsage = 0;
@@ -58,14 +60,13 @@ export class SerpApiClient {
     this.maxRetries = options.maxRetries ?? MAX_RETRIES;
     this.cache = options.cache ?? createTieredCache();
     this.fixtureMode = options.fixtureMode ?? false;
-    this.fixturesPath = options.fixturesPath ?? './tests/fixtures';
   }
 
   estimateCredits(params: BaseSearchParams): CreditEstimate {
     const engine = params.engine;
     const isAdvanced = ADVANCED_ENGINES.has(engine);
     const estimatedCredits = isAdvanced ? 3 : 1;
-    return { estimatedCredits, engine, isAdvanced };
+    return { estimatedCredits, engine, isAdvanced: isAdvanced as boolean };
   }
 
   getCreditUsage(): number {
@@ -195,7 +196,7 @@ export class SerpApiClient {
           throw new SerpApiError('Invalid API key', params.engine, false, 401);
         }
         if (response.status === 400) {
-          const errorData = await response.json().catch(() => ({}));
+          const errorData = await response.json().catch(() => ({ error: 'Bad request' })) as { error?: string };
           throw new SerpApiError(errorData.error ?? 'Bad request', params.engine, false, 400);
         }
         throw new SerpApiError(`HTTP ${response.status}`, params.engine, false, response.status);
@@ -214,15 +215,9 @@ export class SerpApiClient {
   }
 
   private async loadFixture<T>(engine: SerpApiEngine): Promise<SerpApiResponse<T>> {
-    const fixtureName = `${engine}.json`;
-    const fixturePath = `${this.fixturesPath}/${fixtureName}`;
-
     try {
-      const response = await fetch(fixturePath);
-      if (!response.ok) {
-        throw new Error(`Fixture not found: ${fixturePath}`);
-      }
-      return await response.json() as SerpApiResponse<T>;
+      const module = await import(`../../tests/fixtures/${engine}.json`);
+      return module.default as SerpApiResponse<T>;
     } catch {
       return this.getEmptyFixture<T>(engine);
     }
@@ -285,6 +280,5 @@ export function createSerpApiClient(
     apiKey,
     cache,
     fixtureMode,
-    fixturesPath: '/tests/fixtures',
   });
 }

@@ -128,13 +128,211 @@ Full engineering-grade catalog already exists at `docs/SERPAPI_CAPABILITIES.md` 
 
 *(Pending §5.)*
 
-## 7. 20 Candidate Products
+## 7a. CRITICAL FINDING — the "verification agent" pattern is already crowded (2026-09-17, direct WebSearch check on the leading candidates below)
 
-*(Pending §4 and §6 — idea generation is downstream of knowing what's saturated and what's real.)*
+Before locking anything, I ran direct competitive searches on the two frontrunner candidates from the first ideation pass. Result: the mechanism itself — "AI agent cross-checks live search signals to verify whether something (a job, a vendor, a loan app) is legitimate" — is **already being built by multiple other hackathon teams right now**, not hypothetically:
 
-## 8. Top-8 Comparison
+- **Job-offer/recruiter verification, SerpApi-specific:** [JobShield](https://github.com/devy52/JobShield) ("AI agent that verifies job postings live — checking WHOIS domain records, real search results, and known scam patterns... an agent loop orchestrator decides which verification tools to call: WHOIS, live search, reviews search, social presence") and [SerpShield](https://github.com/0xConsole/serpshield) ("AI Threat Intelligence Agent powered by SerpApi + MCP") are near-exact mechanical duplicates of candidate #1 (TrustCheck Jobs). Plus [HireProof](https://github.com/Iron-Mark/Hackathon-HireProof) and [CareerShield-AI](https://github.com/workspacevedant/CareerShield-AI), and a crowded field of non-SerpApi consumer tools (JobScamScore, VerifyJobs, OfferGuard AI, ScamCheck, JobMeter, an MCP server called job-verify) solving the identical user problem.
+- **Vendor/procurement verification:** [vendorproof](https://github.com/simonlin1212/vendorproof) — "Evidence-first AI procurement desk backed by live SerpApi research" — same mechanism applied to B2B vendors, built for a concurrent hackathon (DevNetwork API+Cloud+AI 2026), demoting candidate #3's wedding-vendor angle too (mechanically identical even if the vertical differs).
+- **Rental-listing photo fraud:** [depositcheck](https://github.com/ishal1410/depositcheck) — "Check whether a rental listing's photos actually belong to the address... Built on SerpApi google_lens exact_matches" — clever use of an engine none of my 20 candidates used (`google_reverse_image`/`google_lens`), and directly relevant to candidate #6.
+- Loan-app legitimacy (#2) wasn't directly duplicated in this pass, but combined with the RBI-directory finding above (§7 intro), it's a weaker bet on a different axis.
 
-*(Pending §7.)*
+**Verdict: candidates #1, #2, #3, #6 (the "verify a person/business/listing's legitimacy" family) are downgraded from frontrunner to likely-reject.** Not because the mechanism is bad — it's clearly a strong, natural fit for MCP-style agentic SerpApi usage (which is exactly *why* so many other teams are independently arriving at it right now, this hackathon and adjacent ones) — but because originality is an explicit named judging criterion and "we found 4-5 near-identical projects in one search session" is a real, not hypothetical, risk. This is the mission's Phase 7/8 (competitor duplication + hostile judge) firing early, before the full background audit even lands, and it's a clean example of research changing the direction rather than confirming an initial hunch.
+
+**New direction that survives this check:** candidate #4 (Counterfeit & MRP-Violation Watch, brand-owner persona, not consumer persona) had no direct hackathon-project duplicate found, and — combined with the `google_lens`/reverse-image mechanism `depositcheck` demonstrated for a different vertical — can be sharpened into a **visual + commercial cross-verification** tool: don't just flag suspicious listings by price/seller metadata, but reverse-image-check the listing photos against the brand's official product images to catch stolen/mismatched photos (a concrete, hard, visually demoable technical problem, using an engine none of the crowded "verify a person" projects above are using for this purpose). B2B brand-owner persona is also structurally different from the consumer-scam-checker crowd, which lowers direct-overlap risk further. This is now the leading candidate pending the background research agents' full findings (§4, §6) — see revised entry below.
+
+## 7. 20 Candidate Products (DRAFT PASS — pending cross-check against §4/§6 when background research lands)
+
+Writing this now rather than waiting idle on the two background research agents, so GEMINI can start red-teaming immediately (per continuous-operation protocol) and so idea generation isn't serialized behind research that's already running in parallel. Will revise/kill/add entries once §4 (saturation) and §6 (evidence) land — flagged inline where a candidate is a likely mission-brief-flagged saturation risk.
+
+A pattern emerged while generating these: a large share of genuinely painful, frequent, evidence-rich Indian problems are **"is this real / can I trust it" problems** — job offers, loan apps, marketplace sellers, wedding vendors, colleges — where the only way to answer is to cross-check a claim against multiple *live* sources right now, because the thing you're checking (a listing, an app, a seller) is specifically trying to look legitimate at this moment. A static dataset or an LLM's training data can't do this; only current search data can. This is a materially different pattern from "aggregate SerpApi results into a dashboard" (OPENCODE's top 3 picks in TECHNICAL_FEASIBILITY.md) — it's verify → cross-reference → score confidence → flag risk, which is exactly the kind of complexity the mission brief calls out as *real* engineering rather than manufactured complexity. Several candidates below explore this pattern; §8 scoring will test whether it holds up.
+
+**EVIDENCE UPDATE (2026-09-17, direct WebSearch, not the background agent):** Checked real evidence for candidates #1 and #2 specifically since they were the early frontrunners — this changed the read, documenting per the mission's "let research change your mind" rule.
+- **Job scams (#1):** Real and large. India's National Cyber Crime Reporting Portal received 50,000+ job-scam complaints in 2025 (~6.4% YoY rise); a single Kanpur fake-recruitment call center busted by UP Police in April 2025 alone defrauded 1.2 lakh (120,000) job seekers using spoofed caller ID and fake company websites. [Business Standard](https://www.business-standard.com/india-news/work-from-home-scams-rising-in-india-here-s-all-you-must-know-about-them-123062000533_1.html), [Hirist](https://www.hirist.tech/blog/protect-yourself-from-online-job-scams-in-india/). **No official live/structured registry exists for verifying a recruiter/job posting** — the Cyber Crime Portal is for reporting after the fact, not pre-checking. This means there is genuinely no static-data alternative to a live cross-search approach.
+- **Loan apps (#2):** Real and large, but **materially changed by one new fact**: RBI operationalized an official "Digital Lending Apps (DLA)" directory on **2025-07-01** specifically so consumers can verify "a DLA's association with a [RBI-]Regulated Entity." [Medianama](https://www.medianama.com/2025/05/223-rbi-digital-lending-apps-centralised-directory/), [PIB](https://www.pib.gov.in/PressReleasePage.aspx?PRID=2241255&reg=3&lang=1). This is a **structured, authoritative, static-lookup alternative already built by the regulator for exactly this problem** — it weakens (does not kill) the "SerpApi is essential, nothing else can do this" argument for LoanCheck, since a judge could reasonably ask "why not just query RBI's own directory?" A defensible answer exists (most predatory apps deliberately aren't on any registry and mimic legitimate branding instead, so the real value is live corroborating signal — app-store developer-churn patterns, fresh news complaints — layered on top of a registry lookup, not the registry lookup itself) but it's a weaker, second-order SerpApi-necessity story than job-scam verification has. **Net effect: #1 (TrustCheck Jobs) is now the clearer frontrunner; #2 (LoanCheck) is demoted to a secondary/expansion vertical rather than the primary bet**, pending the competitive-saturation check in §4/§9.
+
+### 1. TrustCheck Jobs — Job Offer / Recruiter Legitimacy Verifier **[DEMOTED — see §7a: multiple direct SerpApi-hackathon duplicates found (JobShield, SerpShield, HireProof, CareerShield-AI) plus a crowded consumer-tool field. Kept below for transparency, not being pursued further as primary.]**
+- **Idea:** Paste a job posting or recruiter message; agent cross-checks the company's live footprint (Maps listing age/consistency, News for scam reports, whether the same "recruiter" is cross-posting identical listings under different company names) and returns a legitimacy score with evidence.
+- **Target user:** Freshers / first-time jobseekers in India (huge volume, high vulnerability to "pay a registration fee" / fake WFH scams).
+- **SerpApi:** `google_jobs`, `google_jobs_listing`, `google_maps`, `google_news`, `google` (company name + "scam"/"fraud" search).
+- **Why SerpApi essential:** The legitimacy signal only exists as a live cross-reference across sources that change daily (scam listings get taken down and re-posted under new names constantly) — a static blocklist goes stale immediately.
+- **Why different:** Not a job *search* tool (saturated); a job *verification* tool. No dashboard, one verdict.
+- **Core technical challenge:** Entity resolution (is "TechCorp Solutions" in this posting the same as the legit Maps listing, or a copycat name?), confidence scoring across weak/conflicting signals.
+- **Demo moment:** Paste two postings live — one real, one from a known scam pattern — watch the agent independently reach different verdicts with visible evidence trail.
+- **Biggest risk:** False negatives could give false confidence — needs honest confidence bands, not binary yes/no. Legal caution around "accusing" a real company.
+- **Feasibility:** Medium-high.
+
+### 2. LoanCheck — Predatory Digital Lending App Verifier
+- **Idea:** Paste a loan-app name/link; agent checks Play Store listing signals (developer name reuse across pulled/relisted apps, review-bombing patterns, permissions), live news for RBI action/complaints, and app-store presence consistency, returning a risk verdict.
+- **Target user:** First-time smartphone users / lower-income borrowers targeted by predatory instant-loan apps.
+- **SerpApi:** `google_play`, `google_play_product`, `google_play_reviews`, `google_news`, `google`.
+- **Why SerpApi essential:** RBI's own published lists lag; apps reappear under new names within days — only live Play Store + live news data can catch a *current* repost.
+- **Why different:** This is a real, well-documented, high-stakes India-specific crisis (RBI's 2022 digital lending guidelines followed widely reported borrower harassment and multiple suicides) — not a generic "app store analytics" tool.
+- **Core technical challenge:** Detecting developer/name-reuse patterns and review anomalies without a labeled dataset; careful, non-sensational UX given the human stakes.
+- **Demo moment:** Check a known-flagged app pattern vs. a legitimate bank app side by side.
+- **Biggest risk:** Sensitive/high-stakes subject matter; must avoid overclaiming ("we detect scams") vs. accurately framing ("we surface risk signals"). Needs careful legal framing (not defamatory).
+- **Feasibility:** Medium — Play Store engine coverage/consistency needs verification.
+
+### 3. VendorCheck — Wedding/Event Vendor Advance-Payment Fraud Screener
+- **Idea:** Same cross-verification mechanism as #1, applied to wedding photographers/caterers/venues, where advance-payment fraud is common and the India wedding industry is enormous.
+- **Target user:** Couples/families booking vendors.
+- **SerpApi:** `google_maps`, `google_maps_reviews`, `google_news`, `google`.
+- **Why SerpApi essential:** Same as #1 — live cross-reference, not static.
+- **Why different:** Different vertical of the same mechanism; large addressable market, very demo-friendly (visual, relatable to any judge).
+- **Core technical challenge:** Same entity-resolution/confidence problem as #1.
+- **Demo moment:** Similar side-by-side reveal.
+- **Biggest risk:** Overlaps mechanically with #1 and #8 below — picking more than one "verification vertical" would be redundant, not additive.
+- **Feasibility:** Medium-high.
+
+### 4. Counterfeit & MRP-Violation Watch — Brand Protection for Indian D2C Sellers **[UPDATED — now leading candidate, see §7a]**
+- **Idea:** Brand owner enters product name/SKU + uploads/links an official product photo; agent scans `google_shopping`/marketplace listings for unauthorized sellers and below-MRP pricing, **then reverse-image-verifies each suspect listing's photos against the official product image** (`google_reverse_image`/`google_lens`) to catch stolen stock photos, mismatched variants, or visually-inconsistent counterfeit listings — producing a ranked, evidence-backed takedown-candidate list (price evidence + visual evidence + seller evidence together, not any one alone).
+- **Target user:** Indian D2C brand owners / small manufacturers (large, underserved segment; Meesho/Amazon/Flipkart seller fraud and counterfeiting is a well-documented pain point — commercial brand-protection SaaS like MarqVision/Bustem/LdotR exist but are enterprise-priced and not India-D2C/hackathon-accessible; no direct SerpApi hackathon-project duplicate found in the 2026-09-17 competitive check).
+- **SerpApi:** `google_shopping`, `google_shopping_filters`, `amazon`/`amazon_product`, `google_reverse_image`/`google_lens` (the visual-verification engine — genuinely underused per §4/§7a, and the one piece of hard-to-fake evidence an LLM-alone approach cannot produce).
+- **Why SerpApi essential:** Live marketplace listing data (price, seller, photos) has no public alternative API, and image-level product verification specifically requires a reverse-image/visual-search engine, not a text API — removing SerpApi removes the entire evidentiary basis of the tool, not just a convenience.
+- **Why different from OPENCODE's "Price Intelligence" concept AND from the crowded "verify legitimacy" family in §7a:** Inverted persona (brand owner policing their own listings, not a consumer or jobseeker protecting themselves) + a visual-evidence mechanism none of the found competitors use for this purpose = lowest direct-overlap risk found so far.
+- **Core technical challenge:** Product-variant matching/deduplication across sellers with inconsistent titles; combining three independent weak signals (price anomaly, seller anomaly, visual mismatch) into one ranked confidence score — genuine multi-signal fusion, not a single API call summarized.
+- **Demo moment:** Real brand + real marketplace scan surfacing a listing whose photo doesn't match the official product — a visually obvious, hard-to-dispute "gotcha" moment that plays well on screen.
+- **Biggest risk:** Needs a cooperating brand/SKU (or a well-chosen public example) to demo convincingly; must stay framed as "evidence for the brand owner to review," not an automated accusation, to avoid the defamation-adjacent trap that flagged candidate #5 and #15.
+- **Feasibility:** Medium — `google_lens` engine verified directly (2026-09-17, https://serpapi.com/google-lens-api): takes `url` (image URL) or an uploaded `image_id`, `type` parameter supports `products`, `exact_matches` (identical-image matches — exactly what's needed here), `visual_matches`, `about_this_image`. This is real, buildable, not a documentation-only feature.
+- **Evidence (2026-09-17, direct WebSearch, real numbers with sources):** This is a large, current, well-documented Indian problem, not a hypothetical one. 35% of urban Indian consumers bought counterfeit goods online in the past year; India's counterfeit market is estimated at **$58.7B/year**, costing the government **$16.2B in lost tax revenue** ([source](https://the420.in/e-commerce-deception-99-of-products-on-amazon-flipkart-fake/) — figure attribution needs a second corroborating source before using in the pitch deck, flagged). BIS raided an Amazon Delhi warehouse in **March 2025**, seizing 3,500+ electrical appliances (~₹70 lakh) with forged ISI certification marks, and a Flipkart Trinagar warehouse (590 pairs of footwear, ₹6 lakh, no ISI marks) ([Moneylife](https://www.moneylife.in/article/bis-cracks-down-on-amazon-and-flipkart-sellers-for-fake-isi-mark-substandard-goods/76755.html)). Meesho removed 4.2 million counterfeit listings in six months. Most directly on-point: the **Delhi High Court restricted Flipkart's "latching-on" feature in November 2024** specifically because it let third-party sellers list counterfeit/unauthorized goods directly under a genuine brand's existing product listing ([EU IP Helpdesk](https://intellectual-property-helpdesk.ec.europa.eu/news-events/news/delhi-high-court-restricts-latching-feature-flipkarts-website-misleading-users-buy-fake-or-deceiving-2024-11-28_en)) — this is a courts-recognized, named version of exactly the mechanism this product targets (unauthorized sellers piggybacking on a legitimate listing), which is about as strong as problem-validation evidence gets for a hackathon pitch.
+
+### 5. CollegeCheck — Placement Claim Reality-Check for Prospective Students
+- **Idea:** Enter a private college name; agent cross-checks claimed placement statistics/accreditation against live news coverage, `google_scholar` faculty output, and review sentiment, flagging inflated or unverifiable claims.
+- **Target user:** 12th-grade students/parents choosing a private engineering/MBA college (huge, high-stakes, once-a-year decision; India has thousands of low-quality private colleges overstating placement rates — well-documented media pattern).
+- **SerpApi:** `google_news`, `google_scholar`, `google_maps_reviews`, `google`.
+- **Why SerpApi essential:** Claims must be checked against *current* news/reviews, not a static ranking list (which colleges already game).
+- **Why different:** Targets a specific, high-stakes, once-a-year decision with real financial consequences (education loans) rather than generic "research assistant."
+- **Core technical challenge:** Extracting/verifying quantitative claims from unstructured news and reviews; confidence scoring under sparse evidence.
+- **Biggest risk:** Defamation-adjacent — must present as "unverifiable" not "false," needs careful evidence-first UX.
+- **Feasibility:** Medium.
+
+### 6. ResaleCheck — Second-Hand Vehicle/Gadget Listing & Seller Fraud Screener
+- **Idea:** Same verification mechanism applied to OLX/Quikr-style used-vehicle or gadget listings — fair-price check via `google_shopping` + seller-history cross-check via Maps/News.
+- **Target user:** Used-vehicle/gadget buyers.
+- **Why flagged:** Third variant of the "verification agent" pattern (see #1, #3) — good evidence exists (resale fraud is common) but risks diluting focus if we pick a different vertical of the same mechanism; keep as a candidate only if #1/#2 don't pan out.
+- **SerpApi:** `google_shopping`, `google_maps`, `google_news`.
+- **Feasibility:** Medium — weakest SerpApi-native data source (classifieds aren't a SerpApi engine).
+
+### 7. AppRisk — Play Store Scam-App Pattern Detector (general, not loan-specific)
+- **Idea:** Generalized version of #2 across all app categories (not just loans) — detects developer-identity churn and review-manipulation patterns.
+- **Why demoted vs #2:** Loses the specific, evidence-rich, emotionally resonant India narrative (RBI crackdown) that makes #2 compelling; "generic app safety checker" is weaker and closer to existing App Store review-analysis tools.
+- **Feasibility:** Medium.
+
+### 8. ClaimCheck — Scholarly-vs-Media Misinformation Screener
+- **Idea:** Enter a viral health/science claim circulating in Indian news/WhatsApp-forward culture; agent searches `google_scholar` for the actual underlying research and `google_news`/`google_related_questions` for how it's being reported, surfacing the gap between the study and the claim.
+- **Target user:** Journalists, fact-checkers, health-conscious consumers.
+- **SerpApi:** `google_scholar`, `google_news`, `google_related_questions`, `google`.
+- **Why SerpApi essential:** Needs *current* circulating claims (News/PAA) cross-referenced against the *current* state of literature (Scholar) — a moving target on both sides.
+- **Why different:** Existing fact-checkers (Alt News, Boom, PolitiFact) are manual/human; this is a live scholarly cross-reference tool, a distinct mechanism, Knowledge & Public Interest track.
+- **Core technical challenge:** Matching a lay claim to the correct underlying paper (semantic, not keyword); representing scientific uncertainty honestly.
+- **Biggest risk:** Health/science misinformation is a crowded, sensitive space; risk of judges seeing it as "yet another fact-checker."
+- **Feasibility:** Medium-low (hardest NLP matching problem of the set).
+
+### 9. PatentGap — Prior-Art & Novelty Quick-Check for Indian Student Inventors/Makers
+- **Idea:** Before a student/startup builds or files, agent searches `google_patents` + `google_scholar` for existing prior art and returns a novelty confidence read plus nearest matches.
+- **Target user:** Indian engineering students, campus incubator founders (IIT/IISc/NIT ecosystem is large and specifically referenced as an audience OPENCODE also considered for Concept 6).
+- **SerpApi:** `google_patents`, `google_patents_details`, `google_scholar`.
+- **Why different from OPENCODE's Academic Research concept:** That concept is a citation-network browser (niche, low demo wow, OPENCODE scored it 3/5 wow). This is action-oriented (should I file/build this?) with a single clear yes/no-ish output, much sharper demo.
+- **Biggest risk:** Niche audience (only relevant to inventors, not "everyone"), harder to make emotionally compelling to a general judge panel in 30 seconds.
+- **Feasibility:** Medium.
+
+### 10. SchemeWatch — Government Scheme Eligibility & Change Monitor
+- **Idea:** Citizen enters basic profile (state, occupation, income band); agent finds currently-active central+state schemes via live news/search (not a static registry, which goes stale) and flags recent changes/deadlines.
+- **Target user:** Rural/semi-urban citizens navigating subsidy/scheme access (myscheme.gov.in exists but is self-reported/often outdated).
+- **SerpApi:** `google_news`, `google`, `google_related_questions`.
+- **Why weaker:** SerpApi dependency is real but thinner — a good chunk of this could theoretically be built off a periodically-scraped static registry instead; must show *why live search specifically* (deadline changes, discontinued schemes) is essential, not just convenient.
+- **Feasibility:** Medium — data structure is the hard part (schemes aren't a structured SerpApi engine).
+
+### 11. Kirana Price Radar — Hyperlocal Competitive Pricing for Small Retailers
+- **Idea:** A neighborhood kirana/small retailer benchmarks their prices against nearby competitors and online (`google_shopping`) for fast-moving SKUs.
+- **Target user:** India's ~13M small retail stores (huge underserved segment).
+- **Why weaker:** Small retailers are price-takers from distributors, not price-setters with much room to react; unclear the "decision" this enables is strong enough. Likely fails the "does this change a real decision" test — flagged for elimination pending problem evidence.
+- **SerpApi:** `google_shopping`, `google_maps`.
+- **Feasibility:** Medium.
+
+### 12. Accessible Places — Disability-Access-Aware Local Discovery
+- **Idea:** Mines `google_maps_reviews` text specifically for accessibility mentions (ramp, elevator, accessible washroom) to build an accessibility-confidence score per place — India has very poor structured accessibility data.
+- **Target user:** Wheelchair users / mobility-impaired people in Indian cities.
+- **Why interesting:** A genuinely underserved angle inside the saturated "local discovery" track (Travel & Local Discovery) — narrow, real, original wedge rather than "yet another places app."
+- **SerpApi:** `google_maps`, `google_maps_reviews`.
+- **Core technical challenge:** Extracting accessibility signal from free-text reviews reliably (most reviews never mention it — sparse-signal problem, needs honest "unknown" states not false confidence).
+- **Biggest risk:** Sparse signal (most reviews don't mention accessibility) could mean "unknown" for the vast majority of places, weakening demo.
+- **Feasibility:** Medium.
+
+### 13. InfluenceCheck — Creator Brand-Deal Authenticity Screener
+- **Idea:** Brands vetting an influencer cross-check claimed reach against `instagram_profile`/`youtube` engine signals and news for past controversy/fraud reports.
+- **Target user:** Small D2C brands doing influencer marketing (fast-growing India creator economy).
+- **SerpApi:** `instagram_profile`, `youtube`, `google_news`.
+- **Biggest risk:** Instagram/engagement data via SerpApi may be shallow (profile-level, not deep engagement analytics) — needs verification before relying on it.
+- **Feasibility:** Medium-low pending engine depth check.
+
+### 14. ExportScout — Market-Entry Intelligence for Indian MSME Exporters
+- **Idea:** MSME manufacturer picks a product + target country; agent surfaces demand signal (`google_trends` geo=target), competing listings (`google_shopping` in that market), and IP conflicts (`google_patents`) before they invest in export.
+- **Target user:** Indian MSME exporters (large policy-relevant segment; India government actively pushing MSME exports).
+- **SerpApi:** `google_trends`, `google_shopping`, `google_patents`, `google_news`.
+- **Why interesting:** Multi-engine synthesis genuinely needed (demand + competition + IP risk = three different questions, one decision); good technical-complexity story.
+- **Biggest risk:** B2B persona is harder to demo emotionally to a judge panel in 30 seconds than a consumer pain point.
+- **Feasibility:** Medium.
+
+### 15. Matrimonial/Big-Transaction Identity Consistency Checker
+- **Idea:** Cross-check a person's claimed profile (employer, location) against public search footprint before a major decision (arranged-marriage matches, large peer-to-peer transactions).
+- **Why flagged HIGH RISK / likely reject:** Real privacy/ethics/defamation exposure — verifying private individuals is explicitly the kind of thing the mission brief and general product ethics flag as a legal problem "that cannot be solved" easily. Keeping on the list for completeness/transparency but pre-flagging for elimination in §5.
+- **Feasibility:** High technical feasibility, low ethical feasibility.
+
+### 16. Food Safety Reputation Aggregator
+- **Idea:** Cross `google_maps_reviews` sentiment with local news for food-safety incidents near a restaurant.
+- **Why weaker:** Overlaps mechanically with #1/#3/#12 (review-mining pattern) without a distinct enough decision; FSSAI-type structured data isn't a SerpApi engine, so the "safety" framing may overclaim what review-text mining can actually support.
+- **Feasibility:** Medium.
+
+### 17. AI Agent Concierge for Multi-City Festival/Event Travel (Kumbh Mela-style mass events)
+- **Idea:** For India's large periodic mass-gathering events (Kumbh Mela, major festivals), an agent plans logistics using `google_events`, `google_hotels`, `google_flights`, `google_maps` under real capacity/crowding constraints.
+- **Why flagged:** Falls inside the mission-brief-flagged "generic travel planner" saturation risk unless the mass-event/crowding angle is sharp enough to differentiate — needs §4 evidence check.
+- **Feasibility:** Medium, travel engines are credit-heavier (per OPENCODE's TECHNICAL_FEASIBILITY.md Concept 5 analysis).
+
+### 18. SerpApi-native connector for an under-served open-source agent framework (Open-Source Integrations track)
+- **Idea:** Ship a genuinely useful, missing SerpApi provider/tool-plugin for a real open-source project that doesn't have one yet (candidate frameworks TBD — needs a gap-check against `serpapi-search-tools`'s already-supported list: OpenAI Agents, LangChain, LangGraph, CrewAI, LlamaIndex, Claude Agent SDK, MS Agent Framework, AutoGen, Haystack, Semantic Kernel, Agno, smolagents, Google ADK — i.e. most major frameworks are *already* covered, so the genuinely-missing gap may be narrow).
+- **Why risky:** `serpapi-search-tools` already covers the obvious frameworks (verified §3) — the "gap" this track wants may not exist in an obvious form, or exists only in a niche/non-Indian-specific tool, weakening the India-relevance/usefulness axis. A library alone also has weak demo potential (mission brief: prefer one unforgettable demo).
+- **Feasibility:** Depends entirely on finding a real gap — unresearched.
+
+### 19. Local Service Trust Score (electrician/plumber/tutor)
+- **Idea:** Same review-mining + business-age pattern as #1/#3/#12 applied to informal home-services.
+- **Why weaker:** Fourth variant of the same mechanism (see #1, #3, #6) — redundant with stronger siblings; India's home-services trust market is already served by Urban Company (dominant, well-funded incumbent) more directly than job-scam or loan-app spaces are served by anyone.
+- **Feasibility:** Medium.
+
+### 20. News-Velocity Early Warning for Price-Sensitive Categories (Commerce & Market Intelligence)
+- **Idea:** Detect early demand spikes (`google_trends_trending_now` + `google_news` velocity) for specific product categories before mainstream price/stock impact, for small e-commerce sellers to react early (e.g., festival-season demand spikes).
+- **Why weaker:** Close to OPENCODE's "Trend Detection" concept (already scored 23/30, differentiation only 3/5, "established competitors" per OPENCODE's own notes) — likely redundant, kept only for completeness.
+- **Feasibility:** Medium-high (OPENCODE's own credit-efficiency data: ~7 calls, very cheap).
+
+---
+
+**Early read, superseded twice already (see §7a for the full reasoning — this is intentionally left as a visible trail, not cleaned up, so the decision process is auditable):** First pass favored #1 (TrustCheck Jobs) on problem-evidence strength. A direct competitive check then found #1, #2, #3, #6 all belong to an already-crowded "AI agent verifies legitimacy via live search" pattern with multiple near-duplicate hackathon projects. **Current leading candidate is #4 (Counterfeit & MRP-Violation Watch), sharpened with a `google_lens`/reverse-image visual-verification mechanism** — no direct duplicate found, inverted (B2B brand-owner) persona lowers overlap risk further, and the visual-evidence mechanism is a genuinely underused engine. Still not locked — pending §4 (full gallery audit) and §6 (broader problem evidence) from the two background research agents, which may surface either a duplicate of this too or a stronger alternative entirely.
+
+## 8. Top-8 Comparison (preliminary — will confirm/revise once background agents land)
+
+**Elimination pass (Phase 5) first, applying the mission's reject criteria plus §7a's fresh finding:**
+- REJECTED — decorative/duplicate mechanism: #1 TrustCheck Jobs, #3 VendorCheck, #6 ResaleCheck (near-duplicate hackathon projects found, §7a).
+- REJECTED — unsolvable legal/privacy exposure: #15 Matrimonial Identity Checker (verifying private individuals).
+- REJECTED — Gemini VETO, saturated + no AI/engineering depth: OPENCODE Concept 3 (Price Intelligence).
+- REJECTED — redundant with a stronger sibling already in the pool: #7 AppRisk (weaker version of #2), #16 Food Safety (weaker version of #12), #19 Local Service Trust (Urban Company already dominant + redundant mechanism), #20 News-Velocity (redundant with OPENCODE Trend Detection, which itself scored weakest-differentiation in OPENCODE's own table).
+- DEPRIORITIZED — weak SerpApi indispensability or weak decision-impact: #10 SchemeWatch, #11 Kirana Price Radar, #13 InfluenceCheck, #18 Open-Source Integration (no confirmed gap exists — most major agent frameworks already covered by `serpapi-search-tools`, verified §3).
+- DEPRIORITIZED — saturated track per mission brief, needs evidence to survive: #17 mass-event travel, OPENCODE Concept 5 (Travel Planning).
+- Remaining #2 LoanCheck: same mechanism family as the rejected trio, but distinct enough evidence (RBI directory is a *different* kind of counter-evidence than a direct hackathon duplicate) — kept as 8th-ranked / expansion-vertical option rather than rejected outright.
+
+**Top 8 surviving candidates, scored 0-10 (CLAUDE's own judgment framework, not official hackathon weights):**
+
+| # | Concept | Idea strength | Originality | Tech complexity | Usefulness | SerpApi necessity | India relevance | Demo wow | Competitive risk (10=low risk) | **Total /80** |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | **BrandGuard** — Counterfeit & MRP-Violation Watch w/ visual verification (cand. #4) | 9 | 8 | 8 | 8 | 9 | 9 | 8 | 8 | **67** |
+| 2 | Job Market Salary/Skill Extraction (OPENCODE #2, sharpened per Gemini: extraction pipeline is the product, not the dashboard) | 7 | 6 | 8 | 8 | 8 | 8 | 6 | 6 | **57** |
+| 3 | Local Business Intelligence w/ temporal wedge (OPENCODE #1 + Gemini's gentrification/price-drift angle) | 6 | 6 | 7 | 6 | 7 | 8 | 7 | 5 | **52** |
+| 4 | ClaimCheck — scholarly-vs-media misinformation screener (cand. #8) | 7 | 6 | 5 | 6 | 6 | 5 | 5 | 6 | **46** |
+| 5 | ExportScout — MSME export market-entry intelligence (cand. #14) | 6 | 6 | 7 | 6 | 7 | 8 | 4 | 7 | **51** |
+| 6 | PatentGap — novelty/prior-art quick-check (cand. #9) | 6 | 5 | 6 | 5 | 7 | 5 | 4 | 6 | **44** |
+| 7 | Accessible Places — accessibility-mined local discovery (cand. #12) | 6 | 7 | 5 | 6 | 5 | 6 | 5 | 7 | **47** |
+| 8 | LoanCheck — predatory lending app screener (cand. #2, demoted) | 8 | 4 | 6 | 8 | 5 | 9 | 7 | 3 | **50** |
+
+**Read:** BrandGuard leads by a wide margin (67 vs. next-best 57) — it's the only candidate scoring ≥8 on both SerpApi necessity *and* competitive-risk-is-low simultaneously, which is the actual gatekeeper combination given the hackathon's explicit "meaningful usage" rule and originality criterion. Job Market Analytics (#2, table) is a credible, safer runner-up if BrandGuard's demo mechanics don't pan out in build (Gemini independently reached a similar view in `GEMINI_CONCEPT_RED_TEAM.md`). Everything below rank 3 is meaningfully weaker on multiple axes at once, not just one.
 
 ## 9. Top-5 Competitor Audit
 

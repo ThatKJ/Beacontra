@@ -1,0 +1,53 @@
+{
+  "search_metadata": {
+    "id": "test-trends-1",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/test-trends-1.json",
+    "created_at": "2026-09-17T10:00:00Z",
+    "processed_at": "2026-09-17T10:00:01Z",
+    "total_time_taken": 0.95
+  },
+  "search_parameters": {
+    "engine": "google_trends",
+    "q": "specialty coffee, cold brew, pour over, coffee subscription",
+    "geo": "IN-KA",
+    "date": "now 7-d",
+    "hl": "en"
+  },
+  "search_information": {},
+  "interest_over_time": {
+    "timeline_data": [
+      {"date": "2026-09-10", "values": [45, 38, 22, 15]},
+      {"date": "2026-09-11", "values": [52, 41, 25, 18]},
+      {"date": "2026-09-12", "values": [48, 39, 23, 16]},
+      {"date": "2026-09-13", "values": [55, 44, 28, 20]},
+      {"date": "2026-09-14", "values": [62, 48, 31, 22]},
+      {"date": "2026-09-15", "values": [68, 52, 35, 25]},
+      {"date": "2026-09-16", "values": [71, 55, 38, 28]},
+      {"date": "2026-09-17", "values": [65, 51, 33, 24]}
+    ]
+  },
+  "interest_by_region": [
+    {"location": "Bengaluru", "value": 100},
+    {"location": "Mumbai", "value": 78},
+    {"location": "Delhi", "value": 72},
+    {"location": "Hyderabad", "value": 65},
+    {"location": "Chennai", "value": 58},
+    {"location": "Pune", "value": 55},
+    {"location": "Kolkata", "value": 48}
+  ],
+  "related_topics": [
+    {"topic": {"title": "Third Wave Coffee", "type": "Company"}, "value": 100},
+    {"topic": {"title": "Blue Tokai", "type": "Company"}, "value": 85},
+    {"topic": {"title": "Specialty Coffee Association", "type": "Organization"}, "value": 60},
+    {"topic": {"title": "Coffee Roasting", "type": "Topic"}, "value": 55},
+    {"topic": {"title": "Single Origin Coffee", "type": "Topic"}, "value": 50}
+  ],
+  "related_queries": [
+    {"query": "best coffee beans bangalore", "value": 95},
+    {"query": "cold brew coffee recipe", "value": 88},
+    {"query": "coffee subscription india", "value": 72},
+    {"query": "pour over coffee technique", "value": 65},
+    {"query": "specialty coffee vs regular coffee", "value": 58}
+  ]
+}

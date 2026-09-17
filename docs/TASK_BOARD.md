@@ -97,6 +97,16 @@
 - [ ] Build succeeds
 - [ ] Lint passes
 
+### T-016: QA Engineering Fixes (Gemini)
+**OWNER:** GEMINI
+**STATUS:** DONE
+**PRIORITY:** P1
+**FILES:** src/index.ts, package.json
+**DEPENDENCIES:** None
+**ACCEPTANCE CRITERIA:**
+- [x] Fix CommonJS `require` usage in `src/index.ts` for Cloudflare Workers.
+- [x] Fix `vitest` version peer dependency conflict in `package.json`.
+
 ### T-008: Demo Readiness
 **OWNER:** OPENCODE
 **STATUS:** TODO

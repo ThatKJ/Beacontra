@@ -1,0 +1,76 @@
+{
+  "search_metadata": {
+    "id": "test-shopping-1",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/test-shopping-1.json",
+    "created_at": "2026-09-17T10:00:00Z",
+    "processed_at": "2026-09-17T10:00:01Z",
+    "total_time_taken": 1.87
+  },
+  "search_parameters": {
+    "engine": "google_shopping",
+    "q": "iPhone 15 128GB",
+    "location": "Bangalore, Karnataka, India",
+    "gl": "in",
+    "hl": "en"
+  },
+  "search_information": {
+    "total_results": 1250,
+    "time_taken_displayed": 0.67,
+    "query_displayed": "iPhone 15 128GB"
+  },
+  "shopping_results": [
+    {
+      "position": 1,
+      "title": "Apple iPhone 15 (128 GB) - Black",
+      "product_link": "https://www.flipkart.com/apple-iphone-15-black-128-gb/p/itm123",
+      "source": "Flipkart",
+      "price": "₹72,999",
+      "extracted_price": 72999,
+      "rating": 4.7,
+      "reviews": 12450,
+      "thumbnail": "https://rukminim2.flixcart.com/image/...",
+      "delivery": "Free delivery by Tomorrow",
+      "extensions": ["Official Apple Store", "No Cost EMI", "Exchange Offer"]
+    },
+    {
+      "position": 2,
+      "title": "Apple iPhone 15 128GB Blue",
+      "product_link": "https://www.amazon.in/dp/B0CHX1W1XY",
+      "source": "Amazon",
+      "price": "₹73,900",
+      "extracted_price": 73900,
+      "rating": 4.6,
+      "reviews": 8920,
+      "thumbnail": "https://m.media-amazon.com/images/I/...",
+      "delivery": "FREE Delivery by Amazon",
+      "extensions": ["Amazon Delivered", "Bank Offer", "Exchange"]
+    },
+    {
+      "position": 3,
+      "title": "iPhone 15 128GB - Pink",
+      "product_link": "https://www.reliancedigital.in/apple-iphone-15/p/123456",
+      "source": "Reliance Digital",
+      "price": "₹74,999",
+      "extracted_price": 74999,
+      "rating": 4.5,
+      "reviews": 2100,
+      "thumbnail": "https://www.reliancedigital.in/medias/...",
+      "delivery": "Standard Delivery in 2-3 days",
+      "extensions": ["In-Store Pickup Available", "Extended Warranty"]
+    },
+    {
+      "position": 4,
+      "title": "Apple iPhone 15 128GB Green",
+      "product_link": "https://www.croma.com/apple-iphone-15-/p/123457",
+      "source": "Croma",
+      "price": "₹73,490",
+      "extracted_price": 73490,
+      "rating": 4.6,
+      "reviews": 1850,
+      "thumbnail": "https://images.croma.com/...",
+      "delivery": "Delivery by Sep 20",
+      "extensions": ["Croma Assured", "Easy EMI", "ZipCare"]
+    }
+  ]
+}

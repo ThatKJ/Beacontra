@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { SerpApiClient, SerpApiError } from './lib/serpapi-client';
+import { createTieredCache } from './lib/cache';
 import type { BaseSearchParams, SerpApiEngine, SerpApiResponse } from './lib/types';
 
 interface Env {
@@ -44,6 +45,7 @@ app.post('/api/search', async (c) => {
     });
   } catch (error) {
     if (error instanceof SerpApiError) {
+      const statusCode = error.statusCode >= 400 && error.statusCode < 600 ? error.statusCode : 502;
       return c.json(
         {
           error: error.message,
@@ -51,7 +53,7 @@ app.post('/api/search', async (c) => {
           isRateLimited: error.isRateLimited,
           statusCode: error.statusCode,
         },
-        error.statusCode >= 400 && error.statusCode < 500 ? error.statusCode : 502
+        statusCode as 400 | 401 | 403 | 404 | 429 | 500 | 502 | 503
       );
     }
     console.error('Search error:', error);
@@ -83,8 +85,3 @@ app.get('/api/usage', (c) => {
 });
 
 export default app;
-
-function createTieredCache(kv?: KVNamespace) {
-  const { createTieredCache } = require('./lib/cache');
-  return createTieredCache(kv);
-}

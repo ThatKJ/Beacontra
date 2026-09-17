@@ -193,7 +193,7 @@ export const TrendsDataPoint = z.object({
 });
 export type TrendsDataPoint = z.infer<typeof TrendsDataPoint>;
 
-export const SerpApiResponse<T = unknown> = z.object({
+export const SerpApiResponseSchema = z.object({
   search_metadata: SearchMetadata,
   search_parameters: BaseSearchParams,
   search_information: SearchInformation.optional(),
@@ -222,7 +222,7 @@ export const SerpApiResponse<T = unknown> = z.object({
   })).optional(),
   error: z.string().optional(),
 }).passthrough();
-export type SerpApiResponse<T = unknown> = z.infer<typeof SerpApiResponse<T>>;
+export type SerpApiResponse<T = unknown> = z.infer<typeof SerpApiResponseSchema> & { data?: T };
 
 export interface CachedResponse<T> {
   data: T;

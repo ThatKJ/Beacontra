@@ -1,0 +1,89 @@
+{
+  "search_metadata": {
+    "id": "test-jobs-1",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/test-jobs-1.json",
+    "created_at": "2026-09-17T10:00:00Z",
+    "processed_at": "2026-09-17T10:00:02Z",
+    "total_time_taken": 2.12
+  },
+  "search_parameters": {
+    "engine": "google_jobs",
+    "q": "backend engineer bangalore",
+    "location": "Bangalore, Karnataka, India",
+    "gl": "in",
+    "hl": "en"
+  },
+  "search_information": {
+    "total_results": 2450,
+    "time_taken_displayed": 0.78,
+    "query_displayed": "backend engineer bangalore"
+  },
+  "jobs_results": [
+    {
+      "job_id": "job_123456",
+      "title": "Senior Backend Engineer - Go/Python",
+      "company_name": "Razorpay",
+      "location": "Bangalore, Karnataka, India",
+      "via": "LinkedIn",
+      "description": "We're looking for a Senior Backend Engineer to join our Core Banking team. You'll build scalable payment infrastructure processing millions of transactions daily. Strong experience with Go, Python, distributed systems, and PostgreSQL required. Salary: ₹35-55 LPA + ESOPs.",
+      "salary": "₹35,00,000 - ₹55,00,000 per year",
+      "job_type": ["Full-time"],
+      "posted_at": "2026-09-15",
+      "apply_link": "https://www.linkedin.com/jobs/view/123456",
+      "company_logo": "https://media.licdn.com/dms/image/..."
+    },
+    {
+      "job_id": "job_123457",
+      "title": "Backend Developer - Node.js/TypeScript",
+      "company_name": "Swiggy",
+      "location": "Bangalore, Karnataka, India",
+      "via": "Naukri",
+      "description": "Join our Order Management team building high-throughput systems. Experience with Node.js, TypeScript, Redis, Kafka, and microservices architecture. 3+ years experience. Salary: ₹25-40 LPA.",
+      "salary": "₹25,00,000 - ₹40,00,000 per year",
+      "job_type": ["Full-time"],
+      "posted_at": "2026-09-14",
+      "apply_link": "https://www.naukri.com/job-listings/123457",
+      "company_logo": "https://media.licdn.com/dms/image/..."
+    },
+    {
+      "job_id": "job_123458",
+      "title": "Staff Backend Engineer - Java/Kotlin",
+      "company_name": "PhonePe",
+      "location": "Bangalore, Karnataka, India",
+      "via": "Company Career Site",
+      "description": "Lead backend architecture for UPI payment platform. 8+ years experience with Java, Kotlin, Spring Boot, distributed systems, and system design. Salary: ₹60-90 LPA + significant equity.",
+      "salary": "₹60,00,000 - ₹90,00,000 per year",
+      "job_type": ["Full-time"],
+      "posted_at": "2026-09-13",
+      "apply_link": "https://careers.phonepe.com/jobs/123458",
+      "company_logo": "https://media.licdn.com/dms/image/..."
+    },
+    {
+      "job_id": "job_123459",
+      "title": "Backend Engineer - Rust/Go",
+      "company_name": "Zerodha",
+      "location": "Bangalore, Karnataka, India (Remote-first)",
+      "via": "Twitter",
+      "description": "Building next-gen trading infrastructure. Rust and Go expertise required. Experience with low-latency systems, WebSocket, and financial protocols. Salary: ₹40-70 LPA. Remote-friendly.",
+      "salary": "₹40,00,000 - ₹70,00,000 per year",
+      "job_type": ["Full-time", "Remote"],
+      "posted_at": "2026-09-12",
+      "apply_link": "https://zerodha.tech/jobs/123459",
+      "company_logo": "https://media.licdn.com/dms/image/..."
+    },
+    {
+      "job_id": "job_123460",
+      "title": "Backend Engineer II - Python/Django",
+      "company_name": "Meesho",
+      "location": "Bangalore, Karnataka, India",
+      "via": "Instahyre",
+      "description": "Scale our marketplace backend serving 100M+ users. Python, Django, MySQL, Redis, Kafka. 2-4 years experience. Salary: ₹20-35 LPA.",
+      "salary": "₹20,00,000 - ₹35,00,000 per year",
+      "job_type": ["Full-time"],
+      "posted_at": "2026-09-11",
+      "apply_link": "https://www.instahyre.com/jobs/123460",
+      "company_logo": "https://media.licdn.com/dms/image/..."
+    }
+  ]
+}

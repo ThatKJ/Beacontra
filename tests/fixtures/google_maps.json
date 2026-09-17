@@ -1,0 +1,155 @@
+{
+  "search_metadata": {
+    "id": "test-maps-1",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/test-maps-1.json",
+    "created_at": "2026-09-17T10:00:00Z",
+    "processed_at": "2026-09-17T10:00:02Z",
+    "total_time_taken": 2.45
+  },
+  "search_parameters": {
+    "engine": "google_maps",
+    "q": "coffee shops in Koramangala Bangalore",
+    "ll": "@12.9352,77.6145,15z",
+    "type": "search"
+  },
+  "search_information": {
+    "total_results": 47,
+    "time_taken_displayed": 0.89,
+    "query_displayed": "coffee shops in Koramangala Bangalore"
+  },
+  "local_results": [
+    {
+      "position": 1,
+      "title": "Third Wave Coffee Roasters",
+      "place_id": "ChIJq6XQ2X5xrjsR8K8YJZ8YJZ8",
+      "data_id": "0x3bae1674567890ab:0x1234567890abcdef",
+      "data_cid": "1234567890123456789",
+      "rating": 4.5,
+      "reviews": 1240,
+      "price_level": 2,
+      "type": "Coffee shop",
+      "address": "123, 4th Block, Koramangala, Bangalore - 560034",
+      "phone": "+91 80 4123 4567",
+      "website": "https://www.thirdwavecoffee.in",
+      "hours": {
+        "monday": "7:00 AM – 11:00 PM",
+        "tuesday": "7:00 AM – 11:00 PM",
+        "wednesday": "7:00 AM – 11:00 PM",
+        "thursday": "7:00 AM – 11:00 PM",
+        "friday": "7:00 AM – 12:00 AM",
+        "saturday": "8:00 AM – 12:00 AM",
+        "sunday": "8:00 AM – 11:00 PM"
+      },
+      "gps_coordinates": {
+        "latitude": 12.9352,
+        "longitude": 77.6145
+      },
+      "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipM...",
+      "service_options": {
+        "dine_in": true,
+        "takeout": true,
+        "delivery": true
+      }
+    },
+    {
+      "position": 2,
+      "title": "Blue Tokai Coffee Roasters",
+      "place_id": "ChIJq6XQ2X5xrjsR8K8YJZ8YJZ9",
+      "data_id": "0x3bae1674567890ab:0x1234567890abcde0",
+      "data_cid": "1234567890123456790",
+      "rating": 4.6,
+      "reviews": 890,
+      "price_level": 2,
+      "type": "Coffee shop",
+      "address": "456, 100 Feet Road, Indiranagar, Bangalore - 560038",
+      "phone": "+91 80 4234 5678",
+      "website": "https://bluetokaicoffee.com",
+      "hours": {
+        "monday": "8:00 AM – 10:00 PM",
+        "tuesday": "8:00 AM – 10:00 PM",
+        "wednesday": "8:00 AM – 10:00 PM",
+        "thursday": "8:00 AM – 10:00 PM",
+        "friday": "8:00 AM – 11:00 PM",
+        "saturday": "9:00 AM – 11:00 PM",
+        "sunday": "9:00 AM – 10:00 PM"
+      },
+      "gps_coordinates": {
+        "latitude": 12.9719,
+        "longitude": 77.6412
+      },
+      "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipN...",
+      "service_options": {
+        "dine_in": true,
+        "takeout": true,
+        "delivery": false
+      }
+    },
+    {
+      "position": 3,
+      "title": "The Flying Squirrel",
+      "place_id": "ChIJq6XQ2X5xrjsR8K8YJZ8YJZA",
+      "data_id": "0x3bae1674567890ab:0x1234567890abcde1",
+      "data_cid": "1234567890123456791",
+      "rating": 4.4,
+      "reviews": 650,
+      "price_level": 2,
+      "type": "Coffee shop",
+      "address": "789, 80 Feet Road, Koramangala, Bangalore - 560034",
+      "phone": "+91 80 4345 6789",
+      "website": "https://theflyingsquirrel.in",
+      "hours": {
+        "monday": "8:00 AM – 10:00 PM",
+        "tuesday": "8:00 AM – 10:00 PM",
+        "wednesday": "8:00 AM – 10:00 PM",
+        "thursday": "8:00 AM – 10:00 PM",
+        "friday": "8:00 AM – 11:00 PM",
+        "saturday": "9:00 AM – 11:00 PM",
+        "sunday": "9:00 AM – 10:00 PM"
+      },
+      "gps_coordinates": {
+        "latitude": 12.9348,
+        "longitude": 77.6198
+      },
+      "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipO...",
+      "service_options": {
+        "dine_in": true,
+        "takeout": true,
+        "delivery": true
+      }
+    },
+    {
+      "position": 4,
+      "title": "Coffee Mechanics",
+      "place_id": "ChIJq6XQ2X5xrjsR8K8YJZ8YJZB",
+      "data_id": "0x3bae1674567890ab:0x1234567890abcde2",
+      "data_cid": "1234567890123456792",
+      "rating": 4.3,
+      "reviews": 420,
+      "price_level": 2,
+      "type": "Coffee shop",
+      "address": "321, 5th Block, Koramangala, Bangalore - 560034",
+      "phone": "+91 80 4456 7890",
+      "website": "https://coffeemechanics.in",
+      "hours": {
+        "monday": "8:00 AM – 9:00 PM",
+        "tuesday": "8:00 AM – 9:00 PM",
+        "wednesday": "8:00 AM – 9:00 PM",
+        "thursday": "8:00 AM – 9:00 PM",
+        "friday": "8:00 AM – 10:00 PM",
+        "saturday": "9:00 AM – 10:00 PM",
+        "sunday": "9:00 AM – 9:00 PM"
+      },
+      "gps_coordinates": {
+        "latitude": 12.9365,
+        "longitude": 77.6123
+      },
+      "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipP...",
+      "service_options": {
+        "dine_in": true,
+        "takeout": true,
+        "delivery": false
+      }
+    }
+  ]
+}
