@@ -88,7 +88,7 @@ npm run test:live
 - **Engines Used**:
   - `google_shopping`: 1 call per scan to discover marketplace listings.
   - `google_lens`: Reverse image search against official product photos (capped to top 10 candidates per scan to strictly respect the 250/month free tier budget).
-- **Signal Fusion**: Deterministic weighting of Price Anomaly, Seller Anomaly, and Visual Signal into a 0-100 Confidence Risk Score.
+- **Signal Fusion**: Deterministic weighting of Price Anomaly, Seller Anomaly, and Visual Signal into a 0-100 **Review Priority Score** (verified against the current UI label — not a statistical confidence figure, a review-ranking heuristic).
 - **Frontend**: Clean Tailwind CSS + Vanilla JS interface with side-by-side visual photo comparison and "Load Demo Example" capability.
 
 ---
