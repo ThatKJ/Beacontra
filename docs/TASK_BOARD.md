@@ -373,3 +373,15 @@
 - [ ] Fix applied per the above principle, not a blanket "make the datetime regex more permissive" patch.
 - [ ] **Separate, arguably more important finding:** `SerpApiResponseSchema` (which would have caught this) is currently only used in `scripts/serpapi-smoke.ts`'s one-off diagnostic `safeParse` call — it is **not** wired into `serpapi-client.ts`'s actual request path at all. This means live response validation isn't actually enforced anywhere in production code today. Worth a decision (not necessarily this task): either wire schema validation into the real request path (catches future SerpApi response-shape drift automatically) or explicitly document that responses are trusted un-validated by design, so it's a decision, not an oversight.
 **VERIFICATION NEEDED:** Re-run `npm run serpapi:smoke` after the fix — the two "Invalid datetime" warnings should disappear.
+
+### T-028: Demo prefill's hardcoded official product image URL is dead (404) — breaks the central demo moment
+**OWNER:** OPENCODE
+**STATUS:** TODO
+**PRIORITY:** P0
+**FILES:** public/index.html
+**DEPENDENCIES:** None
+**ACCEPTANCE CRITERIA:**
+- [ ] CLAUDE verified directly: the "Load Demo Example" button (`public/index.html` line ~246) pre-fills `officialImageUrl` with `https://cdn.shopify.com/s/files/1/0057/8938/4802/products/141-black.png` — this returns **HTTP 404** as of 2026-09-17 (`curl -o /dev/null -w '%{http_code}'` confirmed, not assumed).
+- [ ] The page's own `onerror` fallback means this won't show a broken-image icon — it'll silently swap to a generic "Official Image" placeholder SVG. That's worse for the demo, not better: it means the side-by-side comparison — the product's entire central "gotcha" moment (`docs/DEMO.md`) — has *nothing real* on the official-photo side, and a presenter clicking the demo button on stage wouldn't get a visual warning that anything's wrong until they look closely.
+- [ ] Fix: replace with a verified-working, stable image URL. Recommend testing the replacement with `curl -o /dev/null -w '%{http_code}' <url>` (or equivalent) before committing it, and re-testing periodically — a hardcoded external CDN URL for a demo asset is inherently fragile (this is presumably exactly how the current one died). Consider hosting the demo reference image as a static asset within this repo/deployment instead of depending on an external brand's CDN staying stable.
+**VERIFICATION NEEDED:** Load the demo example and manually confirm the "Official Brand Photo" panel actually renders a real product photo, not the placeholder SVG.
