@@ -274,3 +274,14 @@
 - [x] Create fixture files for key engines (google, google_maps, google_shopping, google_jobs, google_trends)
 - [x] Verify: npm run build, npm run typecheck, npm run lint, npm test all pass
 **VERIFICATION:** All 24 tests pass, typecheck clean, lint clean, build succeeds
+### T-021: Fix P0 UX Gap — Visual Side-by-Side "Gotcha" Missing from Demo UI
+**OWNER:** OPENCODE
+**STATUS:** TODO
+**PRIORITY:** P0
+**FILES:** public/index.html
+**DEPENDENCIES:** None
+**ACCEPTANCE CRITERIA:**
+- [ ] Raised by GEMINI's UX audit (`docs/GEMINI_UX_AUDIT.md`, P0): results currently render as a text-only dashboard (title/seller/price/a text badge for Lens matches) — no image is shown. This directly undermines the product's entire differentiation story (`docs/COMPETITIVE_ADJUDICATION.md`'s 30-second-demo-test explicitly centers the demo on a *visible* photo-vs-photo mismatch, not a text table).
+- [ ] Result cards must render the suspect listing's thumbnail next to the official product photo, so a mismatch is visible without narration — this is the literal "gotcha" moment the product/demo concept was built around, not a nice-to-have.
+- [ ] (P1, same file, bundle in while touching this) Add a "Load Demo Example" button pre-filling a realistic product name + official image URL, so a live demo doesn't require fumbling with pasted URLs on stage.
+- [ ] (P2, same file, bundle in if convenient) Label the composite score with its scale (e.g., "Confidence Score: 85/100") rather than a bare number.
