@@ -239,8 +239,8 @@ async function main() {
     defaultTimeout: 60000,
   });
   
-  // Test image - use Google logo (known working)
-  const testImageUrl = 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png';
+  // Test image - use boAt Airdopes 141 product image (real ecommerce product)
+  const testImageUrl = 'https://www.boat-lifestyle.com/cdn/shop/files/AD141-FI_Black06_600x.jpg';
   console.log(`Test image: ${testImageUrl}`);
   
   // First, upload image to get image_id
