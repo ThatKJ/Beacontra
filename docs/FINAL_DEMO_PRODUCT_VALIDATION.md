@@ -1,20 +1,22 @@
 # Final Demo Product Validation
 
-**Date:** 2026-09-17  
-**Status:** COMPLETE - Primary demo product validated
+**Date:** 2026-09-17
+**Status:** COMPLETE — with an important disambiguation added 2026-09-18.
+
+**⚠️ Read this before the "Lens Validation Results" section below.** The 8-test matrix in this document (60 visual_matches, 139 exact_matches) called `google_lens` **directly on boAt's own pristine official reference image** — it tests whether the Lens API mechanism works at all, and it does. It does **not** test what the real product actually does. The real end-to-end flow calls Lens on each **marketplace listing's own thumbnail** (a different, usually lower-quality image) and compares that against the reference photo. That real flow was separately run and recorded in `docs/FINAL_VERIFIED_RUN.md`: **0 of 40 listings produced a positive visual match** on this product. Both results are true and not in conflict — they answer different questions. Do not cite the 60/139 numbers below as evidence that the demo's visual "gotcha" moment will fire; cite `docs/FINAL_VERIFIED_RUN.md` for that.
 
 ---
 
 ## Selected Demo Product
 
-### Product: **boAt Airdopes 141 Gen 2**
+### Product: **boAt Airdopes 141**
 
 **Reference Image URL:** `https://www.boat-lifestyle.com/cdn/shop/files/AD141-FI_Black06_600x.jpg`  
 **Image HTTP Status:** 200 OK  
 **Image Size:** 60 KB  
 
-**MRP:** ₹1,299  
-**Expected Price Range:** ₹700 - ₹1,200  
+**Reference MRP:** ₹4,490 (manufacturer list MRP for plain boAt Airdopes 141)  
+**Expected Price Range:** ₹800 - ₹1,500  
 **Known Authorized Sellers:** Flipkart, Amazon, Reliance Digital, Croma, boAt, JioMart, Myntra, Nykaa, boat-lifestyle.com  
 
 ---

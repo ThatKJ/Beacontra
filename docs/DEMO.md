@@ -14,13 +14,15 @@
 
 ### 0:15-0:30 — PRODUCT
 
-> "This is Beacontra. It takes your product name and your real product photo, finds live listings for it across marketplaces, and reverse-image-checks every one of them against your actual photo — not just the price or the seller name, the picture itself."
+> "This is Beacontra. It takes your product name and your real product photo, finds live listings for it across marketplaces, and reverse-image-checks the top candidate listings against your actual photo — not just the price or the seller name, the picture itself."
+
+*(Note on candidate cap: Beacontra performs Lens analysis on the top 10 candidate listings to bound API usage; the remaining listings retain commercial price/source evidence.)*
 
 ### 0:30-1:45 — LIVE WORKFLOW (the magic)
 
 1. Enter a real (or clearly-labeled demo) product name + link the official photo. **State out loud that this is a live SerpApi call, not a canned response** — the hackathon rules require the demo to visibly show it's working, and judges are told production polish isn't the bar, working functionality is.
-2. Show the live `google_shopping`/`amazon_product` results streaming in — a handful of listings appear with price/seller.
-3. **The gotcha moment:** click into the most-flagged result. Show the listing's photo *next to* the official photo, with the `google_lens` match result underneath. If they don't match — or the same photo turns up on a completely different, unrelated listing — that's visible on screen without narration.
+2. Show the live `google_shopping` results streaming in — deduplicated listings appear with price/seller context. **⚠️ Caveat confirmed on the canonical run (`docs/FINAL_VERIFIED_RUN.md`):** a broad product query like "boAt Airdopes 141" can pull in *other* boAt Airdopes variants (Gen 2, Elite ANC, etc.) that aren't the exact product being checked, which will show as price "anomalies" that aren't really comparable. If this hasn't been fixed with tighter query filtering before recording, don't claim on camera that every flagged price is a clean apples-to-apples comparison — say "flagged relative to this product's MRP" rather than implying every result is confirmed to be the same exact item.
+3. **The gotcha moment (only if the chosen demo product/photo actually produces a visual match — verify with a fresh spot-check first, do not assume):** click into a flagged result. Show the listing's photo *next to* the official photo, with the `google_lens` match result underneath. **On the canonical run with boAt Airdopes 141, this did not fire — 0 of 40 listings had a positive visual match, all showed the neutral "no evidence" state instead.** If a live spot-check with the actual demo product/photo still shows no match, present that honestly on camera ("visual check ran, found nothing conclusive here — that's a real, valid outcome, not a failure") rather than imply a mismatch was found when it wasn't, or switch to a product/photo pair confirmed to produce a match before recording.
 4. Show the ranked list with the composite score and the plain-English reason per signal (price/seller/visual) — say explicitly: *"this is not one API call summarized by an AI — three independent signals get computed and fused into this score, and you can see all three."*
 
 ### 1:45-2:15 — WHY IT'S DIFFERENT
@@ -48,6 +50,6 @@
 ## Open blockers before this script is rehearsal-ready
 
 1. ~~T-021 (visual side-by-side rendering)~~ — DONE, verified.
-2. ~~T-017 (`google_lens` spike)~~ — request-path bugs fixed and verified; mechanism confirmed to return real structured data (tested on the Google logo, not yet on a realistic product photo — see status note above).
-3. A specific, pre-tested product+photo demo pair still needs to be chosen and spot-checked live (one targeted check, not another full matrix — credit-conscious per `docs/SERPAPI_BUDGET.md`) before the first full rehearsal, and the demo's reference-image URL is currently dead (T-028). This is now the single remaining real blocker.
+2. ~~T-017 (`google_lens` spike)~~ — request-path bugs fixed and verified; mechanism confirmed to return real structured data.
+3. **T-028 partially resolved, two real items remain (per `docs/FINAL_VERIFIED_RUN.md`, corrected 2026-09-18):** boAt Airdopes 141 (MRP ₹4,490, real live reference image) has a working end-to-end pipeline, but (a) it produced **zero positive visual matches** in the canonical run — step 3 above needs a fresh spot-check or a different product/photo before recording, and (b) the Shopping query pulls in other boAt variants, inflating the price-anomaly count for reasons unrelated to real pricing — needs tighter filtering or a cleaner query before the price signal is shown as a clean example.
 4. ~~Naming~~ — DONE. `NAMING STATUS: FINAL` — Beacontra. Script updated above.
