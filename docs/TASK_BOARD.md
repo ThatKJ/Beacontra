@@ -484,3 +484,27 @@
 - [x] `.env.example` contains only `SERPAPI_API_KEY=` with no value.
 - [x] No key-like strings found in tracked source files via targeted grep.
 - [x] `docs/LENS_MATRIX_RESULTS.json` and all fixture JSON files checked directly for `api_key` field leakage — none found (the real matrix run's raw responses don't include the request's own API key, only response data).
+
+### T-033: THE "CANONICAL FINAL VALIDATION" IS BUILT ON A BROKEN SCRIPT — do not trust FINAL_METRICS.md or FINAL_DEMO_PRODUCT_VALIDATION.md's headline numbers yet
+**OWNER:** OPENCODE
+**STATUS:** TODO
+**PRIORITY:** P0 — this blocks declaring SUBMISSION_READY, it is the truth-gate issue itself
+**FILES:** scripts/final-validation.ts, docs/FINAL_METRICS.md, docs/FINAL_DEMO_PRODUCT_VALIDATION.md
+**DEPENDENCIES:** None
+**FOUND BY:** CLAUDE, reading the actual script and its real output (`docs/FINAL_METRICS_DUMP.json`), not trusting the commit message or the docs' own "COMPLETE"/"canonical" framing.
+
+**Two separate, real bugs compound into an unreliable result:**
+
+1. **Wrong input field names.** `scripts/final-validation.ts` constructs `input = { productName, referenceImageUrl, referencePrice }` and passes it to `service.scan(input)`. `BeacontraInput` (`src/lib/beacontra.ts`) actually requires `officialImageUrl` and `mrp` — neither of which this script sets. At runtime this means `input.officialImageUrl` is `undefined` for the entire scan, so **every** visual-match check (`m.link?.includes(officialImageUrl)`) is comparing against `undefined`, and **every** price-anomaly check (`if (mrp && ...)`) is skipped entirely because `mrp` is also `undefined`. This one scan's price-signal and visual-match-against-official-photo results are meaningless by construction, independent of whatever Lens actually returned.
+2. **Wrong enum values in the result-counting logic.** The script checks `v.anomalyType === 'same_product'` and `v.status === 'anomalous_evidence'` — **neither value exists** in the real `VisualSignal` type (`anomalyType` is one of `'matched' | 'visual_match' | 'no_evidence' | 'unavailable' | 'unverified_photo_source' | 'different_product' | 'match' | 'not_verified'`; `status` is one of `'matched' | 'visual_match' | 'no_evidence' | 'unavailable'`). This means `exactMatchCount` and `anomalyCount` can **never** increment, no matter what the scan actually found.
+3. **The real dump (`docs/FINAL_METRICS_DUMP.json`) proves this is live, not theoretical:** `{"resultCount": 40, "exactMatchCount": 0, "anomalyCount": 0, "noEvidenceCount": 8}` — only 8 of 40 results landed in *any* counted bucket. **The other 32 are unaccounted for**, which (given the broken checks above) most likely means they had `status: 'matched'` or `status: 'visual_match'` — i.e., Lens may well have found real evidence for the majority of listings, and the script's own bug is hiding it, not proving it absent.
+4. **Separately, this script tested a third, undocumented product** ("Skechers Go Walk 6 Men") — not boAt Airdopes 141, which `docs/FINAL_DEMO_PRODUCT_VALIDATION.md` claims is the validated primary demo product. That document's "60 visual_matches, 139 exact_matches" numbers come from a *different, separate* test that called `google_lens` directly on boAt's own pristine official reference image (testing the raw API in isolation) — **not** from running the real `scan()` flow against actual marketplace listing thumbnails, which is what the product actually does and what a demo would show. These two results are not in conflict; they're answering two different questions, and the current docs conflate them into one misleadingly positive narrative ("Demo: working with live boAt Airdopes 141 (180+ listings, proper scoring, correct visual signals)" in commit `c77ac1d` is not supported by either document's actual test).
+
+**Net effect:** as of this writing, **we do not actually know** whether the real end-to-end product produces useful Lens evidence on ordinary marketplace listing thumbnails (as opposed to a brand's own pristine reference photo) for any product, boAt or otherwise. `docs/FINAL_DEMO_PRODUCT_VALIDATION.md`'s "Status: COMPLETE" is premature and should not be relied on until this is fixed and rerun correctly.
+
+**ACCEPTANCE CRITERIA:**
+- [ ] Fix `scripts/final-validation.ts`'s input object to use the real `BeacontraInput` field names (`officialImageUrl`, `mrp`), for whichever product is actually chosen.
+- [ ] Fix the result-counting logic to use the real enum values (`anomalyType`/`status` as actually defined), or better, just count occurrences of each real `status`/`anomalyType` value directly (`matched`, `visual_match`, `no_evidence`, `unavailable`, `unverified_photo_source`, `different_product`) rather than hand-picking two values to special-case.
+- [ ] Re-run against **one clearly chosen** product (resolve the boAt-vs-Skechers ambiguity first) with correct inputs, and record the real, now-trustworthy breakdown.
+- [ ] Rewrite `docs/FINAL_METRICS.md` and `docs/FINAL_DEMO_PRODUCT_VALIDATION.md` from that corrected run — do not keep the current numbers, they are not derived from a working test.
+- [ ] If the corrected run shows Lens genuinely finds little/nothing on ordinary listing thumbnails even with the bugs fixed, that's the real answer the original truth-gate asked for — report it honestly (per the pre-committed STRONG/MIXED/POOR bands in `docs/TASK_BOARD.md`'s T-017 review-criteria entry) rather than leaning on the reference-image-only test as if it answered the same question.
