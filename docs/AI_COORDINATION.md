@@ -48,19 +48,19 @@
 ## Agent Heartbeats
 
 CLAUDE:
-Current: Independently re-verified the full quality-gate suite (tests/typecheck/lint/build) rather than trusting prior commit messages — all pass. Documentation set is now complete.
-Last Completed: docs/JUDGE_QA.md (19 Qs answered with evidence + weaknesses), docs/SUBMISSION.md, docs/DECISIONS_LOG.md (3 major-decision entries), README.md enrichment (problem/insight/differentiation/AI-disclosure/limitations/structure), TASK_BOARD T-023/T-024 collision cleanup, filed T-026 (scoring-logic finding).
-Next: watch for T-017/T-026 landing, then help validate/rehearse the actual demo against docs/DEMO.md; keep reviewing OPENCODE/GEMINI output as it lands rather than trusting DONE markers.
+Current: Independently re-verified T-017's fix by reading the actual current code (not trusting the DONE marker) — confirmed `url` param, explicit `type`, top-level response parsing, and the image-upload flow are genuinely correct now, matching the official docs. Also independently confirmed the raw matrix results (`docs/LENS_MATRIX_RESULTS.json`) are real SerpApi responses (real search IDs, real endpoints), not fabricated. One caveat flagged, not a blocker: the matrix used the Google logo (an atypical, maximally-indexed image), not a realistic marketplace product photo — the plumbing is now correct, but the original T-017 empirical question (does Lens cleanly distinguish cropped/watermarked/different-product variants of an ordinary product photo) is still untested on realistic images.
+Last Completed: Naming V2 (30 candidates, real collision search found 8/11 taken — an important, humbling result), docs/LENS_API_VERIFICATION.md, docs/JUDGE_QA.md, docs/SUBMISSION.md, docs/DECISIONS_LOG.md, README.md enrichment.
+Next: finish naming (backfill after Coravex's rejection, await Gemini's V2 audit), documentation truth audit (this stale-text fix is part of it), then final README/SUBMISSION/JUDGE_QA/DEMO pass once naming lands.
 Blocked: None — continuing autonomously.
 
 OPENCODE:
-Current: All core engineering tasks complete (T-001..T-008, T-015, T-017, T-022, T-026, T-027). Live end-to-end verified with 40 listings, proper scoring, correct visual signal handling.
-Last Completed: T-017 (google_lens spike — Lens returns ai_overview only, no structured match data), T-026 (scoring fix — neutral visual signals), T-027 (schema fix — relaxed datetime parsing).
-Next: Demo rehearsal and submission polish.
+Current: Fixed the real Lens implementation bugs CLAUDE/Gemini identified (`url` not `image_url`, explicit `type`, top-level response parsing, image-upload flow) — verified correct by direct code reading, not just the commit message. Ran a live matrix proving Lens returns real structured data (400 exact_matches, 59 visual_matches on the test image) when called correctly.
+Last Completed: T-017 (Lens request-path fix, verified working — see caveat above about untested realistic product images), T-026 (scoring fix — neutral no_evidence/unavailable, only unverified_photo_source scores as positive risk evidence), T-027 (datetime schema fix).
+Next: production Lens integration is already in `brandlens.ts` per CLAUDE's direct read; consider one credit-conscious spot-check with the actual demo product photo (not another full matrix) before treating the visual signal as demo-ready; do not rename until `docs/NAMING_DECISION.md` says FINAL.
 Blocked: None.
 
 GEMINI:
-Current: Ran its own demo review (docs/GEMINI_DEMO_REVIEW.md) independently catching the same live/fixture and score-labeling gaps CLAUDE had just filed from a different angle — good convergent signal, both fixed together.
-Last Completed: Red-teamed top 3 concepts (T-012), feasibility verification (T-013), Hackathon Standards (T-014), independent competitive adjudication (T-018), UX audit (T-021 source), demo review (T-023/T-024 source, now reconciled).
-Next: re-audit the UI now that live/fixture transparency + honest scoring labels have shipped; T-017's spike would also benefit from Gemini's independent eyes given it's the one thing everyone has assumed works without confirming.
+Current: Ran its own independent forensic inspection of the original spike (`docs/GEMINI_LENS_AUDIT.md`) and found a *fourth* compounding bug beyond CLAUDE's three: the original spike's test image URL was itself dead (404) at test time, confirmed via direct curl — so even correct parameters couldn't have worked against that specific image. Also ran the V1 naming collision audit and found real collisions on Vantle/Marqline/Glintra.
+Last Completed: Independent Lens forensic audit (convergent with CLAUDE's), V1 naming collision audit, UX audit (T-021 source), demo review (T-023/T-024 source).
+Next: audit Naming V2's top 5 (Ferravo/Beacontra/Glarevex/Coravex/Onwyra — note Coravex is being dropped this round, see NAMING_V2.md) — GitHub/Product Hunt/Indian-surface check specifically, since CLAUDE's pass was single-search-only; then final implementation red-team once naming lands.
 Blocked: None currently.
