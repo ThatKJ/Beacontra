@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { SerpApiClient, SerpApiError } from './lib/serpapi-client';
 import { createTieredCache } from './lib/cache';
+import { createBrandLensService, type BrandLensInput } from './lib/brandlens';
 import type { BaseSearchParams, SerpApiEngine, SerpApiResponse } from './lib/types';
 
 interface Env {
@@ -16,13 +17,17 @@ app.use('*', cors());
 
 app.get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
-app.post('/api/search', async (c) => {
-  const env = c.env;
-  const client = new SerpApiClient({
+function createClient(env: Env) {
+  return new SerpApiClient({
     apiKey: env.SERPAPI_KEY,
     cache: createTieredCache(env.CACHE_KV),
     fixtureMode: env.ENVIRONMENT === 'development' && !env.SERPAPI_KEY,
   });
+}
+
+app.post('/api/search', async (c) => {
+  const env = c.env;
+  const client = createClient(env);
 
   try {
     const body = await c.req.json();
@@ -61,8 +66,53 @@ app.post('/api/search', async (c) => {
   }
 });
 
+app.post('/api/brandlens/scan', async (c) => {
+  const env = c.env;
+  const client = createClient(env);
+  const brandLens = createBrandLensService(client);
+
+  try {
+    const input = await c.req.json<BrandLensInput>();
+
+    if (!input.productName || !input.officialImageUrl) {
+      return c.json({ error: 'productName and officialImageUrl are required' }, 400);
+    }
+
+    const result = await brandLens.scan(input);
+
+    return c.json({
+      data: result,
+      meta: {
+        scanId: result.scanId,
+        creditsUsed: result.creditsUsed,
+        totalListingsFound: result.totalListingsFound,
+      },
+    });
+  } catch (error) {
+    if (error instanceof SerpApiError) {
+      const statusCode = error.statusCode >= 400 && error.statusCode < 600 ? error.statusCode : 502;
+      return c.json(
+        {
+          error: error.message,
+          engine: error.engine,
+          isRateLimited: error.isRateLimited,
+          statusCode: error.statusCode,
+        },
+        statusCode as 400 | 401 | 403 | 404 | 429 | 500 | 502 | 503
+      );
+    }
+    console.error('BrandLens scan error:', error);
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+app.get('/api/brandlens/results/:scanId', async (c) => {
+  const scanId = c.req.param('scanId');
+  return c.json({ error: 'Scan results retrieval not yet implemented - use scan endpoint', scanId }, 501);
+});
+
 app.get('/api/engines', (c) => {
-  const engines: SerpApiEngine[] = [
+  const engines = [
     'google',
     'google_light',
     'google_maps',
@@ -75,6 +125,8 @@ app.get('/api/engines', (c) => {
     'google_news',
     'google_images',
     'google_local',
+    'google_lens',
+    'amazon_product',
     'search_index',
   ];
   return c.json({ engines });

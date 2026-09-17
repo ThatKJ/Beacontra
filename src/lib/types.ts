@@ -104,6 +104,19 @@ export const TrendsSearchParams = BaseSearchParams.extend({
 });
 export type TrendsSearchParams = z.infer<typeof TrendsSearchParams>;
 
+export const LensSearchParams = BaseSearchParams.extend({
+  engine: z.literal('google_lens'),
+  url: z.string().url().optional(),
+  image_url: z.string().url().optional(),
+});
+export type LensSearchParams = z.infer<typeof LensSearchParams>;
+
+export const AmazonProductSearchParams = BaseSearchParams.extend({
+  engine: z.literal('amazon_product'),
+  asin: z.string(),
+});
+export type AmazonProductSearchParams = z.infer<typeof AmazonProductSearchParams>;
+
 export const SearchMetadata = z.object({
   id: z.string(),
   status: z.string(),
@@ -187,6 +200,48 @@ export const JobResult = z.object({
 });
 export type JobResult = z.infer<typeof JobResult>;
 
+export const LensMatchResult = z.object({
+  thumbnail: z.string().url().optional(),
+  link: z.string().url().optional(),
+  title: z.string().optional(),
+  source: z.string().optional(),
+});
+export type LensMatchResult = z.infer<typeof LensMatchResult>;
+
+export const LensSearchResult = z.object({
+  exact_matches: z.array(LensMatchResult).optional(),
+  visual_matches: z.array(LensMatchResult).optional(),
+  text_results: z.array(z.object({
+    text: z.string(),
+    source: z.string().optional(),
+    link: z.string().url().optional(),
+  })).optional(),
+  knowledge_graph: z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    image_url: z.string().url().optional(),
+  }).optional(),
+});
+export type LensSearchResult = z.infer<typeof LensSearchResult>;
+
+export const AmazonProductResult = z.object({
+  asin: z.string().optional(),
+  title: z.string().optional(),
+  price: z.string().optional(),
+  extracted_price: z.number().optional(),
+  rating: z.number().optional(),
+  reviews: z.number().optional(),
+  availability: z.string().optional(),
+  images: z.array(z.string().url()).optional(),
+  description: z.string().optional(),
+  features: z.array(z.string()).optional(),
+  brand: z.string().optional(),
+  manufacturer: z.string().optional(),
+  seller: z.string().optional(),
+  product_link: z.string().url().optional(),
+});
+export type AmazonProductResult = z.infer<typeof AmazonProductResult>;
+
 export const TrendsDataPoint = z.object({
   date: z.string(),
   values: z.array(z.number()),
@@ -202,6 +257,8 @@ export const SerpApiResponseSchema = z.object({
   place_results: LocalResult.optional(),
   shopping_results: z.array(ShoppingResult).optional(),
   jobs_results: z.array(JobResult).optional(),
+  lens_results: LensSearchResult.optional(),
+  amazon_product: AmazonProductResult.optional(),
   interest_over_time: z.object({
     timeline_data: z.array(TrendsDataPoint),
   }).optional(),

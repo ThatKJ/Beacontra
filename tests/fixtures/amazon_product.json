@@ -1,0 +1,38 @@
+{
+  "search_metadata": {
+    "id": "test-amazon-product-1",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/test-amazon-product-1.json",
+    "created_at": "2026-09-17T10:00:00Z",
+    "processed_at": "2026-09-17T10:00:01Z",
+    "total_time_taken": 1.23
+  },
+  "search_parameters": {
+    "engine": "amazon_product",
+    "asin": "B00FAKE123"
+  },
+  "search_information": {},
+  "amazon_product": {
+    "asin": "B00FAKE123",
+    "title": "Fake Brand Product - Unauthorized Listing",
+    "price": "₹499",
+    "extracted_price": 499,
+    "rating": 4.2,
+    "reviews": 156,
+    "availability": "In Stock",
+    "images": [
+      "https://marketplace.com/listing/suspect-product.jpg",
+      "https://marketplace.com/listing/suspect-product-2.jpg"
+    ],
+    "description": "Low quality imitation product sold by unauthorized seller",
+    "features": [
+      "Cheap material",
+      "No warranty",
+      "Unauthorized seller"
+    ],
+    "brand": "Unknown Brand",
+    "manufacturer": "Unknown",
+    "seller": "RandomSeller123",
+    "product_link": "https://www.amazon.in/dp/B00FAKE123"
+  }
+}
