@@ -16,24 +16,21 @@
 - docs/GEMINI_COMPETITOR_AUDIT.md / GEMINI_SERPAPI_AUDIT.md / JUDGE_QA.md / GEMINI_UX_AUDIT.md / GEMINI_DEMO_REVIEW.md — pending, now unblocked since product+implementation both exist
 - docs/DECISION_CHALLENGES.md (Gemini conflict protocol - RESOLVED, CLOSED)
 
-**ACTIVE WORK:**
-- OPENCODE: Shipped live/fixture transparency + heuristic score labeling fixes (commit 2ee008a — resolved both CLAUDE's and GEMINI's independently-filed versions of the same findings). T-017 (google_lens spike) and T-026 (no-match scoring fix, renumbered from a collision — see TASK_BOARD note) still open.
-- CLAUDE: Full documentation set now complete — reviewed OPENCODE's implementation directly (not just trusted DONE markers), confirmed two earlier code-review fixes landed correctly, found and filed T-026, wrote docs/JUDGE_QA.md (19 questions answered with evidence + stated weaknesses), docs/SUBMISSION.md, docs/DECISIONS_LOG.md entries for the 3 biggest decisions, enriched README.md with problem/differentiation/AI-disclosure/limitations sections. Next: keep reviewing as T-017/T-026 land; help rehearse/validate the actual demo once those close.
-- GEMINI: Ran its own demo review (docs/GEMINI_DEMO_REVIEW.md) independently catching the same live/fixture and score-labeling issues CLAUDE had just filed — both sets fixed in the same commit. Filed under colliding task IDs (T-023/T-024) — reconciled in TASK_BOARD, next task ID is T-026 onward, please grep before adding new tasks.
+**ACTIVE WORK (correcting a stale overwrite of this section found 2026-09-17 — the heartbeats below stayed accurate, only this summary block had regressed to older content; T-021/T-022 are DONE, not in-progress):**
+- OPENCODE: owns T-017 (google_lens spike), T-026 (scoring-logic fix), T-027 (schema fix, just filed) per explicit user role division. CLAUDE is reviewing, not implementing these.
+- CLAUDE: documentation set complete; ran one live smoke test directly (found/filed T-027); now in continuous review mode watching for T-017/T-026/T-027 to land.
+- GEMINI: red-team/audit work complete through T-018/T-021-source/T-023-24-source; available to independently verify T-017's spike results per its own suggestion in the heartbeat below.
 
 **KNOWN BLOCKERS:**
-- None blocking further work. Two real open quality items remain: T-017 (google_lens spike, P0 — a live key now exists in `.env`, this should actually be run, not deferred further) and T-026 (P1, scoring-logic overclaim on absent Lens matches).
+- None. SERPAPI_API_KEY is configured; one controlled live call already verified the core pipeline works (see CLAUDE heartbeat / T-027).
 
 **INTEGRATION STATUS:**
-- SerpApi environment loading: VERIFIED (centralized config layer `src/lib/config.ts` supports `SERPAPI_API_KEY` & `SERPAPI_KEY`, tested in Worker & Node)
-- SerpApi client: VERIFIED (caching, deduplication, retry/backoff, fixture mode, `google_lens` param normalization)
-- Live authentication: IMPLEMENTED — LIVE VERIFICATION STILL PENDING (executable via `npm run serpapi:smoke` or `npm run test:live` — a key is configured but T-017's actual spike write-up has not been done)
-- Google Lens integration: IMPLEMENTED — capped to 10 candidates/scan, graceful degradation on failure; the "zero matches" case is over-scored as a mismatch (T-026, open)
-- Frontend: VERIFIED (side-by-side photo comparison, demo example prefiller, live/fixture badge, honestly-labeled heuristic score)
-- Documentation: COMPLETE — every file the mission brief and the user's quality gates ask for now exists
-- Tests/typecheck/lint/build: **independently re-run and confirmed by CLAUDE (2026-09-17, not just trusted from a commit message)** — 68 passed, 1 skipped, 0 failed; typecheck clean; lint clean; `npm run build` (dry-run deploy) succeeds, 110.70 KiB / 26.94 KiB gzip. Minor, non-blocking: wrangler 3.114.17 is out of date (4.x available) and `wrangler build` itself is deprecated in favor of `wrangler deploy --dry-run` — cosmetic, not a quality gate failure.
+- SerpApi: Integrated with caching, fixtures, credit tracking; live connectivity independently verified (1 real `google_shopping` call, HTTP 200, 40 results) — see T-027 for the schema issue that call surfaced.
+- Frontend: Demo UI complete (public/index.html), live/fixture transparency + honest score labeling shipped.
+- Backend: Cloudflare Worker with API endpoints.
+- Tests: 68 passing, 1 skipped, 0 failing — independently re-run by CLAUDE, not just cited.
 
-**LAST VERIFIED TEST STATUS:** 68 passed, 1 skipped, 0 failed — independently re-run by CLAUDE this session, not just cited from a prior commit.
+**LAST VERIFIED TEST STATUS:** 68 passing / 1 skipped / 0 failing; typecheck clean; lint clean; build succeeds (independently re-run by CLAUDE 2026-09-17).
 
 
 ---
