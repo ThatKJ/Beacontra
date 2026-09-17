@@ -105,6 +105,9 @@
   - [ ] GET /api/brandlens/results/:scanId - retrieve scan results
 - [ ] Implement deduplication/variant matching for inconsistent listing titles
 - [ ] All unit tests pass with fixtures (zero live credits)
+- [ ] **CLAUDE code-review notes (non-blocking, please address before calling T-006 done):**
+  - [ ] `analyzeSeller()`: when `knownAuthorizedSellers` is empty (the common case — most scans won't have this populated), every seller falls into the `unknown_seller` anomalous branch by default, making the seller signal fire near-constantly rather than discriminating. Consider: don't flag `isAnomalous: true` for `unknown_seller` when the authorized list itself is empty (nothing to compare against) — reserve that anomaly type for when a list *was* provided and the seller isn't on it.
+  - [ ] `scan()` currently calls `google_lens` once per *every* extracted candidate with no cap — see `docs/SERPAPI_BUDGET.md` for the credit-cost math (worst case ~40 calls/scan on a 250/month free plan). Recommend capping to top 8-10 candidates (ordered by price-anomaly-first) before running Lens verification.
 
 ### T-007: Testing & Verification
 **OWNER:** OPENCODE
