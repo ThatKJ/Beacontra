@@ -135,15 +135,17 @@
 
 ### T-008: Demo Readiness
 **OWNER:** OPENCODE
-**STATUS:** TODO
-**FILES:** src/, docs/DEMO.md
+**STATUS:** DONE
+**FILES:** public/index.html, src/index.ts
 **DEPENDENCIES:** T-007
 **ACCEPTANCE CRITERIA:**
-- [ ] Strongest workflow demoable in <3 minutes
-- [ ] No fake data, no placeholder metrics
-- [ ] Good loading/empty/error states
-- [ ] Source evidence visible
-- [ ] Production build succeeds
+- [x] Strongest workflow demoable in <3 minutes
+- [x] No fake data, no placeholder metrics
+- [x] Good loading/empty/error states
+- [x] Source evidence visible (price, seller, visual signals with provenance)
+- [x] Production build succeeds
+- [x] Frontend for demo (Tailwind CSS + vanilla JS)
+**VERIFICATION:** Build succeeds, all tests pass, demo UI renders scan form and results with evidence
 
 ### T-009: Finalize Product Decision
 **OWNER:** CLAUDE
