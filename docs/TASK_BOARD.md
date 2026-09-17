@@ -13,7 +13,7 @@
 
 ### T-036: Signature 3D and motion experience — 80% calm / 20% wow
 **OWNER:** ASTRA — PRODUCT EXPERIENCE / UI OWNER
-**STATUS:** VERIFY — implementation and verification complete; committing
+**STATUS:** DONE — committed as 6189baf
 **PRIORITY:** P1
 **FILES:** public/index.html, public/styles.css, public/app.js, public/experience.css, public/experience.js, scripts/ui-check.mjs, docs/ASTRA_VISUAL_REBUILD.md, docs/ASTRA_VISUAL_QA.md
 **ISSUE:** User requests a major visual upgrade beyond T-034's restrained evidence desk.

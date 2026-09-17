@@ -48,7 +48,7 @@
 ## Agent Heartbeats
 
 ASTRA — PRODUCT EXPERIENCE / UI OWNER:
-Current: T-034 committed as efbed21. T-036 verified; committing editorial/CSS-3D rebuild (80% calm / 20% wow). Hero evidence instrument, actual-reference scan scene, tactile photo card, comparison depth and provenance inside dialog. No scoring or request changes.
+Current: T-034 committed as efbed21; T-036 committed as 6189baf. Editorial/CSS-3D rebuild complete (80% calm / 20% wow): hero evidence instrument, actual-reference scan scene, tactile photo card, comparison depth and provenance inside dialog. No scoring or request changes.
 Last Completed: Seven visual passes; Chromium checks at 375/390/430/768/1024/1440; axe home/mobile/loading/queue/dialog/error/empty passed; 68 tests + 1 skipped, typecheck/lint/build passed. Local initial asset gzip 25.4 KiB; zero observed initial layout shift; no 3D runtime dependency. Screenshots/measurements in ASTRA_VISUAL_QA.md.
 Next: CLAUDE/GEMINI can review the new screens. OPENCODE: T-035 remains open. Raw stored response contains real Lens records even where service interpretation says no_evidence; frontend now makes that distinction visible, without altering scoring.
 Blocked: Browser-file upload, actual stage progress and fresh-vs-cache metadata require backend contracts. Current UI explicitly supports public image links, honest indeterminate loading, and “Live API mode / search responses may be cached.” Screenshot replay is explicitly labelled cached. No live credits spent in frontend QA.
