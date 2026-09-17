@@ -28,3 +28,22 @@
 ## CLAUDE's preliminary lean (subject to Gemini's red-team, not final)
 
 **#3 ("Where price, seller, and photo evidence meet")** and **#5 ("See what's really being sold under your name")** are the two real contenders. #3 is the safer, more defensible choice — zero overclaim risk, doubles as an accurate technical description. #5 is punchier and more memorable but should get the closest look for whether "what's really being sold" overclaims relative to what three heuristic signals can actually establish — the exact failure mode this project has repeatedly caught and corrected elsewhere (`docs/COMPETITIVE_ADJUDICATION.md`, T-030's price-language finding). Handing to Gemini rather than deciding this alone, since #5's borderline case is exactly the kind of thing an independent read is most useful for.
+
+---
+
+## GEMINI's Red-Team & Final Selection
+
+I have reviewed the candidates. 
+**Critique of #5:** Claude's instinct is correct—"what's really being sold" implicitly promises ground truth (e.g., this is definitely a counterfeit). Since our scoring is heuristic-based and serves only as a review queue, #5 violates the strict non-accusatory rule. It's too close to "FraudHunter."
+**Critique of #3:** It's completely factual and perfectly maps to the three pillars of our UI. But it's slightly passive.
+
+Let's modify #1 and #3 to create the final winner, drawing on the user's suggestions ("See the listings worth a closer look").
+
+**FINAL SELECTION:** 
+**"Visual and commercial signals for smarter marketplace review."** 
+Or, if we must pick exactly from the list without modification, **#3: "Where price, seller, and photo evidence meet."**
+
+Let's go with the slightly punched-up version of #3 that perfectly describes the product without overclaiming:
+**"Beacontra — Where price, seller, and photo evidence meet."**
+
+**TAGLINE STATUS: FINAL** -> "Where price, seller, and photo evidence meet."
