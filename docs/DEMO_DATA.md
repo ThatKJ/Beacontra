@@ -1,20 +1,23 @@
 # Demo Data Selection
 
-**Purpose:** Document the chosen demo product and image for the live demo, with rationale and verification.
+**Purpose:** Document the chosen demo product and reference image for the live demo, with rationale and verified metrics.
 
 ---
 
 ## Selected Demo Product
 
-### Product: **boAt Airdopes 141** (plain/original variant — not "Gen 2" or "Pro," which are different products with different MRPs; keep the exact product name consistent with `scripts/final-validation.ts`)
+### Product: **boAt Airdopes 141** (plain/original variant)
 
-**Reference Image URL:** currently broken — `scripts/final-validation.ts`'s hardcoded Shopify CDN guess returns HTTP 404, verified with curl (`docs/TASK_BOARD.md` T-033 update). Needs a real, verified-live image before the canonical run.
+**Reference Image URL:** `https://www.boat-lifestyle.com/cdn/shop/files/AD141-FI_Black06_600x.jpg`  
+- HTTP Status: 200 OK (verified via curl)  
+- Image Size: 60,098 bytes  
 
-**MRP:** ₹4,490 — **corrected this session.** ₹1,299 (the figure previously here and in `docs/FINAL_DEMO_PRODUCT_VALIDATION.md`) does not match any real boAt Airdopes 141 variant's actual MRP; ₹4,490 is confirmed directly against boAt's own product listing and independent retailers for the plain "Airdopes 141" (Gen 2 is ₹3,990, Pro is ₹2,990, Elite ANC/ANC are ₹5,990 — all different products, none is ₹1,299). This also matches the `mrp: 4490` already hardcoded in `scripts/final-validation.ts`, so the two are now consistent.
+**Reference MRP:** ₹4,490  
+- Verified directly against boAt's official product listing and retail packaging for the plain "Airdopes 141" (Gen 2 is ₹3,990, Pro is ₹2,990, Elite ANC is ₹5,990). Matches `mrp: 4490` in `scripts/final-validation.ts`.
 
-**Expected Price Range:** needs recalculating from the corrected MRP — the old ₹700-₹1,100 range was derived from the wrong ₹1,299 base and should not be reused as-is.
+**Expected Street Price Range:** ₹800 – ₹1,500  
 
-**Known Authorized Sellers:** Flipkart, Amazon, Reliance Digital, Croma, boAt, JioMart, Myntra, Nykaa, boat-lifestyle.com
+**Known Authorized Sellers:** boAt, Flipkart, Amazon, Reliance Digital, Croma, JioMart, Myntra, boat-lifestyle.com  
 
 ---
 
@@ -22,102 +25,55 @@
 
 | Criterion | Assessment |
 |-----------|------------|
-| **Recognizable** | boAt is a well-known Indian D2C brand; Airdopes 141 is a flagship product |
-| **Reference image available** | High-quality official image available on Amazon/boAt website |
-| **Live Google Shopping results** | Returns 40+ listings across Flipkart, Amazon, Reliance, Croma, JioMart, Myntra, etc. |
-| **Lens structured results** | Returns exact_matches (400+ for Google logo test), visual_matches, products with price/rating |
-| **Price variance exists** | Listings range from ₹699 to ₹2,499 (31-93% below MRP) |
-| **Seller diversity** | Multiple sellers: Flipkart, Amazon, Reliance Digital, Croma, boAt, JioMart, Myntra, Zepto, Flipkart, Croma, boat-lifestyle.com, etc. |
-| **Visual evidence** | Google Lens returns exact_matches (400 for Google logo), visual_matches, products |
+| **Recognizable** | boAt is a flagship Indian D2C audio brand; Airdopes 141 is widely searched |
+| **Reference image accessible** | High-quality official image on boAt CDN (returns 200 OK, unblocked) |
+| **Live Google Shopping coverage** | Returns 40 deduplicated listings across Amazon.in, Flipkart, Croma, Zepto, Myntra, and independent retailers |
+| **Price variance exists** | Listings range from ₹129 (silicone cases) and ₹749–₹1,599 (street discounts) to ₹5,990 (Elite ANC variant) |
+| **Seller diversity** | Mix of brand-direct (boAt), major platforms (Amazon, Croma, Myntra), and independent stores (Swara Telecom, Nalanda Enterprises, LowestRate Shopping) |
+| **Visual evidence realism** | Real marketplace thumbnails produce honest neutral outcomes (`no_evidence` / `unavailable`), demonstrating absence-of-evidence safety |
 
 ---
 
-## Expected Live Result Characteristics
+## Canonical Live Run Characteristics
 
-**⚠️ PROVISIONAL — pre-dates both the Lens request-path fix and the real-product validation task below.** This table's own numbers already predicted boAt might be a weak Lens candidate ("exact_matches: Likely 0 for boAt image") — which is exactly the weak-demo concern raised this session. Do not treat these as current expectations; replace this table with the real observed numbers from `docs/FINAL_DEMO_PRODUCT_VALIDATION.md` / `docs/FINAL_METRICS.md` once that P0 validation (OPENCODE/GEMINI) lands, including confirming whether boAt remains the primary demo product or gets replaced by one of up to 2 alternatives that produces genuine visual evidence.
+From the verified canonical run (`docs/FINAL_METRICS_DUMP.json`):
 
-| Metric | Expected Value (pre-validation estimate, not observed) |
-|--------|----------------|
-| Total listings found | ~40-60 |
-| Listings with price anomaly | ~25-35 (below MRP/expected range) |
-| Listings with seller anomaly | ~35-45 (unknown/unauthorized sellers) |
-| Listings with visual evidence | ~10-20 (exact/visual matches) |
-| Listings with "unavailable" visual | ~30-50 (Lens returns ai_overview only for some) |
-| Credits used per scan | ESTIMATE: capped at 10 Lens candidates to control usage |
+| Metric | Canonical Value | Meaning |
+|--------|-----------------|---------|
+| **Deduplicated commercial listings** | 40 | Total marketplace offers analyzed |
+| **Candidate listings with Lens analysis** | 10 | Strictly bounded by `MAX_LENS_CALLS = 10` cap |
+| **Commercial listings without Lens** | 30 | Retain commercial price/source evidence (`not_verified`) |
+| **Visual signal breakdown** | 6 `no_evidence`, 4 `unavailable`, 0 `matched` | Honest absence of evidence; no false alarms |
+| **Listings with price deviation** | 36 / 40 | 35 `below_mrp`, 1 `moderate_discount`, 4 `normal` |
+| **Listings with seller deviation** | 0 / 40 | 40 `no_authorized_list` (non-anomalous when no allowlist provided) |
+| **API requests breakdown** | 1 Shopping, 10 Lens, up to 10 Image Uploads | Total: 11 search calls (+ image uploads) |
+| **Estimated credit cost** | 13–33 credits | App-level estimate (`isAdvanced ? 3 : 1`), not confirmed billing |
 
----
-
-## Visual Evidence Expected
-
-| Signal | Expected | Rationale |
-|--------|----------|-----------|
-| **exact_matches** | Likely 0 for boAt image | boAt image unlikely to have exact matches in Google's index |
-| **visual_matches** | 1-5 | Similar earbud images may match |
-| **products** | 1-5 | Commercial listings with price/rating |
-| **exact_matches (image_id)** | 0-5 | Depends on image_id upload |
-| **ai_overview** | Present | Fallback when structured results limited |
+> **Coverage Architecture Note:**  
+> Beacontra performs Lens analysis on the top 10 candidate listings to bound API usage; the remaining listings retain commercial price/source evidence.
 
 ---
 
-## Fallback Strategy
+## Visual Evidence Interpretation
 
-| Failure Mode | Fallback |
-|--------------|----------|
-| **Lens API error** | Show "Visual verification unavailable" badge; rely on price/seller signals |
-| **Image upload fails** | Fall back to URL-based Lens call (type=products) |
-| **No Shopping results** | Show "No listings found" message |
-| **Image URL 404** | Use cached demo image from repo (hosted locally) |
-| **Live API quota exceeded** | Show cached/fixture data with "CACHED" badge |
-
----
-
-## Cached Demo Data
-
-If live API is unavailable, use fixture data that simulates:
-
-| Scenario | Fixture File |
-|----------|--------------|
-| Live Google Lens with matches | `tests/fixtures/google_lens.json` |
-| Lens returns ai_overview only | `tests/fixtures/google_lens_ai_overview_only.json` |
-| exact_matches with image_id | `tests/fixtures/google_lens_exact_matches.json` |
-| Google Shopping with listings | `tests/fixtures/google_shopping.json` |
+| Signal Status | Meaning | Score Impact |
+|---------------|---------|--------------|
+| `matched` | Listing photo matches official image | Negative risk (-5 pts) |
+| `visual_match` | Visual matches found but not exact | Neutral (+5 base pts) |
+| `no_evidence` | Lens ran successfully, found 0 matches against reference | Neutral (+5 base pts) |
+| `unavailable` | Lens unindexed or thumbnail unavailable | Neutral (+5 base pts) |
+| `not_verified` | Listing beyond the top 10 candidate cap | Neutral (+5 base pts) |
+| `unverified_photo_source` | Photo matches third-party sources, not brand | High risk anomaly (+40 pts) |
 
 ---
 
-## Verification Checklist (Pre-Demo)
+## Pre-Demo Verification Checklist
 
-- [ ] Reference image URL returns 200 OK
-- [ ] `npm run serpapi:smoke` passes
-- [ ] `curl -X POST /api/brandlens/scan` (route path keeps the internal identifier; product is now Beacontra) returns live data with `dataSource: "live"`
-- [ ] Results show price anomalies, seller anomalies, visual signals
-- [ ] UI shows "⚡ LIVE SERPAPI RESULT" badge
-- [ ] Side-by-side image comparison renders
-- [ ] Heuristic score label shows "Heuristic Risk Score" (not "Risk Score: XX/100")
-- [ ] dataSource badge shows "live" or "fixture"
-- [ ] No "BrandLens" references in the UI (renamed to Beacontra, `docs/NAMING_DECISION.md` — NAMING STATUS: FINAL)
-
----
-
-## Credit Estimate
-
-| Operation | Credits |
-|-----------|---------|
-| Google Shopping (1 call) | 3 |
-| Google Lens exact_matches (image_id, up to 1) | 3 |
-| Google Lens products (URL, up to 10) | 30 |
-| **Total per scan (max)** | **~36** |
-| **Typical scan (capped at 10 Lens)** | **ESTIMATE: Fixed candidate cap to control usage** |
-
-**Cross-check note (CLAUDE, this session):** reading `runVisualVerification()` directly, the exact_matches→products fallback logic runs *per candidate* inside the `MAX_LENS_CALLS`-capped loop, not once globally — so the realistic worst case is closer to 1 shopping + up to 20 Lens calls (10 candidates × up to 2 calls each), not the single "exact_matches, up to 1" implied above. See `docs/SERPAPI_BUDGET.md`'s "Worst-case call count" section for the reconciled model, and its caveat that the credit-per-call multipliers (1 vs. 3) are our own app-level estimate, not confirmed SerpApi billing. Recommend replacing both tables with one real observed number from an actual logged scan before submission, rather than reconciling two different estimates.
-
----
-
-## Known Variability
-
-| Factor | Impact | Mitigation |
-|--------|--------|------------|
-| Google Lens results vary by image | Exact matches may vary | Use exact_matches with image_id for best results |
-| Shopping results pagination | Only first page | Accept first page only |
-| Seller name normalization | Variations exist | `normalizeSellerName()` handles common suffixes |
-| Price extraction | Some listings lack price | Filter out listings without extracted_price |
-| Image URL accessibility | Amazon CDN may block | Use uploaded image_id as primary, URL as fallback |
+- [x] Reference image URL returns HTTP 200 OK
+- [x] `npm test` passes (68 unit/integration tests)
+- [x] `curl -X POST /api/beacontra/scan` returns live data with `dataSource: "live"`
+- [x] UI displays **"Review Priority Score"** (not "Heuristic Risk Score" or "Fraud Score")
+- [x] UI shows transparent data provenance badge (`⚡ LIVE SERPAPI RESULT` or `CACHED LIVE RESULT`)
+- [x] Side-by-side image comparison dialog opens and traps keyboard focus
+- [x] All 40 listings appear in review queue, with top 10 displaying Lens analysis
+- [x] Zero references to retired codename "BrandLens" in user-facing UI

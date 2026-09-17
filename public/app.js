@@ -255,7 +255,7 @@
             : "PROVENANCE UNAVAILABLE";
     const time = new Date(data.createdAt);
     $("resultsMeta").textContent =
-      `${Number.isNaN(time.getTime()) ? "" : `Scan created ${time.toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · `}${source === "fixture" ? "Synthetic fixtures, not current marketplace evidence." : source === "cache" ? "Previously retrieved evidence; not a new live search." : source === "live" ? "Search responses may be cached." : "The response did not identify its data origin."}`;
+      `${Number.isNaN(time.getTime()) ? "" : `Scan created ${time.toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · `}${source === "fixture" ? "Synthetic fixtures, not current marketplace evidence." : source === "cache" ? "Previously retrieved evidence; not a new live search." : source === "live" ? "Search responses may be cached." : "The response did not identify its data origin."} Visual analysis is bounded to the top 10 candidates to control API usage.`;
     const results = data.results;
     const sources = new Set(results.map((r) => r.listing.source).filter(usable))
       .size;
@@ -312,7 +312,7 @@
     if (!$("maxPrice").validity.valid || !$("minPrice").validity.valid)
       document.querySelector(".context").open = true;
     if (!$("scanForm").reportValidity()) return null;
-    return {
+    const payload = {
       productName: $("productName").value.trim(),
       officialImageUrl: $("officialImageUrl").value.trim(),
       mrp,
@@ -323,6 +323,12 @@
         .map((s) => s.trim())
         .filter(Boolean),
     };
+    
+    const file = $("imageFile")?.files?.[0];
+    if (file) {
+      payload.imageFile = file;
+    }
+    return payload;
   }
   async function scan(input) {
     if (state.busy) return;
@@ -349,14 +355,36 @@
     }, 1000);
     const timeout = setTimeout(() => controller.abort(), 240000);
     try {
-      const response = await fetch("/api/beacontra/scan", {
+      let fetchOptions = {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
         signal: controller.signal,
-      });
+      };
+
+      if (input.imageFile) {
+        const formData = new FormData();
+        formData.append("productName", input.productName);
+        if (input.officialImageUrl) formData.append("officialImageUrl", input.officialImageUrl);
+        if (input.mrp) formData.append("mrp", input.mrp);
+        formData.append("imageFile", input.imageFile);
+        
+        // Preview local image
+        input.officialImageUrl = URL.createObjectURL(input.imageFile);
+        fetchOptions.body = formData;
+      } else {
+        fetchOptions.headers = { "Content-Type": "application/json" };
+        fetchOptions.body = JSON.stringify(input);
+      }
+
+      const response = await fetch("/api/beacontra/scan", fetchOptions);
       if (!response.ok) {
-        const error = new Error("request");
+        let serverError;
+        try {
+          const errData = await response.json();
+          serverError = errData.error;
+        } catch {
+          // ignore parsing error
+        }
+        const error = new Error(serverError || "request");
         error.status = response.status;
         throw error;
       }
@@ -373,7 +401,9 @@
             ? "The search service is at its request limit. Wait a little before retrying; your product details are saved."
             : [401, 403].includes(error.status)
               ? "The search service could not authorize this request. Check the server’s SerpApi configuration before retrying."
-              : "Marketplace search is temporarily unavailable. Your product details are saved — retry, or edit the product and image link.";
+              : error.message !== "request" && error.message !== "response"
+                ? error.message
+                : "Marketplace search is temporarily unavailable. Your product details are saved — retry, or edit the product and image link.";
       $("retryBtn").focus();
     } finally {
       clearInterval(timer);

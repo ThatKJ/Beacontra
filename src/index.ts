@@ -98,10 +98,61 @@ app.post('/api/beacontra/scan', async (c) => {
   const beacontra = createBeacontraService(client);
 
   try {
-    const input = await c.req.json<BeacontraInput>();
+    let input: BeacontraInput;
+    const contentType = c.req.header('content-type') || '';
 
-    if (!input.productName || !input.officialImageUrl) {
-      return c.json({ error: 'productName and officialImageUrl are required' }, 400);
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await c.req.parseBody();
+      const productName = formData['productName'] as string;
+      const mrpStr = formData['mrp'] as string;
+      let officialImageUrl = formData['officialImageUrl'] as string;
+      const imageFile = formData['imageFile'] as File;
+      
+      if (!productName) return c.json({ error: 'productName is required' }, 400);
+
+      // If a file was uploaded, we send it to SerpApi Image API to get an image_id
+      if (imageFile && !officialImageUrl) {
+        try {
+          const apiKey = client.getApiKey?.() || '';
+          if (apiKey && !client.isFixtureMode()) {
+            const serpFormData = new FormData();
+            serpFormData.append('image', imageFile, imageFile.name);
+            serpFormData.append('api_key', apiKey);
+            
+            const uploadResponse = await fetch('https://serpapi.com/image', {
+              method: 'POST',
+              body: serpFormData,
+            });
+            if (uploadResponse.ok) {
+              const uploadResult = await uploadResponse.json() as { image_id?: string };
+              if (uploadResult.image_id) {
+                // Use the image_id pseudo-URL for the backend
+                officialImageUrl = `serpapi:image_id:${uploadResult.image_id}`;
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Failed to upload local image to SerpApi:', e);
+        }
+        if (!officialImageUrl) {
+          officialImageUrl = 'local-upload://' + imageFile.name;
+        }
+      }
+
+      if (!officialImageUrl) {
+        return c.json({ error: 'officialImageUrl or imageFile is required' }, 400);
+      }
+
+      input = {
+        productName,
+        officialImageUrl,
+        mrp: mrpStr ? Number(mrpStr) : undefined,
+      };
+    } else {
+      input = await c.req.json<BeacontraInput>();
+      if (!input.productName || !input.officialImageUrl) {
+        return c.json({ error: 'productName and officialImageUrl are required' }, 400);
+      }
     }
 
     const result = await beacontra.scan(input);

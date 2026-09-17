@@ -42,7 +42,7 @@ export interface LensEvidence {
 
 export interface PriceSignal {
   isAnomalous: boolean;
-  anomalyType: 'below_mrp' | 'below_range' | 'moderate_discount' | 'normal';
+  anomalyType: 'below_mrp' | 'below_range' | 'large_deviation' | 'moderate_discount' | 'normal';
   mrp?: number;
   priceRatio?: number;
   details: string;
@@ -89,8 +89,6 @@ export interface BeacontraScanResult {
   creditsUsed: number;
 }
 
-const PRICE_ANOMALY_THRESHOLD = 0.7;
-
 export class BeacontraService {
   private client: SerpApiClient;
 
@@ -106,7 +104,7 @@ export class BeacontraService {
 
     const shoppingResults = await this.searchMarketplaceListings(input.productName);
 
-    const candidates = this.extractCandidates(shoppingResults);
+    const candidates = this.extractCandidates(shoppingResults, input.productName);
 
     const priceSignals = candidates.map(c => ({ candidate: c, priceSignal: this.analyzePrice(c, input) }));
     priceSignals.sort((a, b) => {
@@ -116,18 +114,14 @@ export class BeacontraService {
       return b.candidate.extractedPrice - a.candidate.extractedPrice;
     });
 
-    const results: FusedResult[] = [];
-
-    for (const entry of priceSignals) {
+    const resultsPromises = priceSignals.map(async (entry, index) => {
       const { candidate, priceSignal } = entry;
       const sellerSignal = this.analyzeSeller(candidate, input);
 
       let lensEvidence: LensEvidence;
       let visualSignal: VisualSignal;
 
-      const currentLensCalls = results.filter(r => r.visualSignal.anomalyType !== 'not_verified').length;
-
-      if (currentLensCalls < BeacontraService.MAX_LENS_CALLS) {
+      if (index < BeacontraService.MAX_LENS_CALLS) {
         lensEvidence = await this.runVisualVerification(candidate.thumbnail, input.officialImageUrl);
         visualSignal = this.analyzeVisual(lensEvidence);
       } else {
@@ -141,9 +135,10 @@ export class BeacontraService {
         };
       }
 
-      const fused = this.fuseSignals(candidate, lensEvidence, priceSignal, sellerSignal, visualSignal);
-      results.push(fused);
-    }
+      return this.fuseSignals(candidate, lensEvidence, priceSignal, sellerSignal, visualSignal);
+    });
+
+    const results: FusedResult[] = await Promise.all(resultsPromises);
 
     results.sort((a, b) => b.compositeScore - a.compositeScore);
 
@@ -169,10 +164,33 @@ export class BeacontraService {
     return this.client.search(params);
   }
 
-  private extractCandidates(response: SerpApiResponse): ListingCandidate[] {
+  private isVariantMismatch(title: string, productName: string): boolean {
+    const t = title.toLowerCase();
+    const p = productName.toLowerCase();
+    
+    // Filter out common accessories if the original product is not an accessory
+    const accessoryTokens = ['case', 'cover', 'skin', 'silicone', 'pouch', 'protector'];
+    if (accessoryTokens.some(token => t.includes(token) && !p.includes(token))) {
+      return true;
+    }
+    
+    // Filter out variants that change the SKU price (Pro, ANC, Gen 2, etc.)
+    const variantTokens = ['pro', 'anc', 'gen 2', 'gen2', 'elite', 'max', 'plus', 'ultra', 'neo', 'active', 'lite'];
+    for (const token of variantTokens) {
+      const regex = new RegExp(`\\b${token}\\b`, 'i');
+      if (regex.test(t) && !regex.test(p)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
+  private extractCandidates(response: SerpApiResponse, productName: string): ListingCandidate[] {
     const shoppingResults = response.shopping_results || [];
     return shoppingResults
       .filter((r): r is ShoppingResult => r.extracted_price !== undefined && r.extracted_price > 0)
+      .filter((r) => !this.isVariantMismatch(r.title, productName))
       .map((r) => ({
         position: r.position ?? 0,
         title: r.title,
@@ -345,19 +363,40 @@ export class BeacontraService {
     const price = candidate.extractedPrice;
     const mrp = input.mrp;
 
-    if (mrp && price < mrp * PRICE_ANOMALY_THRESHOLD) {
+    if (mrp && price < mrp * 0.5) {
       return {
         isAnomalous: true,
         anomalyType: 'below_mrp',
+        mrp,
+        priceRatio: price / mrp,
+        details: `Price ₹${price} is ${Math.round((1 - price / mrp) * 100)}% below MRP ₹${mrp} (Extreme deviation)`,
+      };
+    }
+
+    if (mrp && price < mrp * 0.7) {
+      return {
+        isAnomalous: true,
+        anomalyType: 'large_deviation',
         mrp,
         priceRatio: price / mrp,
         details: `Price ₹${price} is ${Math.round((1 - price / mrp) * 100)}% below MRP ₹${mrp}`,
       };
     }
 
+    if (mrp && price < mrp * 0.9) {
+      const discountPct = Math.round((1 - price / mrp) * 100);
+      return {
+        isAnomalous: false,
+        anomalyType: 'moderate_discount',
+        mrp,
+        priceRatio: price / mrp,
+        details: `Price ₹${price} is ${discountPct}% below MRP ₹${mrp} (Standard market discount)`,
+      };
+    }
+
     if (input.expectedPriceRange) {
       const { min, max } = input.expectedPriceRange;
-      if (price < min * PRICE_ANOMALY_THRESHOLD) {
+      if (price < min * 0.7) { // Using 0.7 instead of the removed PRICE_ANOMALY_THRESHOLD
         return {
           isAnomalous: true,
           anomalyType: 'below_range',
@@ -365,17 +404,6 @@ export class BeacontraService {
           details: `Price ₹${price} is significantly below expected range ₹${min}-₹${max}`,
         };
       }
-    }
-
-    if (mrp && price < mrp * 0.9) {
-      const discountPct = Math.round((1 - price / mrp) * 100);
-      return {
-        isAnomalous: true,
-        anomalyType: 'moderate_discount',
-        mrp,
-        priceRatio: price / mrp,
-        details: `Price ₹${price} is ${discountPct}% below MRP ₹${mrp}`,
-      };
     }
 
     return {
@@ -518,7 +546,7 @@ export class BeacontraService {
       score += 25;
       reasons.push(`Seller anomaly: ${sellerSignal.details}`);
     } else {
-      score += 15;
+      score += 5; // Neutral base score (down from 15 to prevent false positives when no allowlist exists)
     }
 
     // Visual signal scoring - only add risk for actual anomalies

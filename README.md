@@ -100,9 +100,13 @@ npm run test:live
 ## Architecture & Credit Budget
 
 - **Backend Runtime**: Cloudflare Workers (Hono framework) with TypeScript.
-- **Engines Used**:
-  - `google_shopping`: 1 call per scan to discover marketplace listings.
-  - `google_lens`: Reverse image search against official product photos (capped to top 10 candidates per scan to strictly respect the 250/month free tier budget).
+- **Engines & Request Breakdown**:
+  - **TOTAL API REQUESTS**: 11 engine search calls (+ up to 10 image-upload attempts per scan)
+  - **SHOPPING REQUESTS**: 1 call per scan (`google_shopping`) to discover marketplace listings.
+  - **LENS REQUESTS**: 10 calls per scan (`google_lens`) evaluated on the top candidate thumbnails.
+  - **IMAGE-UPLOAD REQUESTS**: up to 10 pre-search uploads to generate `image_id` for Lens exact matching.
+  - **ESTIMATED CREDIT COST**: 13–33 credits (internal app-level heuristic estimate; not confirmed SerpApi billing).
+- **Candidate Cap & Visual Coverage**: Beacontra performs Lens analysis on the top 10 candidate listings to bound API usage; the remaining listings retain commercial price/source evidence.
 - **Signal Fusion**: Deterministic weighting of Price Anomaly, Seller Anomaly, and Visual Signal into a 0-100 **Review Priority Score** (verified against the current UI label — not a statistical confidence figure, a review-ranking heuristic).
 - **Frontend**: Dependency-free vanilla JavaScript and local CSS, served through Workers Static Assets. Ranked queue, side-by-side evidence workspace, accessible expanded comparison, image-link preview, and an example-product shortcut.
 
@@ -121,17 +125,16 @@ This project was built primarily by three AI coding agents working under human d
 Stated plainly rather than glossed over:
 - Scoring weights (price/seller/visual signal contributions) are hand-chosen heuristics, not statistically calibrated against a labeled dataset — none exists to calibrate against. This is positioned as decision-support, not a certainty score.
 - No real brand owner has used this yet — usefulness is evidenced by a documented market gap (two independently-run research passes reaching the same conclusion), not validated customer demand.
-- `google_lens`'s behavior against real cropped/watermarked/altered product photos has not yet been empirically spiked (`docs/TASK_BOARD.md` T-017) — the fusion design treats it as one of three signals specifically so a weak Lens result degrades a score rather than invalidating it.
-- A known scoring-logic issue is open as of this writing (T-026): "Lens found zero matches" is currently treated as positive evidence of a mismatch rather than as absence of evidence.
+- Absence of evidence is handled conservatively: Lens returning zero matches is classified as neutral `no_evidence`, not penalized as an automatic counterfeit accusation.
 - No takedown-drafting or enforcement step exists — the output is a review queue for a human, not an end-to-end enforcement workflow.
 
 ## Project structure
 
 ```
 src/
-  index.ts              Hono app, API routes (/api/search, /api/brandlens/scan)
+  index.ts              Hono app, API routes (/api/search, /api/beacontra/scan)
   lib/
-    brandlens.ts         Core service: listing extraction, signal analysis, fusion/scoring
+    beacontra.ts         Core service: listing extraction, signal analysis, fusion/scoring
     serpapi-client.ts     Generic SerpApi client: caching, retry, fixtures, credit tracking
     config.ts              Centralized env/config resolution (SERPAPI_API_KEY / SERPAPI_KEY)
     cache.ts                Tiered KV + in-memory cache

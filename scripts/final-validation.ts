@@ -68,6 +68,11 @@ async function main() {
   let unavailableCount = 0;
   let anomalousCount = 0;
 
+  let belowMrpCount = 0;
+  let largeDeviationCount = 0;
+  let moderateDiscountCount = 0;
+  let normalPriceCount = 0;
+
   for (const r of result.results) {
     const v = r.visualSignal;
     if (v.status === 'matched') matchedCount++;
@@ -75,6 +80,12 @@ async function main() {
     if (v.status === 'no_evidence') noEvidenceCount++;
     if (v.status === 'unavailable') unavailableCount++;
     if (v.isAnomalous) anomalousCount++;
+
+    const p = r.priceSignal;
+    if (p.anomalyType === 'below_mrp') belowMrpCount++;
+    if (p.anomalyType === 'large_deviation') largeDeviationCount++;
+    if (p.anomalyType === 'moderate_discount') moderateDiscountCount++;
+    if (p.anomalyType === 'normal') normalPriceCount++;
   }
 
   console.log('Visual Status Breakdown:');
@@ -83,6 +94,12 @@ async function main() {
   console.log('  No Evidence:', noEvidenceCount);
   console.log('  Unavailable:', unavailableCount);
   console.log('  Anomalous:', anomalousCount);
+
+  console.log('Price Status Breakdown:');
+  console.log('  Below MRP (Extreme):', belowMrpCount);
+  console.log('  Large Deviation:', largeDeviationCount);
+  console.log('  Moderate Discount:', moderateDiscountCount);
+  console.log('  Normal:', normalPriceCount);
 
   // We need to write this to a file so we can view it
   fs.writeFileSync('docs/FINAL_METRICS_DUMP.json', JSON.stringify({
@@ -94,6 +111,12 @@ async function main() {
     noEvidenceCount,
     unavailableCount,
     anomalousCount,
+    priceCounts: {
+      belowMrpCount,
+      largeDeviationCount,
+      moderateDiscountCount,
+      normalPriceCount
+    },
     results: result.results
   }, null, 2));
 }

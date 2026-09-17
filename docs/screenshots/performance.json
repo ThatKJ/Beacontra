@@ -31,22 +31,18 @@
     {
       "name": "desktop",
       "cpuSlowdown": 1,
-      "lcp": 60,
+      "lcp": 96,
       "layoutShifts": 0,
       "longTasks": [],
-      "fcp": 60,
-      "frameMedianMs": 8.300000000000182,
-      "frameP95Ms": 8.799999999999727,
+      "fcp": 96,
+      "frameMedianMs": 16.699999999999818,
+      "frameP95Ms": 16.700000000000273,
       "framesOver32ms": 0,
-      "sampledFrames": 241,
+      "sampledFrames": 121,
       "requests": [
         {
           "url": "http://localhost:8787/styles.css",
           "transferBytes": 5316
-        },
-        {
-          "url": "http://localhost:8787/experience.css",
-          "transferBytes": 7115
         },
         {
           "url": "http://localhost:8787/experience.js",
@@ -55,20 +51,26 @@
         {
           "url": "http://localhost:8787/app.js",
           "transferBytes": 7915
+        },
+        {
+          "url": "http://localhost:8787/experience.css",
+          "transferBytes": 7115
         }
       ]
     },
     {
       "name": "mobile-4x-cpu",
       "cpuSlowdown": 4,
-      "lcp": 100,
+      "lcp": 120,
       "layoutShifts": 0,
-      "longTasks": [],
-      "fcp": 100,
-      "frameMedianMs": 8.299999999999955,
-      "frameP95Ms": 10.199999999999818,
+      "longTasks": [
+        58
+      ],
+      "fcp": 120,
+      "frameMedianMs": 16.699999999999818,
+      "frameP95Ms": 16.799999999999727,
       "framesOver32ms": 0,
-      "sampledFrames": 240,
+      "sampledFrames": 121,
       "requests": [
         {
           "url": "http://localhost:8787/styles.css",

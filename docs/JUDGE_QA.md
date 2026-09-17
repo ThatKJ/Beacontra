@@ -75,17 +75,17 @@
 **WEAKNESS IF ANY:** Both operate in the same coarse "brand protection" market category, and CeaseFire is a materially more mature codebase (3,800+ backend LOC, 4,800+ frontend LOC, 194 tests) if a judge inspects both repos side by side — a judge could form a first impression of overlap before reading the differentiation, which is exactly why the demo script (`docs/DEMO.md`) addresses this proactively rather than waiting to be asked.
 
 ### 15. How many SerpApi calls does a user action use?
-**STRONG FACTUAL ANSWER:** One `google_shopping` call per scan, plus up to 10 `google_lens` calls (capped, ordered by price-anomaly-first) — worst case ~11 calls per scan, down from an uncapped worst case of ~16-41 before the cap was added.
-**EVIDENCE:** `docs/SERPAPI_BUDGET.md`, and the `MAX_LENS_CALLS = 10` constant read directly from `src/lib/brandlens.ts`.
+**STRONG FACTUAL ANSWER:** One `google_shopping` call per scan, plus up to 10 `google_lens` calls (capped, ordered by price-anomaly-first) — exactly 11 engine search calls per scan (plus up to 10 image-upload attempts to obtain `image_id`). Beacontra performs Lens analysis on the top 10 candidate listings to bound API usage; the remaining listings retain commercial price/source evidence.
+**EVIDENCE:** `docs/SERPAPI_BUDGET.md`, and the `MAX_LENS_CALLS = 10` constant read directly from `src/lib/beacontra.ts`.
 **WEAKNESS IF ANY:** None significant — this was an identified risk that was found and fixed, and the fix is verifiable in the code, not just claimed.
 
 ### 16. What happens when the API fails?
-**STRONG FACTUAL ANSWER:** A single listing's `google_lens` call failing (timeout, rate limit, malformed response) degrades that one listing's visual signal to "no evidence," not a crashed scan — `runVisualVerification()` catches and returns `emptyLensEvidence()` rather than propagating the error. A `google_shopping` failure surfaces as a typed `SerpApiError` with the correct HTTP status, not a silent empty result.
-**EVIDENCE:** `src/lib/brandlens.ts` try/catch in `runVisualVerification()`; `src/index.ts` error handling for `SerpApiError`.
+**STRONG FACTUAL ANSWER:** A single listing's `google_lens` call failing (timeout, rate limit, malformed response) degrades that one listing's visual signal to "no evidence" or "unavailable," not a crashed scan — `runVisualVerification()` catches and returns `emptyLensEvidence()` rather than propagating the error. A `google_shopping` failure surfaces as a typed `SerpApiError` with the correct HTTP status, not a silent empty result.
+**EVIDENCE:** `src/lib/beacontra.ts` try/catch in `runVisualVerification()`; `src/index.ts` error handling for `SerpApiError`.
 **WEAKNESS IF ANY:** Partial-failure states (e.g., 3 of 10 Lens calls fail) are not distinctly surfaced to the end user beyond each affected listing's own signal — there's no scan-level "N of M checks completed" indicator.
 
 ### 17. What did YOU build rather than API providers?
-**STRONG FACTUAL ANSWER:** SerpApi provides raw search/image data; we built the listing-extraction/normalization layer, the three independent signal analyzers, the weighted fusion/scoring algorithm, the credit-control cap, the caching/retry/fixture infrastructure, and the evidence-first UI. None of that exists in SerpApi's API response — it's the product's own logic, verifiable by reading `src/lib/brandlens.ts` directly rather than taking the claim on faith.
+**STRONG FACTUAL ANSWER:** SerpApi provides raw search/image data; we built the listing-extraction/normalization layer, the three independent signal analyzers, the weighted fusion/scoring algorithm, the credit-control cap, the caching/retry/fixture infrastructure, and the evidence-first UI. None of that exists in SerpApi's API response — it's the product's own logic, verifiable by reading `src/lib/beacontra.ts` directly rather than taking the claim on faith.
 **EVIDENCE:** `docs/ARCHITECTURE.md` component breakdown.
 **WEAKNESS IF ANY:** None significant beyond what's already disclosed above (heuristic, uncalibrated weights).
 

@@ -236,15 +236,25 @@
                   ><span>Your genuine<br />product photo</span>
                 </div>
                 <div class="photo-fields">
-                  <label for="officialImageUrl">Genuine product photo</label
-                  ><input
-                    id="officialImageUrl"
-                    name="officialImageUrl"
-                    type="url"
-                    required
-                    placeholder="https://yourbrand.com/photo.jpg"
-                    aria-describedby="imageHint imageStatus"
-                  />
+                  <label for="officialImageUrl">Genuine product photo (URL or File)</label>
+                  <div class="flex gap-2">
+                    <input
+                      type="url"
+                      id="officialImageUrl"
+                      name="officialImageUrl"
+                      required
+                      placeholder="https://yourbrand.com/photo.jpg"
+                      aria-describedby="imageHint imageStatus"
+                      class="flex-1"
+                    />
+                    <input
+                      type="file"
+                      id="imageFile"
+                      name="imageFile"
+                      accept="image/png, image/jpeg, image/webp"
+                      class="text-sm self-center w-full max-w-[200px]"
+                    />
+                  </div>
                   <p id="imageHint" class="hint">
                     Paste a public image link from your brand’s website.
                   </p>

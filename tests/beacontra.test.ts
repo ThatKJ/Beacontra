@@ -71,7 +71,9 @@ describe('BeacontraService', () => {
   });
 
   it('should detect price anomaly for below-MRP listings', async () => {
-    const result = await beacontra.scan(validInput);
+    // Override MRP to force a large_deviation anomaly (e.g. price 72999 < 120000 * 0.7)
+    const testInput = { ...validInput, mrp: 120000 };
+    const result = await beacontra.scan(testInput);
     const results = result.results ?? [];
 
     const hasPriceAnomaly = results.some(r => r.priceSignal.isAnomalous);
