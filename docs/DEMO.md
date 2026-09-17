@@ -1,6 +1,6 @@
 # Demo Script (target: 2:30-2:50, hard limit 3:00)
 
-**Status: draft, buildable but not yet rehearsable end-to-end.** This script assumes T-021 (visual side-by-side rendering in `public/index.html` — currently the single biggest gap, per `docs/GEMINI_UX_AUDIT.md`) is done before the first rehearsal; the visual "gotcha" beat below does not work without it. T-017 (`google_lens` spike) should also land first so the Lens-based beat reflects real, not assumed, engine behavior. Do not rehearse against this script until both are closed.
+**Status: draft, close to rehearsable — updated this session.** T-021 (visual side-by-side rendering in `public/index.html`) is DONE, verified directly. T-017 (`google_lens` spike) is substantially resolved — the request-path bugs (wrong param name, missing `type`, wrong response path) are fixed and verified, and a live matrix confirms Lens genuinely returns structured `exact_matches`/`visual_matches`/`products` data (`docs/LENS_SPIKE_V2.md`). **One real caveat before treating this as demo-proven:** that matrix was tested against the Google logo (an atypical, maximally-indexed image), not an ordinary marketplace product photo — the mechanism works, but whether it reliably produces a clean, camera-ready "gotcha" on the *actual* demo product/photo pair is not yet confirmed. Do one credit-conscious spot-check with the real chosen demo image (not another full parameter matrix) before rehearsing on camera.
 
 **Naming note:** the product is referred to below only as "this tool" / descriptively — a public name is still open (`docs/TASK_BOARD.md` T-019); do not record a demo that bakes in the "BrandLens" internal codename as a public-facing brand name.
 
@@ -47,6 +47,7 @@
 
 ## Open blockers before this script is rehearsal-ready
 
-1. T-021 (visual side-by-side rendering) — without this, step 3 of the live workflow doesn't exist yet.
-2. T-017 (`google_lens` spike) — informs whether the "gotcha" moment reliably fires on a real product/listing pair, or needs a hand-picked example.
-3. A specific, pre-tested product+photo demo pair needs to be chosen and verified to produce a clean result before the first full rehearsal.
+1. ~~T-021 (visual side-by-side rendering)~~ — DONE, verified.
+2. ~~T-017 (`google_lens` spike)~~ — request-path bugs fixed and verified; mechanism confirmed to return real structured data (tested on the Google logo, not yet on a realistic product photo — see status note above).
+3. A specific, pre-tested product+photo demo pair still needs to be chosen and spot-checked live (one targeted check, not another full matrix — credit-conscious per `docs/SERPAPI_BUDGET.md`) before the first full rehearsal. This is now the single remaining real blocker.
+4. The product's public name is still open (`docs/NAMING_V2.md`/`docs/NAMING_DECISION.md`) — this script deliberately avoids baking in "BrandLens," and should get the real name once `NAMING STATUS: FINAL`.

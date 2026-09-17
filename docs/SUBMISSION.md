@@ -1,6 +1,6 @@
 # Submission Package
 
-**Status: draft, ready for final copy-edit once T-017 (Lens spike) and T-026 (scoring fix) close and a rehearsed demo recording exists.** All facts below are sourced to `docs/DECISION.md`, `docs/RESEARCH.md`, `docs/COMPETITIVE_ADJUDICATION.md`, and direct code reading — nothing here is invented for submission-copy purposes.
+**Status: draft, ready for final copy-edit once naming is FINAL and a rehearsed demo recording exists.** T-017 (Lens request-path fix) and T-026 (scoring fix) are both resolved and independently verified by direct code reading this session — see the updated Known Limitations below for what's actually still open (narrower than before). All facts below are sourced to `docs/DECISION.md`, `docs/RESEARCH.md`, `docs/COMPETITIVE_ADJUDICATION.md`, and direct code reading — nothing here is invented for submission-copy purposes.
 
 ---
 
@@ -55,7 +55,7 @@ Every fact the product surfaces — which listings exist, at what price, from wh
 
 ## DEMO DESCRIPTION
 
-Full script: `docs/DEMO.md`. Structure: problem (real, sourced numbers) → product (one sentence) → live workflow ending in a visible photo-vs-photo mismatch → proactive comparison against the closest existing SerpApi-gallery project → explicit SerpApi-necessity statement → close. **Not yet rehearsed end-to-end** — blocked on the same open items as everything else that touches the live pipeline (T-017, T-026).
+Full script: `docs/DEMO.md`. Structure: problem (real, sourced numbers) → product (one sentence) → live workflow ending in a visible photo-vs-photo mismatch → proactive comparison against the closest existing SerpApi-gallery project → explicit SerpApi-necessity statement → close. **Not yet rehearsed end-to-end** — the remaining real blocker is picking and spot-checking one specific demo product/photo pair against the corrected live pipeline (T-017/T-026 are otherwise resolved), plus finalizing the public product name.
 
 ## AI TOOLS USED
 
@@ -74,7 +74,7 @@ See `README.md` for the authoritative, tested setup path (env var configuration,
 Stated plainly, matching `docs/JUDGE_QA.md`'s weaknesses rather than a softened version for outside readers:
 - Scoring weights (price/seller/visual point contributions) are hand-chosen heuristics, not statistically calibrated against a labeled dataset — no such dataset exists to calibrate against. The product is positioned as decision-support, not a certainty score, and the UI avoids percentage-style framing for exactly this reason.
 - No real brand owner has used this yet — usefulness is evidenced by a documented market gap (two independent research passes), not validated customer demand.
-- As of this writing, `google_lens`'s behavior against real cropped/watermarked/altered product photos has not been empirically spiked (`docs/TASK_BOARD.md` T-017, still open) — the visual signal's reliability in practice is not yet independently confirmed, though the fusion design deliberately treats it as one of three signals rather than sole arbiter so a weak Lens signal degrades rather than breaks a result.
-- A scoring-logic issue was found during this session's review and is still open as of this writing (`docs/TASK_BOARD.md` T-026): when `google_lens` returns zero visual matches, the current code treats that absence of evidence as if it were positive evidence of a mismatch. This overclaims what the signal supports and should be fixed before the number is used in a live judged demo.
+- `google_lens` was initially thought not to return structured match data at all — that conclusion turned out to be caused by three implementation bugs (wrong parameter name, missing required `type` parameter, wrong response-parsing path), found via direct comparison against SerpApi's official docs and fixed. A live matrix test now confirms Lens genuinely returns structured `exact_matches`/`visual_matches`/`products` data when called correctly. **What's still open:** that matrix used an atypical test image (the Google logo, one of the most heavily-indexed images on the internet), not an ordinary marketplace product photo — the mechanism works, but its real-world hit rate on typical product images hasn't been separately confirmed.
+- The scoring-logic issue found during review (treating "no visual match" as positive mismatch evidence) has been fixed and independently verified by direct code reading — `no_evidence` and `unavailable` are now both neutral, non-scoring states, distinct from an actual positive finding.
 - "BrandLens" is an internal codename colliding with existing products; a public submission name has not been finalized (T-019).
 - No takedown-drafting or enforcement-action step exists — output is a review queue for a human, not an end-to-end enforcement workflow (unlike, e.g., CeaseFire's notice-signing step for its own different problem).

@@ -104,6 +104,7 @@
 - [x] Fixed test to use `matched` instead of `match` anomaly type
 - [x] Updated fixture to match live reality (ai_overview only, no lens_results)
 **VERIFICATION:** 68 tests pass, typecheck clean, lint clean, build succeeds, live scan shows correct "unavailable" visual status.
+**SUPERSEDED NOTE (this session):** "ai_overview only, no lens_results" was accurate live reality *at the time this was written*, before T-017's parameter/response-path bugs were found and fixed. Current reality (verified by CLAUDE reading the live code, `docs/LENS_SPIKE_V2.md`, `docs/LENS_MATRIX_RESULTS.json`): Lens does return structured `exact_matches`/`visual_matches`/`products` when called with the correct `url`/`type`/top-level-parsing. This fixture/comment should be refreshed to reflect the corrected shape (`docs/LENS_SPIKE_V2.md`'s own "Updated Fixtures Needed" section already says the same) — leaving this note here rather than rewriting the historical record above.
 
 ### T-027: Fix Live Datetime Schema (T-027)
 **OWNER:** OPENCODE
