@@ -63,7 +63,7 @@
 
 ### T-005: Core Stack Setup (post-DECISION.md)
 **OWNER:** OPENCODE
-**STATUS:** TODO
+**STATUS:** BLOCKED_BY_DECISION
 **FILES:** package.json, wrangler.jsonc, tsconfig.json, src/
 **DEPENDENCIES:** T-001, DECISION.md exists
 **ACCEPTANCE CRITERIA:**
@@ -71,6 +71,7 @@
 - [ ] Configure TypeScript, linting, testing
 - [ ] Set up SerpApi client with caching/retry
 - [ ] Create development fixtures for testing without live credits
+**NOTE:** Blocked by DECISION.md for product-specific architecture. Generic infrastructure can proceed.
 
 ### T-006: Core Product Implementation (post-DECISION.md)
 **OWNER:** OPENCODE
@@ -136,3 +137,54 @@
 - [x] Initialize empty red team audit files
 - [x] Document lack of product decision as the current highest risk
 - [x] Prepare structure for continuous validation
+
+### T-012: Gemini Early Concept Red Team
+**OWNER:** GEMINI
+**STATUS:** DONE
+**PRIORITY:** P1
+**FILES:** docs/GEMINI_CONCEPT_RED_TEAM.md
+**DEPENDENCIES:** None
+**ACCEPTANCE CRITERIA:**
+- [x] Subject OpenCode's top 3 concepts to the "Boring Project", "AI Wrapper", and "Top Project" tests.
+- [x] Surface high-risk weaknesses in these concepts before Claude finalizes DECISION.md.
+
+### T-013: Feasibility Assumptions Verification
+**OWNER:** GEMINI
+**STATUS:** DONE
+**PRIORITY:** P1
+**FILES:** docs/TECHNICAL_FEASIBILITY.md
+**DEPENDENCIES:** None
+**ACCEPTANCE CRITERIA:**
+- [x] Verify OpenCode's unverified assumptions regarding SerpApi limits and domain parity.
+- [x] Update TECHNICAL_FEASIBILITY.md with the verified results.
+
+### T-014: Hackathon Evaluation Standards
+**OWNER:** GEMINI
+**STATUS:** DONE
+**PRIORITY:** P1
+**FILES:** docs/GEMINI_HACKATHON_STANDARDS.md
+**DEPENDENCIES:** None
+**ACCEPTANCE CRITERIA:**
+- [x] Define anti-wrapper criteria.
+- [x] Document generic failure patterns and demo success patterns.
+
+### T-015: Generic Cloudflare Workers Infrastructure (product-agnostic)
+**OWNER:** OPENCODE
+**STATUS:** IN_PROGRESS
+**FILES:** package.json, wrangler.jsonc, tsconfig.json, src/lib/serpapi-client.ts, src/lib/cache.ts, src/lib/types.ts, vitest.config.ts, tests/
+**DEPENDENCIES:** T-001
+**ACCEPTANCE CRITERIA:**
+- [ ] Initialize Cloudflare Workers project with wrangler.jsonc
+- [ ] Configure TypeScript strict mode
+- [ ] Set up Vitest with fixture support (zero live credits)
+- [ ] Configure ESLint + Prettier
+- [ ] Build generic SerpApi client with:
+  - [ ] Request deduplication (in-flight promise cache)
+  - [ ] Response caching (KV + in-memory)
+  - [ ] Retry with exponential backoff
+  - [ ] Fixture mode for development
+  - [ ] Credit tracking/estimation
+  - [ ] Rate limit handling
+  - [ ] Zod schemas for engine responses
+- [ ] Create fixture files for key engines (google, google_maps, google_shopping, google_jobs, google_trends)
+- [ ] Verify: npm run build, npm run typecheck, npm run lint, npm test all pass

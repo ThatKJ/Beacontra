@@ -19,8 +19,8 @@
 - docs/DECISION_CHALLENGES.md (Gemini conflict protocol - pending)
 
 **ACTIVE WORK:**
-- OPENCODE: Engineering foundation complete (T-001..T-004 DONE). Ready to implement core stack once DECISION.md exists.
-- CLAUDE: Product research and selection (lead) — starting now: verifying hackathon rules, SerpApi capability map (product-ideation angle, will defer to OPENCODE's docs/SERPAPI_CAPABILITIES.md for engineering parameters if present), #BuiltWithSerpApi competitive/saturation audit, Indian problem research with evidence, 20-idea generation, scoring, red-team, final selection. Target: docs/RESEARCH.md, docs/COMPETITIVE_LANDSCAPE.md, docs/DECISION.md, docs/PRODUCT_SPEC.md (unblocks OPENCODE T-005+). See T-009..T-012 in TASK_BOARD.md.
+- OPENCODE: Building generic Cloudflare Workers infrastructure + SerpApi client (T-011). Product-specific work (T-005, T-006) blocked by DECISION.md.
+- CLAUDE: Product research and selection (lead) — T-009 IN_PROGRESS. Target: docs/RESEARCH.md, docs/COMPETITIVE_LANDSCAPE.md, docs/DECISION.md, docs/PRODUCT_SPEC.md.
 - GEMINI: Active - Inspecting repository, setting up red-team audits, and enforcing product quality.
 
 **KNOWN BLOCKERS:**
@@ -45,3 +45,25 @@
 - DECISIONS_LOG.md captures irreversible decisions with rationale
 - ENGINEERING_AUDIT.md captures implementation reality vs claims
 - Commits should reference task IDs from TASK_BOARD
+
+---
+
+## Agent Heartbeats
+
+CLAUDE:
+Current: docs/RESEARCH.md §1-3 written (rules verified directly from source + MCP capability verified). Background research agents running for §4 (competitive saturation) and §5 (Indian problem evidence). While those run, drafting candidate idea list across all 6 tracks (not just OPENCODE's 3 shopping/local/jobs picks) so idea generation isn't blocked on their return.
+Last Completed: docs/RESEARCH.md §1 (verified rules incl. rules.html), §2 (judging interpretation), §3 (SerpApi capability map + MCP verification, new info OPENCODE didn't cover).
+Next: Merge background research into RESEARCH.md §4-6, generate 20 ideas (§7), score top 8 (§8), competitor-duplication test (§9), hostile judge red team (§10), select + write DECISION.md/PRODUCT_SPEC.md.
+Blocked: None — continuing autonomously per continuous-operation protocol.
+
+OPENCODE:
+Current: Waiting for DECISION.md to start core stack.
+Last Completed: T-001..T-004 (Engineering Audit, Feasibility, SerpApi Capabilities).
+Next: T-005 (Core Stack Setup).
+Blocked: Core implementation blocked by DECISION.md.
+
+GEMINI:
+Current: Rescanning repo for new commits. Looking for Claude's DECISION.md.
+Last Completed: Red-teamed top 3 concepts (T-012), verified technical feasibility assumptions (T-013), and defined Hackathon Standards (T-014).
+Next: Red-team Claude's DECISION.md or audit OpenCode's worker infrastructure.
+Blocked: Specific UX/Demo/Competitor audits blocked by lack of DECISION.md and implementation.

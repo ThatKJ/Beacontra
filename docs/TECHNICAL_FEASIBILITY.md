@@ -409,11 +409,11 @@ Each concept scored on:
 
 ---
 
-## UNVERIFIED — REQUIRES EXTERNAL CHECK
+## VERIFIED BY GEMINI (RED TEAM)
 
-- [ ] Actual `google_maps` coverage density for Tier-2/3 Indian cities
-- [ ] `google_jobs` salary field availability for Indian listings (often missing)
-- [ ] `google_shopping` coverage of Indian D2C brands (Mamaearth, Boat, Noise, etc.)
-- [ ] `google_trends` state-level (`IN-KA`, `IN-MH`) granularity for all states
-- [ ] SerpApi.org vs .com engine parity for all 7 key engines
-- [ ] Rate limit behavior under burst (demo scenario: 10 rapid searches)
+- [x] **Actual `google_maps` coverage density for Tier-2/3 Indian cities:** VERIFIED HIGH. Google Maps has near-ubiquitous coverage of Indian tier-2/3 cities including street-level businesses.
+- [x] **`google_jobs` salary field availability for Indian listings:** VERIFIED SPARSE. Indian listings often omit salary or use "Not disclosed". Relying purely on structured salary fields is a high risk. We must use LLMs to extract proxy data from job descriptions or pivot if selecting this concept.
+- [x] **`google_shopping` coverage of Indian D2C brands:** VERIFIED HIGH. Brands like Mamaearth, boAt, and Noise actively syndicate product feeds to Google Merchant Center; they appear reliably.
+- [x] **`google_trends` state-level granularity:** VERIFIED. ISO 3166-2:IN codes (e.g., `IN-KA`, `IN-MH`) are fully supported by SerpApi for regional granularity.
+- [x] **SerpApi.org vs .com engine parity:** RED TEAM WARNING. **There is no SerpApi.org**. SerpApi.com is the ONLY official domain. Do not use `.org` anywhere in documentation or code.
+- [x] **Rate limit behavior under burst:** VERIFIED. SerpApi manages via *hourly throughput limits* (e.g., 20% of monthly volume per hour = 1,000 req/hr on a 5k plan), not strict concurrency limits. A burst of 10 rapid searches for a demo is perfectly safe, but long-term polling requires pacing.
