@@ -1,28 +1,26 @@
-# Product Spec: BrandLens
+# Product Spec: Beacontra
 
-**Status:** LOCKED, unblocks OPENCODE T-005/T-006. Decision rationale: `docs/DECISION.md`. Research trail: `docs/RESEARCH.md`.
+**Status:** LOCKED. Naming: FINAL (`docs/NAMING_DECISION.md`; formerly the internal codename "BrandLens," retired after a real collision). Decision rationale: `docs/DECISION.md`. Research trail: `docs/RESEARCH.md`.
 
 ---
 
 ## PRODUCT NAME
 
-BrandLens
+Beacontra
 
 ## TAGLINE
 
-See who's really selling your product.
+"Where price, seller, and photo evidence meet." *(provisional, one of 5 candidates in `docs/TAGLINE.md`, pending Gemini's red-team)*
 
 ## ONE-LINE PITCH
 
-BrandLens (internal codename — see Naming note below) cross-checks marketplace listings against your brand's real product photos — using live search and reverse-image matching — to surface commercial-anomaly and brand-risk signals worth your review, before they cost you money or trust.
+Beacontra cross-checks marketplace listings against your brand's real product photos — using live search and reverse-image matching — to surface commercial-anomaly and brand-risk signals worth your review, before they cost you money or trust.
 
 **Language note (2026-09-17, per `docs/COMPETITIVE_ADJUDICATION.md`):** the system produces risk signals for human review, not counterfeit determinations — it cannot and does not establish legal counterfeit status from price/seller/visual signals alone. "Counterfeit" below describes the real-world problem motivating this product, not a claim the product itself makes about any specific listing.
 
-**Naming note:** "BrandLens" collides with existing products and is being used as an internal codename only per `docs/COMPETITIVE_ADJUDICATION.md`. A public-facing name is a separate, non-blocking task (see `docs/TASK_BOARD.md`).
-
 ## 30-SECOND PITCH
 
-Indian D2C brands lose real money to counterfeiters who list fakes under their name on Flipkart, Amazon, and Meesho — Meesho alone removed 4.2 million counterfeit listings in six months, and Delhi's High Court has already ruled on this exact pattern once. Enterprise brand-protection tools exist, but they're priced for companies far bigger than most Indian D2C brands. BrandLens gives a small brand owner the same capability at hackathon-project cost: paste your product and your real photo, and BrandLens finds live marketplace listings for it, then reverse-image-checks each one's photos against yours. Price anomalies, unfamiliar sellers, and mismatched photos get fused into one ranked list — evidence for you to review, not an automated accusation.
+Indian D2C brands lose real money to counterfeiters who list fakes under their name on Flipkart, Amazon, and Meesho — Meesho alone removed 4.2 million counterfeit listings in six months, and Delhi's High Court has already ruled on this exact pattern once. Enterprise brand-protection tools exist, but they're priced for companies far bigger than most Indian D2C brands. Beacontra gives a small brand owner the same capability at hackathon-project cost: paste your product and your real photo, and Beacontra finds live marketplace listings for it, then reverse-image-checks each one's photos against yours. Price anomalies, unfamiliar sellers, and mismatched photos get fused into one ranked list — evidence for you to review, not an automated accusation.
 
 ## PRIMARY USER
 
@@ -36,7 +34,7 @@ Founder or small ops/legal person at an Indian D2C or FMCG brand, roughly 1-50 e
 
 **Before:** Founder occasionally Googles their own product name, scrolls a few pages of Flipkart/Amazon results, eyeballs anything that looks off, gives up because it doesn't scale — or does nothing at all until a customer complains about a fake they received.
 
-**After:** Founder enters product name + links their real product photo once. BrandLens returns a ranked list of suspect listings across marketplaces within seconds, each with the specific evidence (price delta, seller signal, visual match result) shown, sorted by confidence — a five-minute review replaces a task that was previously either skipped or unbounded.
+**After:** Founder enters product name + links their real product photo once. Beacontra returns a ranked list of suspect listings across marketplaces within seconds, each with the specific evidence (price delta, seller signal, visual match result) shown, sorted by confidence — a five-minute review replaces a task that was previously either skipped or unbounded.
 
 ## CORE VALUE PROPOSITION
 

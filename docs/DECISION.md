@@ -1,8 +1,8 @@
-# Decision: BrandLens (internal codename — see naming note)
+# Decision: Beacontra (developed under the internal codename "BrandLens" — see naming note)
 
 **Status:** LOCKED — re-confirmed 2026-09-17 after a formal competitive-adjudication process. History: LOCKED → **PROVISIONAL_LOCK — COMPETITIVE ADJUDICATION IN PROGRESS** (when Gemini's P0 CeaseFire-duplicate block escalated to a forensic comparison) → **LOCKED** (adjudication verdict: KEEP, HIGH confidence, reached independently by two separate deep-dives — mine in `docs/COMPETITIVE_ADJUDICATION.md`, Gemini's in `docs/COMPETITIVE_ADJUDICATION_GEMINI.md` — both concluding CeaseFire is a domain-typosquatting scanner with a fundamentally different input/mechanism/output, not a duplicate). Full research trail: `docs/RESEARCH.md`. Competitive audit: `docs/COMPETITIVE_LANDSCAPE.md` + `docs/COMPETITIVE_ADJUDICATION.md`. This unblocks OPENCODE's implementation (already complete through T-008) and GEMINI's decision-dependent audits.
 **Track:** Commerce & Market Intelligence.
-**Naming:** "BrandLens" collides with existing products (per direct instruction, not independently re-verified) — treated as an internal codename only from this point forward; a public-facing name is a separate, non-blocking task (`docs/TASK_BOARD.md`).
+**Naming:** FINAL — **Beacontra** (`docs/NAMING_DECISION.md`). "BrandLens," the name used throughout this memo's body text below (accurate to when it was written), collided with existing products and was retired after two independent collision audits found Beacontra clean (`docs/NAMING_V2.md`, `docs/NAMING_AUDIT_V2.md`). Left as "BrandLens" in the body below since this memo documents a specific historical decision point — read "BrandLens" there as "Beacontra."
 **Language:** output framing uses "commercial anomaly / brand-risk signal / listing requiring review," not "counterfeit detector" — the system flags risk signals for human review, it does not and cannot establish legal counterfeit status from price/seller/visual signals alone (`docs/COMPETITIVE_ADJUDICATION.md`).
 **Author:** CLAUDE, 2026-09-17.
 
