@@ -18,7 +18,9 @@
 
 ## PROJECT DESCRIPTION
 
-A brand owner submits a product name/SKU and their official product photo. The tool searches live marketplace listings (`google_shopping`, `amazon_product`), reverse-image-checks each listing's photo against the official photo (`google_lens`), and fuses that visual signal with deterministic price-anomaly and seller-anomaly checks into one ranked, evidence-backed review queue — not a verdict, a prioritized list of listings worth a human's attention, with the reasoning shown for each.
+A brand owner submits a product name/SKU and their official product photo. The tool searches live marketplace listings (`google_shopping`, `amazon_product`), performs reverse-image checks on the top candidate listings against the official photo (`google_lens`), and fuses that visual signal with deterministic price-anomaly and seller-anomaly checks into one ranked, evidence-backed review queue — not a verdict, a prioritized list of listings worth a human's attention, with the reasoning shown for each.
+
+*(Beacontra performs Lens analysis on the top 10 candidate listings to bound API usage; the remaining listings retain commercial price/source evidence.)*
 
 ## PROBLEM
 
@@ -34,9 +36,12 @@ Founders and small ops teams at Indian D2C/FMCG brands (roughly 1-50 employees) 
 
 ## HOW SERPAPI IS USED
 
-- `google_shopping` — one call per scan, discovers live marketplace listings for the submitted product name across Indian e-commerce.
-- `amazon_product` — Amazon-specific listing detail where applicable.
-- `google_lens` (`exact_matches`/`visual_matches`) — up to 10 calls per scan (capped, ordered by price-anomaly-first to control credit spend), reverse-image-verifies each candidate listing's photo against the brand's official product photo.
+**Corrected 2026-09-18 — the previous version of this section stated a specific request count (11) and credit range that are not actually verifiable from the current instrumentation; see `docs/FINAL_VERIFIED_RUN.md` for the full correction.**
+
+- **SHOPPING REQUESTS**: 1 call per scan (`google_shopping`) — verified, one call regardless of result count.
+- **LENS REQUESTS**: up to 2 calls per candidate listing (`exact_matches` with `image_id`, falling back to `products` with `url` if no exact match), for the top **10** candidate listings only (`MAX_LENS_CALLS = 10`, ordered by price anomaly) — this cap is verified directly in the code, and is the accurate, publishable claim. The *exact* total number of Lens requests in a given scan depends on how many of those 10 candidates needed the fallback and is not currently logged separately from the app's own credit-estimate counter.
+- **IMAGE-UPLOAD REQUESTS**: up to 10 attempts to `serpapi.com/image` (one per capped candidate) to obtain an `image_id`.
+- **CREDIT COST**: not verified against real SerpApi billing. The app's own internal accounting counter (`SerpApiClient.estimateCredits()`, an `isAdvanced ? 3 : 1` heuristic) reported **10** on the canonical live run (`docs/FINAL_VERIFIED_RUN.md`) — this is an app-level estimate, not a confirmed credit charge, and should not be quoted as a verified cost.
 
 ## WHY SERPAPI USAGE IS MATERIAL
 
@@ -44,7 +49,7 @@ Every fact the product surfaces — which listings exist, at what price, from wh
 
 ## TECHNICAL HIGHLIGHTS
 
-- **Real multi-signal fusion, not an LLM summarizing a search result:** price anomaly, seller anomaly, and visual-match signals are each computed independently in deterministic code and combined into one weighted composite score with a full evidence trail per signal (`src/lib/brandlens.ts` `fuseSignals()`). There is no LLM anywhere in the scoring path — a deliberate choice, explained honestly in `docs/JUDGE_QA.md` Q8, that trades "uses an LLM" for "every score is auditable and reproducible."
+- **Real multi-signal fusion, not an LLM summarizing a search result:** price anomaly, seller anomaly, and visual-match signals are each computed independently in deterministic code and combined into one weighted composite score with a full evidence trail per signal (`src/lib/beacontra.ts` `fuseSignals()`). There is no LLM anywhere in the scoring path — a deliberate choice, explained honestly in `docs/JUDGE_QA.md` Q8, that trades "uses an LLM" for "every score is auditable and reproducible."
 - **Credit-budget engineering, not just a feature:** an initial implementation called `google_lens` once per every extracted listing with no cap (worst case ~16-41 calls/scan against a 250/month free plan); this was found during review, fixed to cap at 10 calls ordered by price-anomaly-first, and the fix is verifiable directly in the code (`docs/SERPAPI_BUDGET.md`).
 - **Competitive originality, proven not asserted:** the closest prior art found across the entire `#BuiltWithSerpApi` gallery (177 structured project entries, directly fetched and audited, `docs/COMPETITIVE_LANDSCAPE.md`) triggered a formal, structured adjudication — delete tests in both directions, a user-job comparison, a 30-second-demo comparison, run independently by two separate parties and converging on the same verdict (`docs/COMPETITIVE_ADJUDICATION.md`).
 
@@ -55,7 +60,7 @@ Every fact the product surfaces — which listings exist, at what price, from wh
 
 ## DEMO DESCRIPTION
 
-Full script: `docs/DEMO.md`. Structure: problem (real, sourced numbers) → product (one sentence) → live workflow ending in a visible photo-vs-photo mismatch → proactive comparison against the closest existing SerpApi-gallery project → explicit SerpApi-necessity statement → close. **Not yet rehearsed end-to-end** — the remaining real blocker is picking and spot-checking one specific demo product/photo pair against the corrected live pipeline (T-017/T-026 are otherwise resolved), plus finalizing the public product name.
+Full script: `docs/DEMO.md`. Structure: problem (real, sourced numbers) → product (one sentence) → live workflow ending in a visible photo-vs-photo comparison → proactive comparison against the closest existing SerpApi-gallery project → explicit SerpApi-necessity statement → close. Pre-tested product/photo pair (boAt Airdopes 141, MRP ₹4,490) validated live with reference image HTTP 200 OK and canonical run logged in `docs/FINAL_METRICS_DUMP.json`.
 
 ## AI TOOLS USED
 
@@ -71,10 +76,11 @@ See `README.md` for the authoritative, tested setup path (env var configuration,
 
 ## KNOWN LIMITATIONS
 
-Stated plainly, matching `docs/JUDGE_QA.md`'s weaknesses rather than a softened version for outside readers:
+**Updated 2026-09-18 from the canonical live run (`docs/FINAL_VERIFIED_RUN.md`), computed directly from the run's raw data rather than carried over from an earlier estimate:**
 - Scoring weights (price/seller/visual point contributions) are hand-chosen heuristics, not statistically calibrated against a labeled dataset — no such dataset exists to calibrate against. The product is positioned as decision-support, not a certainty score, and the UI avoids percentage-style framing for exactly this reason.
 - No real brand owner has used this yet — usefulness is evidenced by a documented market gap (two independent research passes), not validated customer demand.
-- `google_lens` was initially thought not to return structured match data at all — that conclusion turned out to be caused by three implementation bugs (wrong parameter name, missing required `type` parameter, wrong response-parsing path), found via direct comparison against SerpApi's official docs and fixed. A live matrix test now confirms Lens genuinely returns structured `exact_matches`/`visual_matches`/`products` data when called correctly. **What's still open:** that matrix used an atypical test image (the Google logo, one of the most heavily-indexed images on the internet), not an ordinary marketplace product photo — the mechanism works, but its real-world hit rate on typical product images hasn't been separately confirmed.
-- The scoring-logic issue found during review (treating "no visual match" as positive mismatch evidence) has been fixed and independently verified by direct code reading — `no_evidence` and `unavailable` are now both neutral, non-scoring states, distinct from an actual positive finding.
-- Naming is finalized (Beacontra); one open follow-up is T-030 (price-signal wording overclaims an ordinary discount as "suspicious" — found this session, fix not yet applied).
+- `google_lens`'s request-path bugs (wrong parameter name, missing `type`, wrong response path) are fixed and verified. **On the canonical real-product live run** (boAt Airdopes 141, 40 listings, 10 analyzed by Lens per the candidate cap), **zero listings produced a positive visual match** (`matched`/`visual_match`) — all 10 were `no_evidence`/`unavailable`, correctly scored as neutral, not as false anomalies. The mechanism works; for this specific product's marketplace thumbnails, it did not find a positive match to demonstrate on camera. The demo should present this honestly as a real neutral outcome, or use a different product/photo pair known to produce a match, rather than imply the visual signal fired when it didn't.
+- **New, from the same canonical run:** the price-anomaly rate (36/40, 90%) is substantially explained by the Shopping query returning listings for *different* boAt Airdopes variants (Gen 2, Elite ANC, 611, Neo, Prime 412, etc.), each compared against the single MRP of the specific variant queried — not by widespread genuinely-suspicious pricing. This is a product-query-specificity gap, not a threshold or language bug (the T-030 language fix is separately confirmed correct and applied). Needs tighter result filtering or a cleaner demo query before the price-anomaly numbers are presented as a clean demonstration.
+- The scoring-logic issue (treating "no visual match" as positive mismatch evidence) is fixed and independently verified by direct code reading and by the real run's data — `no_evidence` and `unavailable` are both neutral, non-scoring states. Separately verified on the same run: the seller signal correctly produced **0/40 anomalies** (all `no_authorized_list`, correctly neutral) when no authorized-seller list was supplied.
+- T-030 (price-signal wording) is applied and verified in the running code (`moderate_discount`, factual "X% below MRP" wording) — no longer open.
 - No takedown-drafting or enforcement-action step exists — output is a review queue for a human, not an end-to-end enforcement workflow (unlike, e.g., CeaseFire's notice-signing step for its own different problem).
