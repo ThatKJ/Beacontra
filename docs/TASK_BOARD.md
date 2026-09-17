@@ -77,16 +77,18 @@
 **OWNER:** OPENCODE
 **STATUS:** REOPENED — REQUEST-PATH VERIFICATION REQUIRED
 **PRIORITY:** P0
-**FILES:** docs/LENS_SPIKE.md, tests/fixtures/google_lens.json
+**FILES:** docs/LENS_API_VERIFICATION.md, scripts/lens-matrix.ts, tests/fixtures/google_lens*.json, docs/LENS_SPIKE_V2.md
 **DEPENDENCIES:** None
 **ACCEPTANCE CRITERIA:**
-- [x] Tested `google_lens` with real product image (boAt Airdopes 141) via live SerpApi
-- [x] Documented findings in docs/LENS_SPIKE.md with actual response snippets
-- [x] **CRITICAL FINDING**: Google Lens engine returns `ai_overview` only — **NO `lens_results`, `exact_matches`, `visual_matches`, or `knowledge_graph`** returned
-- [x] Raw HTML contains only query image, no visual matches from other sources
-- [x] Updated T-006/T-026: Visual signal must be NEUTRAL when Lens unavailable (not positive mismatch signal)
-- [x] Documented in DECISION_CHALLENGES.md as new evidence
-**VERIFICATION:** docs/LENS_SPIKE.md created with actual live response data. Verdict: FAIL - Lens does not return usable visual matching data.
+- [ ] Verify current official SerpApi Google Lens documentation (engine, required parameters, supported `type` values, image URL flow, image upload flow, expected response sections, current example response shapes, known limitations)
+- [ ] Run controlled Lens matrix with documented dedicated tabs: `type=visual_matches`, `type=exact_matches`, `type=products` using Image API + `image_id` upload flow AND public URL flow
+- [ ] For each call record: HTTP status, search_parameters.type, top-level response keys, visual_matches count, exact_matches count, products/relevant product-result count, ai_overview present?, error present?, image fields present?, source fields present?, price fields present?
+- [ ] Determine whether our T-017 spike used the correct current request path (wrong `type`? missing `image_id` upload flow? image URL not publicly fetchable? missing dedicated tab parameter? normalizer looking for obsolete field names?)
+- [ ] If structured results work: update docs/LENS_SPIKE.md, tests, fixtures, normalizers, visual scoring, architecture, demo, README with ACTUAL response shape. Retest variants.
+- [ ] If structured results still don't work: document exact request parameters, response top-level keys, HTTP success/error, image accessibility, image upload success, SerpApi search id, observed behavior. Classify as API BEHAVIOR LIMITATION.
+- [ ] Update docs/LENS_API_VERIFICATION.md with: ENGINE, REQUIRED PARAMETERS, SUPPORTED `type` VALUES, IMAGE URL FLOW, IMAGE UPLOAD FLOW, EXPECTED RESPONSE SECTIONS, CURRENT EXAMPLE RESPONSE SHAPES, KNOWN LIMITATIONS
+- [ ] Only after dedicated modes are verified may T-017 return to DONE
+**VERIFICATION:** Previous conclusion may have tested wrong request path. Official SerpApi docs show dedicated tabs (visual_matches, exact_matches, products) and Image API upload flow. Need controlled verification.
 
 ### T-026: Fix Scoring Overclaim on Absent Lens Matches
 **OWNER:** OPENCODE
@@ -383,8 +385,8 @@
 - [ ] UI copy reflects all three states distinctly, not collapsed into one "Visual Anomaly / Discrepancy" vs "Photo Match Confirmed" binary.
 - [ ] This is the OBSERVATION-vs-INTERPRETATION distinction end to end: "Lens found nothing" and "Lens couldn't run" are both observations that must stay visibly different from each other and from "Lens found a mismatch."
 
-### T-017: google_lens Spike — CLAUDE's review criteria, written ahead of the results landing
-**REVIEW OWNER:** CLAUDE (implementation: OPENCODE). Still not started — `docs/LENS_SPIKE.md`/`docs/research/lens_spike.md` does not exist yet despite later tasks assuming Lens behavior is understood. A real key is configured; this should actually be run, not deferred further.
+### T-017 REVIEW CRITERIA (superseded/merged into the reopened T-017 at line 76 — kept here as CLAUDE's still-valid review bands, applies once the corrected matrix re-test actually runs)
+**UPDATE (this session):** the original T-017 spike (`docs/LENS_SPIKE.md`) is now known to have used a wrong parameter name (`image_url` instead of the documented `url`), never sent the required `type` parameter, and parsed the response at a nonexistent `lens_results` path instead of the documented top-level fields — full analysis in `docs/LENS_API_VERIFICATION.md`. Its "FAIL" verdict is not yet trustworthy. The bands below still apply once OPENCODE's corrected matrix test (T-017 above) actually runs with the fixed request shape.
 **The question that matters, per the user:** does real Lens behavior justify the visual-evidence model we're presenting? Pre-committing to review criteria now so the review is fast and consistent whenever results land, not improvised after the fact:
 - **STRONG** — Lens cleanly separates "same product, different presentation" (cropped/watermarked/different-angle photos of the *same* item) from "genuinely different product," with `exact_matches`/`visual_matches` firing appropriately in both directions. → Keep the visual signal weighted as the heaviest of the three (up to 40 pts), tighten the demo narrative around exactly what was empirically demonstrated (cite the actual spike results, not a general claim about Lens).
 - **MIXED** — Lens has real but imperfect discriminative power (some false negatives on legitimate variant photos, or some false positives on unrelated products), better than random but not clean. → Reduce the visual signal's maximum score contribution and confidence ceiling; lean harder on the three-state model from T-026 so an uncertain Lens result reads as uncertain, not confident; adjust demo/product wording to say "one signal among three," not "the proof."
