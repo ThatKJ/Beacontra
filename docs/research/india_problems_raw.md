@@ -1,6 +1,6 @@
 # India Problem Discovery Research — SerpApi India Hackathon 2026
 
-**Purpose:** Fact-gathering only. No product recommendations are made here — this feeds a teammate's ideation/selection process. Every problem is tied back to specific SerpApi engines (see `/Users/kirtan/Hackathons/Serp/docs/SERPAPI_CAPABILITIES.md`) and backed with real, cited evidence where available. Unverified claims are explicitly labeled ASSUMPTION or HYPOTHESIS.
+**Purpose:** Fact-gathering only. No product recommendations are made here — this feeds a teammate's ideation/selection process. Every problem is tied back to specific SerpApi engines (see `docs/SERPAPI_CAPABILITIES.md`) and backed with real, cited evidence where available. Unverified claims are explicitly labeled ASSUMPTION or HYPOTHESIS.
 
 **Date compiled:** 2026-09-17
 **Method:** WebSearch across Indian news sites, government sources, forums, market reports. 32 problem statements documented across 20+ domains.

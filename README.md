@@ -118,7 +118,16 @@ Every fact this product surfaces — which listings exist, at what price, from w
 
 ## AI development disclosure
 
-This project was built primarily by three AI coding agents working under human direction and coordinating through shared markdown files (`docs/AI_COORDINATION.md`, `docs/TASK_BOARD.md`), not a single agent working alone: **Claude Code** (research, product selection, architecture docs, competitive adjudication, code review, submission copy), **OpenCode** (scaffolding, core implementation, live-integration work), **Gemini CLI** (adversarial red-teaming, UX/demo audits, an independent competitive adjudication, some implementation fixes). The human configured the live SerpApi credentials and made or approved decisions at checkpoints. AI-generated code was verified via automated tests/typecheck/lint/build gates plus cross-agent review that found and fixed real bugs (a seller-signal logic error, an uncapped credit-cost loop, missing live-vs-fixture UI transparency) — not accepted on a single unchecked pass. Full disclosure with specifics: `docs/JUDGE_QA.md` Q17-19, `docs/SUBMISSION.md`.
+This project was built with the assistance of several AI tools, working under human direction and coordinating through shared documentation. All AI-generated work was thoroughly reviewed and verified via automated tests (Vitest), typechecking, linting, and build gates before submission.
+
+The specific AI tools and their roles were:
+- **Claude / Claude Code:** research, product strategy, architecture review, documentation, demo/submission review
+- **OpenCode:** implementation, SerpApi integration, testing, debugging, technical hardening
+- **Gemini:** independent red-team, competitive analysis, QA, claim verification, UX review
+- **GPT-6 Astra:** UI/UX redesign, interaction design, frontend polish, responsive/accessibility review
+- **ChatGPT:** prompt design, research guidance, project review, coordination strategy, submission guidance
+
+The human developer set the mission, configured the live SerpApi credentials, supplied the reference demo assets, and orchestrated the multi-agent coordination (`docs/AI_COORDINATION.md`, `docs/TASK_BOARD.md`).
 
 ## Known limitations
 
