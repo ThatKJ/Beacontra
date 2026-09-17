@@ -450,29 +450,29 @@
 
 ### T-030: Price-signal language overclaims a normal discount as "suspicious"
 **OWNER:** OPENCODE
-**STATUS:** TODO
+**STATUS:** DONE
 **PRIORITY:** P1
 **FILES:** src/lib/brandlens.ts (`analyzePrice()`)
 **DEPENDENCIES:** None
 **FOUND BY:** direct code reading, confirmed with the user's own example — a listing at ₹1,099 against a ₹1,299 MRP (≈15.4% below, `1099/1299 = 0.846`) falls inside the current `price < mrp * 0.9` branch (line 369-377) and is labeled `anomalyType: 'suspicious_discount'` with the literal detail string `"Price ₹1099 has suspicious discount vs MRP ₹1299"`. A 10-30% discount is completely ordinary in Indian e-commerce (sale events, festival pricing) — labeling it "suspicious" is exactly the kind of unsupported-language overclaim this project has otherwise been careful to avoid (`docs/COMPETITIVE_ADJUDICATION.md`'s language-change section).
 **ACCEPTANCE CRITERIA:**
-- [ ] Document the actual thresholds plainly wherever this signal is explained (currently: `<70% of MRP` = `below_mrp`, `70-90% of MRP` = the currently-mislabeled tier, `>=90%` = `normal`) — a user/judge should be able to answer "why did this price contribute to the score" from the documentation, not have to read the source.
-- [ ] Rename `suspicious_discount` to a neutral label (e.g. `moderate_discount` or `below_typical_range`) and reword the detail string to state the fact only — "Price ₹1099 is 15% below MRP ₹1299" — not an interpretation ("suspicious").
-- [ ] Consider whether the 70%/90% split is the right threshold at all, or whether a 3-tier (normal/moderate/large deviation) model better matches how much weight each should carry in `fuseSignals()` — currently `below_mrp` and `suspicious_discount` both contribute the same +35 regardless of whether the listing is 11% or 89% below MRP, which doesn't distinguish "large deviation" from "extreme deviation" the way the label names would imply.
-- [ ] Apply the same review to `analyzeSeller()`'s `suspicious_pattern` label/wording for consistency (matching a generic seller-name pattern is a real, evidence-based heuristic — unlike the price case, this one may be defensible as-is, but the word "suspicious" itself is worth softening for consistency with the rest of the project's language discipline).
+- [x] Document the actual thresholds plainly wherever this signal is explained (currently: `<70% of MRP` = `below_mrp`, `70-90% of MRP` = the currently-mislabeled tier, `>=90%` = `normal`) — a user/judge should be able to answer "why did this price contribute to the score" from the documentation, not have to read the source.
+- [x] Rename `suspicious_discount` to a neutral label (e.g. `moderate_discount` or `below_typical_range`) and reword the detail string to state the fact only — "Price ₹1099 is 15% below MRP ₹1299" — not an interpretation ("suspicious").
+- [x] Consider whether the 70%/90% split is the right threshold at all, or whether a 3-tier (normal/moderate/large deviation) model better matches how much weight each should carry in `fuseSignals()` — currently `below_mrp` and `suspicious_discount` both contribute the same +35 regardless of whether the listing is 11% or 89% below MRP, which doesn't distinguish "large deviation" from "extreme deviation" the way the label names would imply.
+- [x] Apply the same review to `analyzeSeller()`'s `suspicious_pattern` label/wording for consistency (matching a generic seller-name pattern is a real, evidence-based heuristic — unlike the price case, this one may be defensible as-is, but the word "suspicious" itself is worth softening for consistency with the rest of the project's language discipline).
 
 ### T-031: `fixtureMode` does not gate `uploadImage()` — "unit" tests make live network/API calls when a real key is configured
 **OWNER:** OPENCODE
-**STATUS:** TODO
+**STATUS:** DONE
 **PRIORITY:** P0
 **FILES:** src/lib/beacontra.ts (`uploadImage()`)
 **DEPENDENCIES:** None
 **FOUND BY:** independently re-running `npm test` after the rename to verify the "68 tests pass" claim (not just trusted) — noticed `tests/beacontra.test.ts` took **9.8 seconds**, versus ~50-100ms for every other test file. Traced the cause: `uploadImage()` calls raw `fetch(imageUrl)` and `fetch('https://serpapi.com/image', ...)` directly — these bypass `SerpApiClient.search()` entirely, so the client's `fixtureMode: true` (set in the test setup) does **not** prevent them from firing. The only guard is `if (!apiKey) return undefined` — which means on any machine with a real `SERPAPI_API_KEY` configured (this one included), running `npm test` actually attempts a real fetch of the test's fake `https://example.com/official-iphone.jpg` and then **POSTs to the real SerpApi image-upload endpoint with the real API key**, every time the test suite runs.
 **WHY THIS MATTERS:** this directly contradicts a documented safety guarantee — `CLAUDE.md`/`docs/ENGINEERING_AUDIT.md` both state fixture mode means "zero live calls" / "a developer without a key literally cannot spend credits by accident." That guarantee is currently false specifically for the image-upload path whenever a key *is* present, which is precisely the situation on any machine actually being used to develop this feature (a key has to be configured to do anything useful with the live Lens integration). Routine `npm test` runs — in CI, or by any contributor with a key in `.env` — could be silently consuming SerpApi usage against the image-upload endpoint (credit cost for that endpoint specifically is undocumented, see `docs/SERPAPI_BUDGET.md`) with no visibility that it's happening.
 **ACCEPTANCE CRITERIA:**
-- [ ] `uploadImage()` must respect `fixtureMode` — either check `this.client.isFixtureMode()` at the top of the function and return a canned/undefined result immediately, or route the upload through a method on `SerpApiClient` that already respects fixture mode (preferred, keeps the fixture-gating logic in one place rather than duplicated).
-- [ ] Add a unit test that explicitly asserts no `fetch` call happens when `fixtureMode: true`, regardless of whether a real API key is present in the environment — the current test suite's 9.8s runtime is itself evidence this wasn't caught.
-- [ ] Re-run `npm test` after the fix and confirm `tests/beacontra.test.ts` returns to a normal (<200ms) runtime, confirming no network call is being attempted.
+- [x] `uploadImage()` must respect `fixtureMode` — either check `this.client.isFixtureMode()` at the top of the function and return a canned/undefined result immediately, or route the upload through a method on `SerpApiClient` that already respects fixture mode (preferred, keeps the fixture-gating logic in one place rather than duplicated).
+- [x] Add a unit test that explicitly asserts no `fetch` call happens when `fixtureMode: true`, regardless of whether a real API key is present in the environment — the current test suite's 9.8s runtime is itself evidence this wasn't caught.
+- [x] Re-run `npm test` after the fix and confirm `tests/beacontra.test.ts` returns to a normal (<200ms) runtime, confirming no network call is being attempted.
 
 ### T-032: Secret audit — PASSED (verified, not just checklisted)
 **OWNER:** CLAUDE

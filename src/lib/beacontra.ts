@@ -50,7 +50,7 @@ export interface PriceSignal {
 
 export interface SellerSignal {
   isAnomalous: boolean;
-  anomalyType: 'unknown_seller' | 'new_account' | 'suspicious_pattern' | 'authorized' | 'no_authorized_list';
+  anomalyType: 'unknown_seller' | 'new_account' | 'generic_pattern' | 'authorized' | 'no_authorized_list';
   sellerName: string;
   isAuthorized: boolean;
   details: string;
@@ -300,6 +300,7 @@ export class BeacontraService {
 
   private async uploadImage(imageUrl: string): Promise<string | undefined> {
     try {
+      if (this.client.isFixtureMode()) return undefined;
       const apiKey = this.client.getApiKey?.() || '';
       if (!apiKey) return undefined;
 
@@ -402,16 +403,16 @@ export class BeacontraService {
         };
       }
 
-      const suspiciousPatterns = ['random', 'seller', 'shop', 'store', 'mart', 'bazaar', 'unknown', 'new'];
-      const hasSuspiciousPattern = suspiciousPatterns.some(p => seller.includes(p));
+      const genericPatterns = ['random', 'seller', 'shop', 'store', 'mart', 'bazaar', 'unknown', 'new'];
+      const hasGenericPattern = genericPatterns.some(p => seller.includes(p));
 
-      if (hasSuspiciousPattern || seller.length < 5) {
+      if (hasGenericPattern || seller.length < 5) {
         return {
           isAnomalous: true,
-          anomalyType: 'suspicious_pattern',
+          anomalyType: 'generic_pattern',
           sellerName: candidate.seller,
           isAuthorized: false,
-          details: `Seller "${candidate.seller}" has suspicious naming pattern`,
+          details: `Seller "${candidate.seller}" has a generic or unverified naming pattern`,
         };
       }
 
