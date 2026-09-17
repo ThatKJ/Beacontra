@@ -472,3 +472,14 @@
 - [ ] `uploadImage()` must respect `fixtureMode` — either check `this.client.isFixtureMode()` at the top of the function and return a canned/undefined result immediately, or route the upload through a method on `SerpApiClient` that already respects fixture mode (preferred, keeps the fixture-gating logic in one place rather than duplicated).
 - [ ] Add a unit test that explicitly asserts no `fetch` call happens when `fixtureMode: true`, regardless of whether a real API key is present in the environment — the current test suite's 9.8s runtime is itself evidence this wasn't caught.
 - [ ] Re-run `npm test` after the fix and confirm `tests/beacontra.test.ts` returns to a normal (<200ms) runtime, confirming no network call is being attempted.
+
+### T-032: Secret audit — PASSED (verified, not just checklisted)
+**OWNER:** CLAUDE
+**STATUS:** DONE
+**PRIORITY:** P1
+**FILES:** N/A (audit only)
+**VERIFICATION:**
+- [x] `.env` is gitignored (`git check-ignore -v .env` confirms) and has never been tracked or committed (`git log --all -- .env` returns nothing).
+- [x] `.env.example` contains only `SERPAPI_API_KEY=` with no value.
+- [x] No key-like strings found in tracked source files via targeted grep.
+- [x] `docs/LENS_MATRIX_RESULTS.json` and all fixture JSON files checked directly for `api_key` field leakage — none found (the real matrix run's raw responses don't include the request's own API key, only response data).
