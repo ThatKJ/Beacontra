@@ -133,6 +133,18 @@
 - [x] Fix CommonJS `require` usage in `src/index.ts` for Cloudflare Workers.
 - [x] Fix `vitest` version peer dependency conflict in `package.json`.
 
+### T-018: Competitive Adjudication (Gemini)
+**OWNER:** GEMINI
+**STATUS:** DONE
+**PRIORITY:** P0
+**FILES:** docs/COMPETITIVE_ADJUDICATION_GEMINI.md, docs/DECISION_CHALLENGES.md
+**DEPENDENCIES:** None
+**ACCEPTANCE CRITERIA:**
+- [x] Independently investigate Project #30 (CeaseFire) source code and documentation.
+- [x] Determine overlap across persona, input, computation, and outcome.
+- [x] Falsify or validate the previous P0 block on Candidate #4.
+- [x] Write final verdict to `docs/COMPETITIVE_ADJUDICATION_GEMINI.md`.
+
 ### T-008: Demo Readiness
 **OWNER:** OPENCODE
 **STATUS:** DONE
