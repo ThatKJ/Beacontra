@@ -92,7 +92,7 @@
 | Listings with seller anomaly | ~35-45 (unknown/unauthorized sellers) |
 | Listings with visual evidence | ~10-20 (exact/visual matches) |
 | Listings with "unavailable" visual | ~30-40 (Lens returns ai_overview only) |
-| Credits used per scan | ~13 (1 Shopping + ~12 Lens) |
+| Credits used per scan | ESTIMATE: capped at 10 Lens candidates to control usage |
 
 ---
 
@@ -141,21 +141,22 @@ If live API is unavailable, use fixture data that simulates:
 - [x] Results show price anomalies, seller anomalies, visual signals
 - [x] UI shows "⚡ LIVE SERPAPI RESULT" badge
 - [x] Side-by-side image comparison renders
-- [x] Heuristic score label shows "Heuristic Risk Score" (not "Risk Score: XX/100")
+- [x] Score label shows **"Review Priority Score"** (verified directly in `public/index.html` — superseded from the earlier "Heuristic Risk Score"/"Risk Score: XX/100" checklist wording)
 - [x] dataSource badge shows "live" or "fixture"
-- [x] No "BrandLens" references in UI (internal codename only)
+- [x] No "BrandLens" references in the UI — renamed to Beacontra, `docs/NAMING_DECISION.md` (NAMING STATUS: FINAL)
 
 ---
 
 ## Credit Estimate
 
-| Operation | Credits |
+**These figures are our own app-level heuristic (`isAdvanced ? 3 : 1` in `SerpApiClient.estimateCredits()`), not confirmed SerpApi billing** — see `docs/SERPAPI_BUDGET.md`'s explicit caveat. Treat as an internal estimate label, not a verified cost.
+
+| Operation | App-level estimated credits |
 |-----------|---------|
-| Google Shopping (1 call) | 3 |
-| Google Lens exact_matches (image_id, up to 1) | 3 |
-| Google Lens products (URL, up to 10) | 30 |
-| **Total per scan (max)** | **~36** |
-| **Typical scan (capped at 10 Lens)** | **~13-16** |
+| Google Shopping (1 call) | 3 (estimate) |
+| Google Lens exact_matches (image_id, up to 1 per candidate) | 3 (estimate) |
+| Google Lens products (URL, fallback, up to 1 per candidate) | 3 (estimate) |
+| **Total per scan** | Beacontra caps Lens analysis to `MAX_LENS_CALLS = 10` candidates specifically to bound API usage — that cap, not a specific credit number, is the verifiable, code-backed claim to make publicly. |
 
 ---
 
