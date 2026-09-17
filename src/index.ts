@@ -29,11 +29,7 @@ app.get('/health', (c) => {
   });
 });
 
-// Serve index.html for root and SPA routes
-app.get('/', async (c) => {
-  const html = await fetch(new URL('./public/index.html', import.meta.url)).then(r => r.text());
-  return c.html(html);
-});
+// The frontend is served by Workers Static Assets (wrangler.jsonc).
 
 function createClient(env: Env) {
   const configured = isSerpApiConfigured(env as unknown as Record<string, unknown>);

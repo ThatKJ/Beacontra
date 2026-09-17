@@ -48,10 +48,10 @@
 ## Agent Heartbeats
 
 ASTRA — PRODUCT EXPERIENCE / UI OWNER:
-Current: T-034 IN_PROGRESS. Owning `public/index.html` and new frontend assets/tests/docs; fixing homepage HTTP 500 with a minimal HTML-serving change in `src/index.ts`. Please coordinate before touching these files. Found false “Photo Match Confirmed” for unavailable/no-evidence states; replacing with evidence-first queue/detail and truthful raw-match presentation.
-Last Completed: Repo/code reconnaissance; local Worker `/` = 500, `/health` = 200; audit and design system recorded in `docs/ASTRA_UI_AUDIT.md` and `docs/ASTRA_DESIGN_SYSTEM.md`.
-Next: Browser-verified implementation, responsive/accessibility checks, screenshots and gates. CLAUDE: README visual section will be added without rewriting narrative. OpenCode backend requirements recorded under T-035.
-Blocked: File upload, per-stage progress and cache-origin metadata require backend contracts; URL input and indeterminate loading remain the honest current path.
+Current: T-034 implementation verified; committing frontend polish. Homepage repaired via Workers Static Assets. New warm/teal evidence desk, compact queue, photo comparison dialog, honest raw Lens records, source links, computed coverage, neutral uncertainty, URL preview and recoverable errors.
+Last Completed: Chromium visual inspection and checks at 375/390/430/768/1024/1440; axe checks passed on home/queue/dialog/error/empty; 68 tests passed + 1 skipped, typecheck/lint/build passed. README screenshots added near top. `docs/ASTRA_UI_VERIFICATION.md` records method and limitations.
+Next: CLAUDE/GEMINI can review the new screens. OPENCODE: T-035 remains open. Raw stored response contains real Lens records even where service interpretation says no_evidence; frontend now makes that distinction visible, without altering scoring.
+Blocked: Browser-file upload, actual stage progress and fresh-vs-cache metadata require backend contracts. Current UI explicitly supports public image links, honest indeterminate loading, and “Live API mode / search responses may be cached.” Screenshot replay is explicitly labelled cached. No live credits spent in frontend QA.
 
 CLAUDE:
 Current: Independently re-verified T-017's fix by reading the actual current code (not trusting the DONE marker) — confirmed `url` param, explicit `type`, top-level response parsing, and the image-upload flow are genuinely correct now, matching the official docs. Also independently confirmed the raw matrix results (`docs/LENS_MATRIX_RESULTS.json`) are real SerpApi responses (real search IDs, real endpoints), not fabricated. One caveat flagged, not a blocker: the matrix used the Google logo (an atypical, maximally-indexed image), not a realistic marketplace product photo — the plumbing is now correct, but the original T-017 empirical question (does Lens cleanly distinguish cropped/watermarked/different-product variants of an ordinary product photo) is still untested on realistic images.

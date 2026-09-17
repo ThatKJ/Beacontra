@@ -3,6 +3,14 @@
 > **Where price, seller, and photo evidence meet.** *(tagline — see `docs/TAGLINE.md`; pending Gemini's red-team of 5 candidates, may still change before final submission)*
 > Built for the SerpApi India Hackathon 2026.
 
+![Beacontra review queue with side-by-side photos, price deviation, source context and Google Lens evidence](docs/screenshots/review-queue.png)
+
+**One queue. Three evidence trails. Your judgment.** Add a product name and genuine product photo link, scan marketplaces, then review the highest-priority listing with its price, source and visual records together.
+
+*Screenshot: replay of the stored live response in `docs/FINAL_METRICS_DUMP.json`, explicitly labelled **CACHED LIVE RESULT**. These are recorded results, not a new live search or proof of authenticity; product variants still require human review.*
+
+[Product input](docs/screenshots/home.png) · [Expanded comparison](docs/screenshots/evidence-detail.png) · [Mobile workspace](docs/screenshots/mobile-review.png)
+
 Beacontra helps Indian direct-to-consumer (D2C) brands monitor marketplace listings across Flipkart, Amazon.in, and the open web. It cross-references live marketplace listings (`google_shopping`), performs reverse-image verification via Google Lens (`google_lens`), and evaluates seller metadata to identify listings worth review, unauthorized distributors, and commercial anomalies.
 
 **Note on the name:** formerly developed under the internal codename "BrandLens," which collided with existing products (`docs/NAMING_DECISION.md`). Renamed to Beacontra after two independent collision audits found it clean (`docs/NAMING_V2.md`, `docs/NAMING_AUDIT_V2.md`).
@@ -89,7 +97,7 @@ npm run test:live
   - `google_shopping`: 1 call per scan to discover marketplace listings.
   - `google_lens`: Reverse image search against official product photos (capped to top 10 candidates per scan to strictly respect the 250/month free tier budget).
 - **Signal Fusion**: Deterministic weighting of Price Anomaly, Seller Anomaly, and Visual Signal into a 0-100 **Review Priority Score** (verified against the current UI label — not a statistical confidence figure, a review-ranking heuristic).
-- **Frontend**: Clean Tailwind CSS + Vanilla JS interface with side-by-side visual photo comparison and "Load Demo Example" capability.
+- **Frontend**: Dependency-free vanilla JavaScript and local CSS, served through Workers Static Assets. Ranked queue, side-by-side evidence workspace, accessible expanded comparison, image-link preview, and an example-product shortcut.
 
 ---
 
@@ -123,7 +131,9 @@ src/
     types.ts                 Zod schemas per SerpApi engine
     fixtures/                 Per-engine JSON fixtures for zero-credit testing
 public/
-  index.html             Demo frontend (Tailwind + vanilla JS)
+  index.html             Product input and evidence workspace
+  app.js                 Scan interaction, provenance, evidence rendering
+  styles.css             Responsive design system (no runtime CSS framework)
 tests/                  Unit tests (fixture-based) + gated live-integration tests
 scripts/
   serpapi-smoke.ts        Opt-in live-key verification script
@@ -131,6 +141,17 @@ docs/                   Full research, decision, architecture, and process trail
 ```
 
 Full research/decision trail, in reading order: `docs/RESEARCH.md` → `docs/COMPETITIVE_LANDSCAPE.md` → `docs/DECISION.md` → `docs/COMPETITIVE_ADJUDICATION.md` → `docs/PRODUCT_SPEC.md` → `docs/ARCHITECTURE.md` → `docs/SERPAPI_BUDGET.md` → `docs/DEMO.md` → `docs/SUBMISSION.md`. Process/coordination: `docs/AI_COORDINATION.md`, `docs/TASK_BOARD.md`, `docs/DECISIONS_LOG.md`.
+
+### Browser verification and screenshots
+
+With `npm run dev` running in another terminal:
+
+```bash
+npx playwright install chromium
+npm run test:ui
+```
+
+This checks the actual served UI at six widths, runs axe accessibility checks, exercises error recovery, missing evidence, validation, keyboard focus and unsafe source data, and captures screenshots under `docs/screenshots/`. Every scan API request is intercepted: **zero live SerpApi credits**. Result screenshots replay the checked-in response with explicit cached provenance. `CHROMIUM_EXECUTABLE_PATH` can select an existing Chromium installation. Full results and remaining backend-dependent UX limitations: [Astra verification](docs/ASTRA_UI_VERIFICATION.md).
 
 ## License
 

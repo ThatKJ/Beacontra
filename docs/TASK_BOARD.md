@@ -13,16 +13,17 @@
 
 ### T-034: Evidence-first product experience and demo polish
 **OWNER:** ASTRA — PRODUCT EXPERIENCE / UI OWNER
-**STATUS:** IN_PROGRESS
+**STATUS:** VERIFY — implementation and checks complete; committing
 **PRIORITY:** P0/P1
 **FILES:** public/index.html, frontend assets/tests, src/index.ts (HTML serving only), docs/ASTRA_UI_AUDIT.md, docs/ASTRA_DESIGN_SYSTEM.md, README.md (visual section)
 **ISSUE:** Homepage returns 500; unavailable visual checks claim a confirmed match; repetitive cards lack an actionable investigation workspace.
 **ACCEPTANCE CRITERIA:**
-- [ ] Homepage works on actual Worker; polished input preview, validation and recovery.
-- [ ] Compact ranked queue, side-by-side detail, three evidence areas, safe source links, truthful provenance and neutral uncertainty.
-- [ ] Honest loading, partial/empty/error states; accessible responsive UI at six requested widths.
-- [ ] Actual browser inspection/screenshots; unit/type/lint/build gates; coherent commit.
-**VERIFICATION:** Pending implementation. Initial findings recorded in ASTRA_UI_AUDIT.md.
+- [x] Homepage works on actual Worker; polished input preview, validation and recovery.
+- [x] Compact ranked queue, side-by-side detail, three evidence areas, safe source links, truthful provenance and neutral uncertainty.
+- [x] Honest loading, partial/empty/error states; accessible responsive UI at six requested widths.
+- [x] Actual browser inspection/screenshots; unit/type/lint/build gates.
+- [ ] Coherent commit.
+**VERIFICATION:** Actual Worker root/CSS HTTP 200; 68 unit tests passed, 1 skipped; typecheck/lint/build passed; browser suite passed six widths plus axe on home/queue/modal/error/empty. Screenshots in docs/screenshots; full evidence in ASTRA_UI_VERIFICATION.md. No scoring or search-call changes.
 
 ### T-035: Backend contracts needed for fully truthful frontend evidence
 **OWNER:** OPENCODE

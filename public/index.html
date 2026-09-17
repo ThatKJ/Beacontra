@@ -1,418 +1,341 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Beacontra - Commercial Anomaly & Brand-Risk Scanner for Indian D2C Brands</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    * { font-family: 'Inter', sans-serif; }
-    .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); }
-    .card-glass { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(148, 163, 184, 0.1); }
-    .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
-    .btn-primary:hover { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }
-    .pulse-ring { animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-    @keyframes pulse-ring { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.3); opacity: 0; } }
-    .skeleton { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-    .confidence-high { border-left-color: #22c55e; }
-    .confidence-medium { border-left-color: #f59e0b; }
-    .confidence-low { border-left-color: #ef4444; }
-    .recommendation-urgent { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
-    .recommendation-review { background: rgba(245, 158, 11, 0.15); color: #fcd34d; }
-    .recommendation-monitor { background: rgba(59, 130, 246, 0.15); color: #93c5fd; }
-    .recommendation-genuine { background: rgba(34, 197, 94, 0.15); color: #86efac; }
-  </style>
-</head>
-<body class="gradient-bg min-h-screen text-slate-100">
-  <div class="max-w-6xl mx-auto px-4 py-8">
-    <!-- Header -->
-    <header class="mb-8">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl md:text-4xl font-bold tracking-tight">
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Beacontra</span>
-          </h1>
-          <p class="text-slate-400 mt-1">Commercial Anomaly & Brand-Risk Scanner for Indian D2C Brands</p>
-        </div>
-        <div class="flex items-center gap-4">
-          <span class="px-3 py-1 text-xs font-medium rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-            Powered by SerpApi
-          </span>
-        </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#173f35" />
+    <meta
+      name="description"
+      content="Prioritize marketplace listings for human review. See price, source and visual evidence together with Beacontra."
+    />
+    <title>Beacontra — Marketplace evidence, in focus</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23173f35'/%3E%3Ccircle cx='20' cy='20' r='11' fill='none' stroke='%23c3e6c9' stroke-width='2'/%3E%3Ccircle cx='20' cy='20' r='4' fill='%23c3e6c9'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to workspace</a>
+    <header class="header">
+      <div class="shell header-inner">
+        <a class="brand" href="/" aria-label="Beacontra home"
+          ><span class="brand-mark" aria-hidden="true"><i></i></span
+          >Beacontra<span class="brand-period">.</span></a
+        >
+        <span class="header-label">Marketplace intelligence</span>
+        <a
+          class="powered"
+          href="https://serpapi.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Search infrastructure by <strong>SerpApi ↗</strong></a
+        >
       </div>
     </header>
-
-    <!-- Scan Form -->
-    <section class="card-glass rounded-2xl p-6 md:p-8 mb-8">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-semibold">Scan Listings for Review</h2>
-        <button 
-          type="button" 
-          id="loadDemoBtn" 
-          class="text-xs font-medium px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/30 transition-colors flex items-center gap-1.5 cursor-pointer"
-        >
-          <span>⚡</span> Load Demo Example
-        </button>
-      </div>
-
-      
-      <form id="scanForm" class="space-y-5">
-        <div class="grid md:grid-cols-2 gap-5">
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">Product Name / SKU</label>
-            <input 
-              type="text" 
-              id="productName" 
-              name="productName"
-              placeholder="e.g., Nike Air Max 270, Boat Airdopes 141, Mamaearth Face Wash"
-              required
-              class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-slate-100 placeholder-slate-500 transition-all"
-            >
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">Official Product Image URL</label>
-            <input 
-              type="url" 
-              id="officialImageUrl" 
-              name="officialImageUrl"
-              placeholder="https://yourbrand.com/product-image.jpg"
-              required
-              class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-slate-100 placeholder-slate-500 transition-all"
-            >
-          </div>
-        </div>
-
-        <div class="grid md:grid-cols-3 gap-5 pt-2 border-t border-slate-700">
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">MRP (₹)</label>
-            <input 
-              type="number" 
-              id="mrp" 
-              name="mrp"
-              placeholder="e.g., 2999"
-              class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-slate-100 placeholder-slate-500 transition-all"
-            >
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">Expected Price Range (₹)</label>
-            <div class="flex gap-2">
-              <input 
-                type="number" 
-                id="minPrice" 
-                name="minPrice"
-                placeholder="Min"
-                class="w-1/2 px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-slate-100 placeholder-slate-500 transition-all"
-              >
-              <input 
-                type="number" 
-                id="maxPrice" 
-                name="maxPrice"
-                placeholder="Max"
-                class="w-1/2 px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-slate-100 placeholder-slate-500 transition-all"
-              >
-            </div>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">Authorized Sellers (comma-separated)</label>
-            <input 
-              type="text" 
-              id="authorizedSellers" 
-              name="authorizedSellers"
-              placeholder="Flipkart, Amazon, Reliance Digital, Official Website"
-              class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-slate-100 placeholder-slate-500 transition-all"
-            >
-          </div>
-        </div>
-
-        <button 
-          type="submit" 
-          id="scanBtn"
-          class="w-full btn-primary text-white font-semibold py-3 px-6 rounded-lg transition-all hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <span id="btnText">Start Scan</span>
-          <span id="btnLoading" class="hidden flex items-center gap-2">
-            <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-            Scanning marketplaces...
-          </span>
-        </button>
-      </form>
-    </section>
-
-    <!-- Results Section -->
-    <section id="resultsSection" class="hidden">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h2 class="text-xl font-semibold">Scan Results</h2>
-          <p class="text-slate-400 text-sm" id="resultsMeta"></p>
-        </div>
-        <button 
-          id="newScanBtn"
-          class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-slate-100 bg-slate-800 border border-slate-700 rounded-lg transition-colors"
-        >
-          New Scan
-        </button>
-      </div>
-
-      <div id="resultsList" class="space-y-4">
-        <!-- Results will be rendered here -->
-      </div>
-    </section>
-
-    <!-- Empty State -->
-    <section id="emptyState" class="text-center py-16 hidden">
-      <svg class="mx-auto h-16 w-16 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-      </svg>
-      <h3 class="mt-4 text-lg font-medium text-slate-300">Enter a product above to start scanning</h3>
-      <p class="mt-2 text-slate-500">Beacontra searches Indian marketplaces and verifies listing photos against your official product image</p>
-    </section>
-
-    <!-- Footer -->
-    <footer class="mt-16 pt-8 border-t border-slate-800 text-center text-slate-500 text-sm">
-      <p>Beacontra uses <a href="https://serpapi.com" target="_blank" rel="noopener" class="text-blue-400 hover:underline">SerpApi</a> for live marketplace data & visual verification</p>
-      <p class="mt-1">Built for SerpApi India Hackathon 2026</p>
-    </footer>
-  </div>
-
-  <script>
-    const API_BASE = '';
-    
-    const scanForm = document.getElementById('scanForm');
-    const scanBtn = document.getElementById('scanBtn');
-    const btnText = document.getElementById('btnText');
-    const btnLoading = document.getElementById('btnLoading');
-    const resultsSection = document.getElementById('resultsSection');
-    const resultsList = document.getElementById('resultsList');
-    const resultsMeta = document.getElementById('resultsMeta');
-    const emptyState = document.getElementById('emptyState');
-    const newScanBtn = document.getElementById('newScanBtn');
-
-    scanForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const formData = new FormData(scanForm);
-      const input = {
-        productName: formData.get('productName'),
-        officialImageUrl: formData.get('officialImageUrl'),
-        mrp: formData.get('mrp') ? parseInt(formData.get('mrp')) : undefined,
-        expectedPriceRange: formData.get('minPrice') && formData.get('maxPrice') ? {
-          min: parseInt(formData.get('minPrice')),
-          max: parseInt(formData.get('maxPrice'))
-        } : undefined,
-        knownAuthorizedSellers: formData.get('authorizedSellers') ? 
-          formData.get('authorizedSellers').split(',').map(s => s.trim()).filter(Boolean) : 
-          undefined
-      };
-
-      setLoading(true);
-      emptyState.classList.add('hidden');
-      resultsSection.classList.add('hidden');
-
-      try {
-        const response = await fetch('/api/beacontra/scan', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(input)
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Scan failed');
-        }
-
-        renderResults(data.data, input);
-      } catch (error) {
-        showError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    });
-
-    newScanBtn.addEventListener('click', () => {
-      resultsSection.classList.add('hidden');
-      emptyState.classList.remove('hidden');
-      scanForm.reset();
-    });
-
-    const loadDemoBtn = document.getElementById('loadDemoBtn');
-    if (loadDemoBtn) {
-      loadDemoBtn.addEventListener('click', () => {
-        document.getElementById('productName').value = 'boAt Airdopes 141';
-        document.getElementById('officialImageUrl').value = 'https://www.boat-lifestyle.com/cdn/shop/files/AD141-FI_Black06_600x.jpg';
-        document.getElementById('mrp').value = '1299';
-        document.getElementById('minPrice').value = '1199';
-        document.getElementById('maxPrice').value = '1499';
-        document.getElementById('authorizedSellers').value = 'boAt Official, Amazon India, Flipkart, Reliance Digital';
-      });
-    }
-
-
-    function setLoading(loading) {
-      scanBtn.disabled = loading;
-      btnText.classList.toggle('hidden', loading);
-      btnLoading.classList.toggle('hidden', !loading);
-    }
-
-    function renderResults(data, input) {
-      resultsMeta.innerHTML = `
-        Found ${data.totalListingsFound} listings • ${data.results.length} analyzed • ${data.creditsUsed} credits used
-        <span class="ml-3 px-2 py-0.5 text-xs font-semibold rounded ${data.dataSource === 'live' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-slate-700 text-slate-300 border border-slate-600'}">
-          ${data.dataSource === 'live' ? '⚡ LIVE SERPAPI RESULT' : '🛠️ FIXTURE MODE'}
-        </span>
-      `;
-      
-      resultsList.innerHTML = data.results.map((result, index) => `
-        <div class="card-glass rounded-xl p-5 border-l-4 ${confidenceClass(result.confidence)} transition-all hover:border-l-8">
-          <div class="flex items-start justify-between gap-4 mb-4">
-            <div class="flex-1 min-w-0">
-              <h3 class="font-semibold text-lg truncate">${escapeHtml(result.listing.title)}</h3>
-              <div class="flex flex-wrap gap-3 mt-2 text-sm text-slate-400">
-                <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>${escapeHtml(result.listing.source || 'Unknown Source')}</span>
-                <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>${escapeHtml(result.listing.seller || 'Unknown Seller')}</span>
-                <span class="font-semibold text-blue-400">${escapeHtml(result.listing.price || 'Price not listed')}</span>
-              </div>
-            </div>
-            <div class="flex flex-col items-end gap-2">
-              <span class="px-3 py-1 text-xs font-medium rounded-full ${recommendationClass(result.recommendation)}">
-                ${formatRecommendation(result.recommendation)}
-              </span>
-              <span class="px-2 py-1 text-xs font-mono text-slate-400 bg-slate-800 border border-slate-700 rounded">
-                Review Priority Score: ${result.compositeScore}
-              </span>
-            </div>
-          </div>
-
-          <!-- Visual Side-by-Side Comparison (Google Lens Visual Match vs Official) -->
-          <div class="my-4 p-4 rounded-xl bg-slate-900/60 border border-slate-700/60">
-            <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
-              <span>Photo Verification (Google Lens Reverse Match)</span>
-              <span class="px-2 py-0.5 rounded text-xs ${result.visualSignal.isAnomalous ? 'bg-amber-500/20 text-amber-400' : 'bg-green-500/20 text-green-400'}">
-                ${result.visualSignal.isAnomalous ? 'Visual Anomaly / Discrepancy' : 'Photo Match Confirmed'}
-              </span>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-              <div class="space-y-1.5">
-                <span class="text-xs text-slate-400 block font-medium">Official Brand Photo</span>
-                <div class="h-36 w-full rounded-lg bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center p-2">
-                  <img src="${escapeHtml(input.officialImageUrl)}" alt="Official image" class="h-full w-full object-contain" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'64\' height=\'64\' fill=\'%2364748b\'><rect width=\'100%25\' height=\'100%25\' fill=\'%231e293b\'/><text x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%2394a3b8\' font-size=\'10\'>Official Image</text></svg>'">
-                </div>
-              </div>
-              <div class="space-y-1.5">
-                <span class="text-xs text-slate-400 block font-medium">Marketplace Listing Photo</span>
-                <div class="h-36 w-full rounded-lg bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center p-2">
-                  ${result.listing.thumbnail ? `
-                    <img src="${escapeHtml(result.listing.thumbnail)}" alt="Listing thumbnail" class="h-full w-full object-contain" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'64\' height=\'64\' fill=\'%2364748b\'><rect width=\'100%25\' height=\'100%25\' fill=\'%231e293b\'/><text x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%2394a3b8\' font-size=\'10\'>Listing Photo</text></svg>'">
-                  ` : `
-                    <div class="text-xs text-slate-500">No image provided</div>
-                  `}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid md:grid-cols-3 gap-4 mb-4">
-            ${signalCard('Price Signal', result.priceSignal, '💰')}
-            ${signalCard('Seller Signal', result.sellerSignal, '🏪')}
-            ${signalCard('Visual Signal', result.visualSignal, '🔍')}
-          </div>
-
-          <div class="pt-4 border-t border-slate-700">
-            <p class="text-sm text-slate-400"><strong>Evidence:</strong> ${escapeHtml(result.evidenceSummary || 'No summary available.')}</p>
-            ${renderLensEvidence(result.lensEvidence)}
-          </div>
-        </div>
-      `).join('');
-
-      resultsSection.classList.remove('hidden');
-    }
-
-
-    function signalCard(title, signal, icon) {
-      const isAnomalous = signal.isAnomalous;
-      return `
-        <div class="p-3 rounded-lg bg-slate-800/50 border ${isAnomalous ? 'border-amber-500/30' : 'border-green-500/30'}">
-          <div class="flex items-center gap-2 mb-2">
-            <span>${icon}</span>
-            <span class="font-medium">${title}</span>
-            <span class="ml-auto px-2 py-0.5 text-xs rounded ${isAnomalous ? 'bg-amber-500/20 text-amber-400' : 'bg-green-500/20 text-green-400'}">
-              ${isAnomalous ? 'Anomaly Detected' : 'Normal'}
-            </span>
-          </div>
-          <p class="text-sm text-slate-300">${escapeHtml(signal.details)}</p>
-          <p class="text-xs text-slate-500 mt-1">Type: ${signal.anomalyType.replace(/_/g, ' ')}</p>
-        </div>
-      `;
-    }
-
-    function renderLensEvidence(evidence) {
-      if (!evidence || Object.keys(evidence).length === 0) return '';
-      
-      const matchCount = (evidence.exactMatchSources?.length || 0) + (evidence.visualMatchSources?.length || 0);
-      if (matchCount === 0) return '';
-
-      return `
-        <div class="mt-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700">
-          <p class="text-sm font-medium text-slate-300 mb-2">🔍 Google Lens Visual Matches</p>
-          <div class="flex flex-wrap gap-2">
-            ${(evidence.exactMatchSources || []).map(s => `<span class="px-2 py-1 text-xs bg-green-500/20 text-green-400 rounded">Exact: ${escapeHtml(s)}</span>`).join('')}
-            ${(evidence.visualMatchSources || []).map(s => `<span class="px-2 py-1 text-xs bg-blue-500/20 text-blue-400 rounded">Visual: ${escapeHtml(s)}</span>`).join('')}
-          </div>
-          <p class="text-xs text-slate-500 mt-1">Confidence: ${evidence.matchConfidence}</p>
-        </div>
-      `;
-    }
-
-    function confidenceClass(confidence) {
-      switch(confidence) {
-        case 'high': return 'confidence-high';
-        case 'medium': return 'confidence-medium';
-        case 'low': return 'confidence-low';
-        default: return '';
-      }
-    }
-
-    function recommendationClass(rec) {
-      switch(rec) {
-        case 'review_urgently': return 'recommendation-urgent';
-        case 'review': return 'recommendation-review';
-        case 'monitor': return 'recommendation-monitor';
-        case 'likely_genuine': return 'recommendation-genuine';
-        default: return '';
-      }
-    }
-
-    function formatRecommendation(rec) {
-      return rec.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-    }
-
-    function escapeHtml(text) {
-      if (text === null || text === undefined) return '';
-      const div = document.createElement('div');
-      div.textContent = String(text);
-      return div.innerHTML;
-    }
-
-    function showError(message) {
-      resultsList.innerHTML = `
-        <div class="card-glass rounded-xl p-5 border-l-4 border-red-500">
-          <div class="flex items-center gap-3">
-            <svg class="w-6 h-6 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-            </svg>
+    <main id="main" class="shell">
+      <section id="home" class="home" aria-labelledby="homeTitle">
+        <div class="intro">
+          <p class="eyebrow">
+            <span class="tiny-mark" aria-hidden="true"></span> A clearer view of
+            your marketplace
+          </p>
+          <h1 id="homeTitle">
+            Find the listings<br />worth a <em>closer look.</em>
+          </h1>
+          <p class="lede">
+            Your product photo. Marketplace listings.<br />
+            Price, source and visual evidence — together in one prioritized
+            review queue.
+          </p>
+          <div class="workflow" aria-label="How Beacontra works">
             <div>
-              <p class="font-medium text-red-300">Scan Failed</p>
-              <p class="text-sm text-slate-400">${escapeHtml(message)}</p>
+              <span class="step">01</span>
+              <p>
+                <strong>Set your reference</strong
+                ><span>Add your product and genuine photo.</span>
+              </p>
+            </div>
+            <div>
+              <span class="step">02</span>
+              <p>
+                <strong>Search the marketplace</strong
+                ><span>Discover listings and related image evidence.</span>
+              </p>
+            </div>
+            <div>
+              <span class="step">03</span>
+              <p>
+                <strong>Focus your review</strong
+                ><span>Compare the signals. Follow the sources.</span>
+              </p>
             </div>
           </div>
+          <p class="trust-note">
+            Evidence for your judgment. Never an authenticity verdict.
+          </p>
         </div>
-      `;
-      resultsSection.classList.remove('hidden');
-    }
-  </script>
-</body>
+        <section class="scan-card" aria-labelledby="scanTitle">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">New investigation</p>
+              <h2 id="scanTitle">Start with your product</h2>
+            </div>
+            <span class="index-mark" aria-hidden="true">01 / 03</span>
+          </div>
+          <form id="scanForm">
+            <fieldset id="fields">
+              <label for="productName"
+                >Product name <span class="required">Required</span></label
+              >
+              <input
+                id="productName"
+                name="productName"
+                required
+                maxlength="200"
+                placeholder="e.g. boAt Airdopes 141"
+                autocomplete="off"
+              />
+              <div class="photo-input">
+                <div id="imagePreview" class="photo-preview">
+                  <svg
+                    aria-hidden="true"
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.4"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="3" />
+                    <circle cx="8" cy="8" r="1.5" />
+                    <path d="m3 17 6-6 4 4 3-3 5 5" /></svg
+                  ><span>Your genuine<br />product photo</span>
+                </div>
+                <div class="photo-fields">
+                  <label for="officialImageUrl">Genuine product photo</label
+                  ><input
+                    id="officialImageUrl"
+                    name="officialImageUrl"
+                    type="url"
+                    required
+                    placeholder="https://yourbrand.com/photo.jpg"
+                    aria-describedby="imageHint imageStatus"
+                  />
+                  <p id="imageHint" class="hint">
+                    Paste a public image link from your brand’s website.
+                  </p>
+                  <p id="imageStatus" class="hint" role="status"></p>
+                  <button
+                    id="removeImage"
+                    class="text-button"
+                    type="button"
+                    hidden
+                  >
+                    Remove photo
+                  </button>
+                </div>
+              </div>
+              <div class="field">
+                <label for="mrp"
+                  >Reference MRP <span class="optional">Optional</span></label
+                >
+                <div class="currency-input">
+                  <span aria-hidden="true">₹</span
+                  ><input
+                    id="mrp"
+                    name="mrp"
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="Enter the product’s MRP"
+                    aria-describedby="mrpHint"
+                  />
+                </div>
+                <p id="mrpHint" class="hint">
+                  Used to show price deviations, not to establish authenticity.
+                </p>
+              </div>
+              <details class="context">
+                <summary>
+                  Add price range &amp; seller context <span>Optional</span>
+                </summary>
+                <div class="context-fields">
+                  <div class="two-fields">
+                    <div>
+                      <label for="minPrice">Expected minimum (₹)</label
+                      ><input
+                        id="minPrice"
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        placeholder="Minimum"
+                      />
+                    </div>
+                    <div>
+                      <label for="maxPrice">Expected maximum (₹)</label
+                      ><input
+                        id="maxPrice"
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        placeholder="Maximum"
+                      />
+                    </div>
+                  </div>
+                  <label for="authorizedSellers">Your authorized sellers</label
+                  ><input
+                    id="authorizedSellers"
+                    placeholder="Seller names, separated by commas"
+                  />
+                  <p class="hint">
+                    Only add sellers you know are authorized. Marketplace names
+                    may not identify the actual seller.
+                  </p>
+                </div>
+              </details>
+              <button
+                id="scanBtn"
+                class="button primary scan-button"
+                type="submit"
+              >
+                Scan marketplaces <span aria-hidden="true">→</span>
+              </button>
+              <button id="loadDemoBtn" class="sample-button" type="button">
+                Try a product example <span aria-hidden="true">↗</span>
+              </button>
+            </fieldset>
+          </form>
+          <p class="scan-footnote">
+            Google Shopping + Google Lens <span>via SerpApi</span>
+          </p>
+        </section>
+      </section>
+
+      <section
+        id="loading"
+        class="loading panel"
+        hidden
+        aria-labelledby="loadingTitle"
+        aria-busy="true"
+      >
+        <div class="section-heading">
+          <p class="eyebrow">Investigation in progress</p>
+          <span id="elapsed" class="mono">0s elapsed</span>
+        </div>
+        <h1 id="loadingTitle" tabindex="-1">
+          Bringing the evidence into focus.
+        </h1>
+        <p id="loadingProduct" class="lede"></p>
+        <div class="scan-line" aria-hidden="true"></div>
+        <div class="loading-stages">
+          <div>
+            <span class="step">01</span>
+            <h2>Discover listings</h2>
+            <p>Google Shopping finds marketplace offers.</p>
+          </div>
+          <div>
+            <span class="step">02</span>
+            <h2>Gather visual evidence</h2>
+            <p>Google Lens checks selected listing photos.</p>
+          </div>
+          <div>
+            <span class="step">03</span>
+            <h2>Prioritize your review</h2>
+            <p>Price, source and visual signals come together.</p>
+          </div>
+        </div>
+        <p id="loadingNote" class="hint" role="status">
+          The scan is running. Results arrive together when processing finishes;
+          these are workflow steps, not live stage indicators.
+        </p>
+      </section>
+
+      <section id="errorPanel" class="error-panel" hidden role="alert">
+        <div>
+          <p class="eyebrow">Scan interrupted</p>
+          <h2 id="errorTitle">We couldn’t finish this scan.</h2>
+          <p id="errorMessage"></p>
+        </div>
+        <div class="error-actions">
+          <button id="retryBtn" class="button primary" type="button">
+            Retry scan</button
+          ><button id="editBtn" class="button secondary" type="button">
+            Edit product</button
+          ><button id="returnBtn" class="button secondary" type="button" hidden>
+            Return to results
+          </button>
+        </div>
+      </section>
+
+      <section id="resultsSection" hidden aria-labelledby="resultsTitle">
+        <div class="results-heading">
+          <div>
+            <p class="eyebrow">Your evidence workspace</p>
+            <h1 id="resultsTitle" tabindex="-1">Marketplace review</h1>
+            <p id="resultsProduct" class="muted"></p>
+          </div>
+          <button id="newScanBtn" type="button" class="button secondary">
+            ← Edit product
+          </button>
+        </div>
+        <div class="provenance">
+          <span id="dataBadge" class="badge"></span
+          ><span id="resultsMeta"></span>
+        </div>
+        <div id="metrics" class="metrics"></div>
+        <p id="coverage" class="coverage"></p>
+        <div class="workspace">
+          <aside class="queue panel" aria-labelledby="queueTitle">
+            <div class="queue-heading">
+              <h2 id="queueTitle">Review queue</h2>
+              <span id="queueCount" class="count"></span>
+            </div>
+            <label class="sr-only" for="queueFilter">Filter review queue</label
+            ><select id="queueFilter">
+              <option value="all">All listings · highest priority first</option>
+              <option value="priority">Prioritized for review</option>
+              <option value="visual">With Lens evidence</option>
+            </select>
+            <div id="resultsList" class="queue-list"></div>
+          </aside>
+          <section
+            id="evidencePanel"
+            class="evidence panel"
+            aria-labelledby="detailTitle"
+          ></section>
+        </div>
+      </section>
+      <footer>
+        <span
+          >Beacontra <span class="footer-dot">/</span> Where price, seller, and
+          photo evidence meet.</span
+        ><span>Built for human judgment.</span>
+      </footer>
+      <p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
+    </main>
+    <dialog id="comparisonDialog" aria-labelledby="dialogTitle">
+      <div class="dialog-header">
+        <div>
+          <p class="eyebrow">Evidence close-up</p>
+          <h2 id="dialogTitle">Compare the product photos</h2>
+        </div>
+        <button
+          id="closeDialog"
+          class="button secondary"
+          type="button"
+          autofocus
+        >
+          Close <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div id="dialogContent"></div>
+    </dialog>
+    <noscript
+      ><p class="panel">
+        Enable JavaScript to scan marketplaces and explore the evidence.
+      </p></noscript
+    >
+  </body>
 </html>
