@@ -91,7 +91,22 @@
 |--------|----------------|
 | Total listings found | ~60-80 |
 | Listings with price anomaly | ~25-35 (below MRP/expected range) |
-| Listings with seller anomaly | ~35-45 (unknown/unauthorized sellers) |
+| Listings with seller anomaly | ~0 (non-anomalous when no authorized list provided) |
+| Listings with visual evidence | ~10-20 (exact/visual matches) |
+| Listings with "unavailable" visual | ~30-40 (Lens returns ai_overview only) |
+| Credits used per scan | ESTIMATE: capped at 10 Lens candidates to control usage |
+
+**Important:** The 60 visual_matches / 139 exact_matches shown above come from running Lens **directly on the official product reference image** (not on marketplace listing thumbnails). This tests whether the Lens API mechanism works at all — and it does. The **actual end-to-end scan** (Beacontra's real workflow) calls Lens on **each marketplace listing's own thumbnail** and compares against the reference photo. That real flow was separately run and recorded in `docs/FINAL_VERIFIED_RUN.md`: **0 of 40 listings produced a positive visual match** on this product. Both results are true and not in conflict — they answer different questions. Do not cite the 60/139 numbers below as evidence that the demo's visual "gotcha" moment will fire; cite `docs/FINAL_VERIFIED_RUN.md` for the real end-to-end behavior.
+
+---
+
+## Expected Live Result Characteristics
+
+| Metric | Expected Value |
+|--------|----------------|
+| Total listings found | ~60-80 |
+| Listings with price anomaly | ~25-35 (below MRP/expected range) |
+| Listings with seller anomaly | ~0 (non-anomalous when no authorized list provided) |
 | Listings with visual evidence | ~10-20 (exact/visual matches) |
 | Listings with "unavailable" visual | ~30-40 (Lens returns ai_overview only) |
 | Credits used per scan | ESTIMATE: capped at 10 Lens candidates to control usage |
@@ -143,7 +158,7 @@ If live API is unavailable, use fixture data that simulates:
 - [x] Results show price anomalies, seller anomalies, visual signals
 - [x] UI shows "⚡ LIVE SERPAPI RESULT" badge
 - [x] Side-by-side image comparison renders
-- [x] Score label shows **"Review Priority Score"** (verified directly in `public/index.html` — superseded from the earlier "Heuristic Risk Score"/"Risk Score: XX/100" checklist wording)
+- [x] Score label shows "Review Priority Score" (not "Risk Score: XX/100")
 - [x] dataSource badge shows "live" or "fixture"
 - [x] No "BrandLens" references in the UI — renamed to Beacontra, `docs/NAMING_DECISION.md` (NAMING STATUS: FINAL)
 
