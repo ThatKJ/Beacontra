@@ -446,3 +446,16 @@
 - [ ] If structured results still don't work: document exact request parameters, response top-level keys, HTTP success/error, image accessibility, image upload success, SerpApi search id. Classify as API BEHAVIOR LIMITATION.
 - [ ] Compare against our previous spike implementation (scripts/lens-spike.ts) — identify mismatches
 **VERIFICATION:** Previous T-017 conclusion may have tested wrong request path. Official SerpApi docs show dedicated tabs (visual_matches, exact_matches, products) and Image API upload flow. Need controlled verification of each mode.
+
+### T-030: Price-signal language overclaims a normal discount as "suspicious"
+**OWNER:** OPENCODE
+**STATUS:** TODO
+**PRIORITY:** P1
+**FILES:** src/lib/brandlens.ts (`analyzePrice()`)
+**DEPENDENCIES:** None
+**FOUND BY:** direct code reading, confirmed with the user's own example — a listing at ₹1,099 against a ₹1,299 MRP (≈15.4% below, `1099/1299 = 0.846`) falls inside the current `price < mrp * 0.9` branch (line 369-377) and is labeled `anomalyType: 'suspicious_discount'` with the literal detail string `"Price ₹1099 has suspicious discount vs MRP ₹1299"`. A 10-30% discount is completely ordinary in Indian e-commerce (sale events, festival pricing) — labeling it "suspicious" is exactly the kind of unsupported-language overclaim this project has otherwise been careful to avoid (`docs/COMPETITIVE_ADJUDICATION.md`'s language-change section).
+**ACCEPTANCE CRITERIA:**
+- [ ] Document the actual thresholds plainly wherever this signal is explained (currently: `<70% of MRP` = `below_mrp`, `70-90% of MRP` = the currently-mislabeled tier, `>=90%` = `normal`) — a user/judge should be able to answer "why did this price contribute to the score" from the documentation, not have to read the source.
+- [ ] Rename `suspicious_discount` to a neutral label (e.g. `moderate_discount` or `below_typical_range`) and reword the detail string to state the fact only — "Price ₹1099 is 15% below MRP ₹1299" — not an interpretation ("suspicious").
+- [ ] Consider whether the 70%/90% split is the right threshold at all, or whether a 3-tier (normal/moderate/large deviation) model better matches how much weight each should carry in `fuseSignals()` — currently `below_mrp` and `suspicious_discount` both contribute the same +35 regardless of whether the listing is 11% or 89% below MRP, which doesn't distinguish "large deviation" from "extreme deviation" the way the label names would imply.
+- [ ] Apply the same review to `analyzeSeller()`'s `suspicious_pattern` label/wording for consistency (matching a generic seller-name pattern is a real, evidence-based heuristic — unlike the price case, this one may be defensible as-is, but the word "suspicious" itself is worth softening for consistency with the rest of the project's language discipline).
