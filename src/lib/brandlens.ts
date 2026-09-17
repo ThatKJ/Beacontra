@@ -49,7 +49,7 @@ export interface PriceSignal {
 
 export interface SellerSignal {
   isAnomalous: boolean;
-  anomalyType: 'unknown_seller' | 'new_account' | 'suspicious_pattern' | 'authorized';
+  anomalyType: 'unknown_seller' | 'new_account' | 'suspicious_pattern' | 'authorized' | 'no_authorized_list';
   sellerName: string;
   isAuthorized: boolean;
   details: string;
@@ -57,7 +57,7 @@ export interface SellerSignal {
 
 export interface VisualSignal {
   isAnomalous: boolean;
-  anomalyType: 'mismatch' | 'stolen_photo' | 'different_product' | 'match';
+  anomalyType: 'mismatch' | 'stolen_photo' | 'different_product' | 'match' | 'not_verified';
   confidence: 'high' | 'medium' | 'low';
   matchSources: string[];
   details: string;
@@ -94,6 +94,8 @@ export class BrandLensService {
     this.client = client;
   }
 
+  private static readonly MAX_LENS_CALLS = 10;
+
   async scan(input: BrandLensInput): Promise<BrandLensScanResult> {
     const scanId = `scan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const createdAt = new Date().toISOString();
@@ -102,13 +104,38 @@ export class BrandLensService {
 
     const candidates = this.extractCandidates(shoppingResults);
 
+    const priceSignals = candidates.map(c => ({ candidate: c, priceSignal: this.analyzePrice(c, input) }));
+    priceSignals.sort((a, b) => {
+      const aScore = a.priceSignal.isAnomalous ? 100 : 0;
+      const bScore = b.priceSignal.isAnomalous ? 100 : 0;
+      if (aScore !== bScore) return bScore - aScore;
+      return b.candidate.extractedPrice - a.candidate.extractedPrice;
+    });
+
     const results: FusedResult[] = [];
 
-    for (const candidate of candidates) {
-      const lensEvidence = await this.runVisualVerification(candidate.thumbnail, input.officialImageUrl);
-      const priceSignal = this.analyzePrice(candidate, input);
+    for (const entry of priceSignals) {
+      const { candidate, priceSignal } = entry;
       const sellerSignal = this.analyzeSeller(candidate, input);
-      const visualSignal = this.analyzeVisual(lensEvidence);
+
+      let lensEvidence: LensEvidence;
+      let visualSignal: VisualSignal;
+
+      const currentLensCalls = results.filter(r => r.visualSignal.anomalyType !== 'not_verified').length;
+
+      if (currentLensCalls < BrandLensService.MAX_LENS_CALLS) {
+        lensEvidence = await this.runVisualVerification(candidate.thumbnail, input.officialImageUrl);
+        visualSignal = this.analyzeVisual(lensEvidence);
+      } else {
+        lensEvidence = this.emptyLensEvidence();
+        visualSignal = {
+          isAnomalous: false,
+          anomalyType: 'not_verified',
+          confidence: 'low',
+          matchSources: [],
+          details: 'Visual verification skipped (Lens call cap reached)',
+        };
+      }
 
       const fused = this.fuseSignals(candidate, lensEvidence, priceSignal, sellerSignal, visualSignal);
       results.push(fused);
@@ -260,38 +287,49 @@ export class BrandLensService {
   private analyzeSeller(candidate: ListingCandidate, input: BrandLensInput): SellerSignal {
     const seller = candidate.seller.toLowerCase();
     const authorizedSellers = (input.knownAuthorizedSellers || []).map(s => s.toLowerCase());
+    const hasAuthorizedList = authorizedSellers.length > 0;
 
-    const isAuthorized = authorizedSellers.some(auth => seller.includes(auth) || auth.includes(seller));
+    if (hasAuthorizedList) {
+      const isAuthorized = authorizedSellers.some(auth => seller.includes(auth) || auth.includes(seller));
 
-    if (isAuthorized) {
-      return {
-        isAnomalous: false,
-        anomalyType: 'authorized',
-        sellerName: candidate.seller,
-        isAuthorized: true,
-        details: `Seller "${candidate.seller}" is in authorized sellers list`,
-      };
-    }
+      if (isAuthorized) {
+        return {
+          isAnomalous: false,
+          anomalyType: 'authorized',
+          sellerName: candidate.seller,
+          isAuthorized: true,
+          details: `Seller "${candidate.seller}" is in authorized sellers list`,
+        };
+      }
 
-    const suspiciousPatterns = ['random', 'seller', 'shop', 'store', 'mart', 'bazaar', 'unknown', 'new'];
-    const hasSuspiciousPattern = suspiciousPatterns.some(p => seller.includes(p));
+      const suspiciousPatterns = ['random', 'seller', 'shop', 'store', 'mart', 'bazaar', 'unknown', 'new'];
+      const hasSuspiciousPattern = suspiciousPatterns.some(p => seller.includes(p));
 
-    if (hasSuspiciousPattern || seller.length < 5) {
+      if (hasSuspiciousPattern || seller.length < 5) {
+        return {
+          isAnomalous: true,
+          anomalyType: 'suspicious_pattern',
+          sellerName: candidate.seller,
+          isAuthorized: false,
+          details: `Seller "${candidate.seller}" has suspicious naming pattern`,
+        };
+      }
+
       return {
         isAnomalous: true,
-        anomalyType: 'suspicious_pattern',
+        anomalyType: 'unknown_seller',
         sellerName: candidate.seller,
         isAuthorized: false,
-        details: `Seller "${candidate.seller}" has suspicious naming pattern`,
+        details: `Seller "${candidate.seller}" not in authorized sellers list`,
       };
     }
 
     return {
-      isAnomalous: true,
-      anomalyType: 'unknown_seller',
+      isAnomalous: false,
+      anomalyType: 'no_authorized_list',
       sellerName: candidate.seller,
       isAuthorized: false,
-      details: `Seller "${candidate.seller}" not in authorized sellers list`,
+      details: 'No authorized sellers list provided - cannot verify seller',
     };
   }
 

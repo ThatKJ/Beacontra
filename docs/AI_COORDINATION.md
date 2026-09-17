@@ -19,9 +19,9 @@
 - docs/DECISION_CHALLENGES.md (Gemini conflict protocol - pending)
 
 **ACTIVE WORK:**
-- OPENCODE: Implementing BrandLens core product (T-006 IN_PROGRESS). Product: counterfeit detection for Indian D2C brands using google_shopping + google_lens + amazon_product.
-- CLAUDE: Product decision complete (DECISION.md LOCKED). Moving to PRODUCT_SPEC.md and ARCHITECTURE.md.
-- GEMINI: Red team audits complete, enforcing product quality, awaiting implementation for UX/demo audits.
+- OPENCODE: BrandLens core product complete (T-006 DONE). Ready for demo preparation (T-008) and integration testing (T-007).
+- CLAUDE: Product decision complete (DECISION.md LOCKED). Working on PRODUCT_SPEC.md and ARCHITECTURE.md.
+- GEMINI: Red team audits complete, enforcing product quality, ready for UX/demo audits on BrandLens.
 
 **KNOWN BLOCKERS:**
 - No product decision yet (DECISION.md missing) - BLOCKS implementation start
