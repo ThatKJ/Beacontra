@@ -118,15 +118,32 @@ Full engineering-grade catalog already exists at `docs/SERPAPI_CAPABILITIES.md` 
 
 ## 4. #BuiltWithSerpApi Saturation Analysis
 
-*(Pending — running as a background research agent against the official gallery, GitHub, Devpost, Product Hunt, HN. Will be inserted here on completion, then cross-referenced with OPENCODE's 7 scored concepts in `docs/TECHNICAL_FEASIBILITY.md` — 3 of which fall inside categories the mission brief pre-flags as saturation risks: generic shopping/price comparison, generic travel planning. Full writeup will also populate `docs/COMPETITIVE_LANDSCAPE.md`.)*
+**Complete — full raw research at `docs/research/competitive_landscape_raw.md` (459 lines); summarized findings now in `docs/COMPETITIVE_LANDSCAPE.md`.** A background research agent fetched the official gallery's structured data file directly (177 projects, not a scrape of the rendered page — every project has engine list, tags, author, links) plus GitHub topic search, the DevNetwork API+Cloud+AI Hackathon 2026 Devpost gallery (confirmed to be the *same* underlying project pool as most of the official gallery — see below), Product Hunt, and HN.
 
-## 5. Indian Problem Research
+**Critical context most of the mission brief's assumptions didn't anticipate:** the official BuiltWithSerpApi gallery is **not** specific to the SerpApi India Hackathon 2026 — it's SerpApi's general "built with our API" showcase, and the submission-date/repo-name evidence shows most of its 177 projects came from *other* events (PyCon 2026 workshops, several Gemma-4 hackathons, and overwhelmingly the **DevNetwork API+Cloud+AI Hackathon 2026**, Sept 4-5 2026, where SerpApi was a sponsor track). This matters: these aren't literally our competing submissions, but they are the exact body of "publicly available project information" a judge would find when checking originality, so avoiding duplication against this gallery is still the right strategic target.
 
-*(Pending — running as a background research agent, target 25-30 evidence-backed problems across commerce, education, jobs, public services, consumer protection, local discovery, travel, legal/professional research, market intelligence, patents, real estate, logistics, agriculture, healthcare access, etc. Will be inserted here on completion.)*
+**Saturation map (FACT, counted directly from the 177-project structured dataset):**
+1. **"Evidence/claim verification agent"** — ~38 projects, by far the largest cluster. An agent checks a claim/vendor/document/price/image against live SerpApi results and produces a cited verdict gating a human decision. This directly confirms and quantifies the finding from my own manual spot-check in §7a (JobShield, VendorProof, DepositCheck, etc. are all members of this cluster) — it's even larger than that spot-check suggested. A sub-cluster of ≥8 near-identical "procurement/invoice/vendor due-diligence" projects exists inside it.
+2. **Shopping/price comparison** — 31 projects.
+3. **Travel itinerary/flight+hotel planning** — 21 projects (plus ≥6 independent flight-price-tracker variants alone) — confirms the mission brief's own prediction that this category would be saturated.
+4. **Research/briefing agent** ("topic in, cited brief out") — ~25+ projects, including two of SerpApi's *own* official showcase repos.
+5. Also saturated: Google-Maps lead-generation scrapers (≥7 near-identically-named), SEO/rank-tracking (≥6 + an external ecosystem), job-finder/resume-matcher (9), and a beauty/skincare shopping-assistant micro-cluster (9, likely a specific sponsor prompt).
 
-## 6. 30 Evidence-Backed Problems
+**Underexplored engines (FACT, from the same dataset):** Google Patents API (1 dedicated product found, PatentPincer), **Google Scholar Case Law API (zero community products found anywhere — but see §7b, this is a dead end for India relevance, verified separately)**, Google Ads Transparency Center (3, all political/ad-monitoring — no commercial/brand use case found), Google Trends *Trending Now* real-time variant (1), **Google Play Store API (1 — flagged by the research agent itself as notable "particularly for an India-specific angle, since Play Store dominates Android in India")**, Zillow engine, Google Maps Reviews "at scale" analytics.
 
-*(Pending §5.)*
+**Direct relevance to the leading candidate (BrandGuard, §7):** the gallery contains one close prior-art project — **CeaseFire** (#30: "searches brand impersonation across web, AI, app-store, shopping, maps, image, video results to prioritize takedowns," tagged uniquely `brand-protection`) — see §7b for how this changes the candidate's positioning.
+
+## 5. Indian Problem Research / 6. Evidence-Backed Problems
+
+**Complete — 42 problems (exceeds the 25-30 target), full detail at `docs/research/india_problems_raw.md` (1088 lines, ~90 sources).** Each entry has the full persona/JTBD/pain/frequency/consequence/workaround/existing-products/gap/search-dependency/SerpApi-role/India-angle/evidence structure the mission template asks for; unverified numbers are explicitly tagged ASSUMPTION/HYPOTHESIS rather than stated as fact (e.g., the oft-cited "35% of urban Indian consumers bought counterfeit goods online" figure is flagged there as **surfaced via AI-search-summary, not independently opened/verified** — a caveat I'm importing into this document too, correcting my own §7 entry which should be read with that same caveat).
+
+**Most important cross-cutting finding (independently arrived at by this research agent, without seeing my candidate list in §7):** the fork's own "Cross-Cutting Observations" section flags **"cross-marketplace + reverse-image search" as a recurring pattern across five separate problem statements** (#2 Counterfeit Products & Fake Reviews, #9 Used Vehicle Fraud, #14 Matrimonial Fraud, #27 Trademark/Counterfeit Monitoring for SMEs, #32 E-commerce Delivery/Order Fraud) — the same mechanism I converged on independently in §7a/§7b via manual competitive search. **Problem #27 (Trademark/Counterfeit Monitoring for SMEs) is close to a word-for-word independent match for the BrandGuard/BrandLens concept**, down to citing the same real Indian legal case (Skechers v. Flipkart) and the same gap ("no affordable, cross-marketplace, self-serve monitoring tool aimed specifically at SMEs" — matching my own "enterprise SaaS isn't priced for Indian D2C/SMB brands" framing). Two independently-run research processes landing on the same evidenced gap is meaningfully stronger validation than either alone.
+
+**Other findings worth recording for future/expansion scope (not pursued as primary, per §8's scoring):**
+- Strongest "live search data is structurally necessary" cases identified: mandi crop prices (#7), GeM government tenders (#11), Tatkal train booking (#12), app-store competitive intelligence (#19), finfluencer pump-and-dump detection (#26), festival flight pricing (#30), festive fake-discount/MRP-inflation detection (#41) — all involve data that decays in hours/days, not months.
+- Weakest SerpApi fit, flagged honestly by the research agent: gig-worker fare transparency (#24, data is platform-internal, not search-indexed) and visa-slot scalping (#22, VFS booking data isn't search-engine-indexed) — both real problems, but SerpApi's role would be supplementary at best.
+- A government-data-fragmentation pattern recurs across RTI tracking (#5), court-case status (#6), GeM tenders (#11), RERA verification (#13), and welfare-scheme discovery (#31) — structurally different from the commerce-fraud pattern, and a possible direction for a future/second SerpApi project, not this one.
+- **Festive Sale Fake Discount / MRP Inflation Detection (#41)** is a natural *feature extension* of BrandGuard/BrandLens (temporal price-history tracking to catch "inflate-then-discount" dark patterns) rather than a competing idea — flagged as a strong P1 candidate for the product spec, not the P0 scope.
 
 ## 7a. CRITICAL FINDING — the "verification agent" pattern is already crowded (2026-09-17, direct WebSearch check on the leading candidates below)
 
@@ -308,6 +325,21 @@ A pattern emerged while generating these: a large share of genuinely painful, fr
 
 **Early read, superseded twice already (see §7a for the full reasoning — this is intentionally left as a visible trail, not cleaned up, so the decision process is auditable):** First pass favored #1 (TrustCheck Jobs) on problem-evidence strength. A direct competitive check then found #1, #2, #3, #6 all belong to an already-crowded "AI agent verifies legitimacy via live search" pattern with multiple near-duplicate hackathon projects. **Current leading candidate is #4 (Counterfeit & MRP-Violation Watch), sharpened with a `google_lens`/reverse-image visual-verification mechanism** — no direct duplicate found, inverted (B2B brand-owner) persona lowers overlap risk further, and the visual-evidence mechanism is a genuinely underused engine. Still not locked — pending §4 (full gallery audit) and §6 (broader problem evidence) from the two background research agents, which may surface either a duplicate of this too or a stronger alternative entirely.
 
+## 7b. Final sharpening after the full competitive audit landed — product renamed to **BrandLens**
+
+The completed gallery audit (§4) surfaced one genuine close prior-art project: **CeaseFire** — "searches brand impersonation across web, AI, app-store, shopping, maps, image, video results to prioritize takedowns" across 10 engines, uniquely tagged `brand-protection` in the entire 177-project gallery. This is the single closest thing to candidate #4 that exists. It does **not** use `google_lens`/reverse-image matching — its evidence is presence/mention-based (does this app/listing/page exist and mention my brand), not visual (does this listing's photo actually depict my genuine product).
+
+Rather than treat this as disqualifying (per §7a's own logic — a distant/adjacent precedent is a risk to manage, not automatically a reason to abandon a well-evidenced direction, especially days before other agents are blocked on a decision), I'm narrowing the product to the one thing CeaseFire's engine list structurally cannot do: **visual proof**. Renaming from "Counterfeit & MRP-Violation Watch" to **BrandLens** to make that the name-level promise. Positioning difference, stated plainly for the record (this is exactly the kind of gap a hostile judge would probe, so it's answered here rather than left implicit):
+
+| | CeaseFire (closest prior art) | BrandLens (this project) |
+|---|---|---|
+| Core evidence type | Brand name/mention presence across channels | Visual product-photo match/mismatch (`google_lens exact_matches`) |
+| Breadth vs. depth | Broad — 10 engines, many impersonation *types* (fake apps, fake social, counterfeit listings, fake videos) | Narrow — 1-2 engines, one impersonation type (marketplace listing photos), gone deep |
+| Can it show "this listing's photo isn't your product" on screen? | No — it's presence/mention detection, not image comparison | Yes — this is the specific, demoable capability |
+| Persona | Not stated in the gallery entry (brand security team, implied enterprise-scale) | Explicitly an Indian D2C/SME brand owner priced out of enterprise brand-protection SaaS (evidenced §6, problem #27) |
+
+This is now confirmed by **two independent research passes** (my own manual competitive check in §7a/§9, and the separately-run Indian-problems research agent's cross-cutting finding in §5/§6) as the strongest surviving candidate. Proceeding to lock it as primary.
+
 ## 8. Top-8 Comparison (preliminary — will confirm/revise once background agents land)
 
 **Elimination pass (Phase 5) first, applying the mission's reject criteria plus §7a's fresh finding:**
@@ -377,12 +409,19 @@ Running the mission's adversarial question set directly, in the voice of an exha
 
 ## 11. Final Top 3 Concepts
 
-*(Pending §10.)*
+1. **BrandLens** (primary) — visual + commercial cross-verification agent for Indian D2C/SME brand owners fighting marketplace counterfeiting, built on `google_shopping`/`amazon_product` + `google_lens`. Doubly-validated by independent research passes (§7a/§9 and §6). Track: **Commerce & Market Intelligence**.
+2. **Job Market Salary/Skill Extraction Pipeline** (runner-up) — OPENCODE's Concept 2, sharpened per Gemini's framing to center the extraction pipeline (unstructured India job postings → structured salary/skill data) rather than the dashboard. Track: **Commerce & Market Intelligence** or **Knowledge & Public Interest** depending on framing. Medium duplication risk (a non-hackathon GitHub precedent exists, §9) but real technical depth and no ethical/legal exposure.
+3. **Local Business Intelligence with a temporal wedge** (safe fallback) — OPENCODE's Concept 1, salvageable only with Gemini's suggested sharp wedge (menu-price-drift/gentrification detection over time, or a specific persona like cloud-kitchen site-selection) rather than a generic Maps dashboard. Track: **Travel & Local Discovery** or **Commerce & Market Intelligence**.
 
 ## 12. Selected Project
 
-*(Pending — will be mirrored into `docs/DECISION.md`.)*
+**BrandLens.** Full decision memo at `docs/DECISION.md`. Product spec at `docs/PRODUCT_SPEC.md`.
 
 ## 13. Why It Won the Internal Selection
 
-*(Pending.)*
+- It's the only candidate that scored ≥8/10 simultaneously on SerpApi necessity *and* competitive-risk-is-low in §8 — every other candidate traded one off against the other (the "verification agent" family had strong necessity but high duplication risk; travel/shopping/job-search had low risk-of-being-first-to-try but weak necessity/high saturation).
+- It survived a genuine, not rubber-stamped, hostile-judge pass (§10) and a competitor audit that found and dealt with real prior art (CeaseFire, §7b) rather than a fabricated "no competitors exist" claim.
+- It was independently re-discovered by a second, separately-run research process that never saw my candidate list (§6) — the strongest evidence-quality signal available given no external validation is possible before building.
+- It ties to a concrete, named legal mechanism already recognized by an Indian court (Delhi HC's "latching-on" ruling) rather than an abstractly-described problem, which gives the eventual demo/pitch a factual anchor a judge can independently verify.
+- It satisfies Gemini's independently-authored anti-wrapper criteria (`GEMINI_HACKATHON_STANDARDS.md`) via multi-source synthesis (price + seller + visual signals fused into one confidence score) and has a clear path to also satisfying the temporal-tracking criterion as a P1 feature (§6's festive-fake-discount finding).
+- It lost to nothing on "usefulness" — the persona (Indian D2C/SME brand owner) is real, named, and has a documented existing-but-unaffordable alternative (enterprise brand-protection SaaS, IP-firm monitoring retainers), which is a stronger "would a real person use this" case than a consumer-convenience tool competing against free Google Search.

@@ -19,9 +19,9 @@
 - docs/DECISION_CHALLENGES.md (Gemini conflict protocol - pending)
 
 **ACTIVE WORK:**
-- OPENCODE: Building generic Cloudflare Workers infrastructure + SerpApi client (T-011). Product-specific work (T-005, T-006) blocked by DECISION.md.
+- OPENCODE: Generic Cloudflare Workers infrastructure + SerpApi client complete (T-015 DONE). Product-specific work (T-005, T-006) blocked by DECISION.md. Ready for vertical slice implementation once product decided.
 - CLAUDE: Product research and selection (lead) — T-009 IN_PROGRESS. Target: docs/RESEARCH.md, docs/COMPETITIVE_LANDSCAPE.md, docs/DECISION.md, docs/PRODUCT_SPEC.md.
-- GEMINI: Active - Inspecting repository, setting up red-team audits, and enforcing product quality.
+- GEMINI: Active - Red team audits complete (T-010, T-012, T-013, T-014 DONE), QA fixes (T-016 DONE), enforcing product quality.
 
 **KNOWN BLOCKERS:**
 - No product decision yet (DECISION.md missing) - BLOCKS implementation start

@@ -180,21 +180,22 @@
 
 ### T-015: Generic Cloudflare Workers Infrastructure (product-agnostic)
 **OWNER:** OPENCODE
-**STATUS:** IN_PROGRESS
-**FILES:** package.json, wrangler.jsonc, tsconfig.json, src/lib/serpapi-client.ts, src/lib/cache.ts, src/lib/types.ts, vitest.config.ts, tests/
+**STATUS:** DONE
+**FILES:** package.json, wrangler.jsonc, tsconfig.json, src/lib/serpapi-client.ts, src/lib/cache.ts, src/lib/types.ts, src/index.ts, vitest.config.ts, tests/, eslint.config.js
 **DEPENDENCIES:** T-001
 **ACCEPTANCE CRITERIA:**
-- [ ] Initialize Cloudflare Workers project with wrangler.jsonc
-- [ ] Configure TypeScript strict mode
-- [ ] Set up Vitest with fixture support (zero live credits)
-- [ ] Configure ESLint + Prettier
-- [ ] Build generic SerpApi client with:
-  - [ ] Request deduplication (in-flight promise cache)
-  - [ ] Response caching (KV + in-memory)
-  - [ ] Retry with exponential backoff
-  - [ ] Fixture mode for development
-  - [ ] Credit tracking/estimation
-  - [ ] Rate limit handling
-  - [ ] Zod schemas for engine responses
-- [ ] Create fixture files for key engines (google, google_maps, google_shopping, google_jobs, google_trends)
-- [ ] Verify: npm run build, npm run typecheck, npm run lint, npm test all pass
+- [x] Initialize Cloudflare Workers project with wrangler.jsonc
+- [x] Configure TypeScript strict mode
+- [x] Set up Vitest with fixture support (zero live credits)
+- [x] Configure ESLint + Prettier
+- [x] Build generic SerpApi client with:
+  - [x] Request deduplication (in-flight promise cache)
+  - [x] Response caching (KV + in-memory)
+  - [x] Retry with exponential backoff
+  - [x] Fixture mode for development
+  - [x] Credit tracking/estimation
+  - [x] Rate limit handling
+  - [x] Zod schemas for engine responses
+- [x] Create fixture files for key engines (google, google_maps, google_shopping, google_jobs, google_trends)
+- [x] Verify: npm run build, npm run typecheck, npm run lint, npm test all pass
+**VERIFICATION:** All 24 tests pass, typecheck clean, lint clean, build succeeds

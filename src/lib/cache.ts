@@ -1,6 +1,5 @@
 import type { CacheAdapter, CachedResponse } from './types';
 
-const DEFAULT_TTL = 60 * 60 * 1000;
 const MEMORY_CACHE_MAX_SIZE = 500;
 
 export class MemoryCache implements CacheAdapter {

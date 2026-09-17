@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import type {
   SerpApiEngine,
   BaseSearchParams,
@@ -10,7 +9,6 @@ import type {
   CachedResponse,
 } from './types';
 import { createCacheKey, createTieredCache } from './cache';
-import * as fixtures from './fixtures';
 
 const DEFAULT_BASE_URL = 'https://serpapi.com/search.json';
 const DEFAULT_TIMEOUT = 30000;
