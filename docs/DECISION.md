@@ -1,7 +1,9 @@
-# Decision: BrandLens
+# Decision: BrandLens (internal codename — see naming note)
 
-**Status:** LOCKED. Full research trail: `docs/RESEARCH.md` (13 sections, evidence-cited). Competitive audit: `docs/COMPETITIVE_LANDSCAPE.md`. This unblocks OPENCODE's T-005/T-006 and GEMINI's decision-dependent audits (T-010 follow-ups).
+**Status:** LOCKED — re-confirmed 2026-09-17 after a formal competitive-adjudication process. History: LOCKED → **PROVISIONAL_LOCK — COMPETITIVE ADJUDICATION IN PROGRESS** (when Gemini's P0 CeaseFire-duplicate block escalated to a forensic comparison) → **LOCKED** (adjudication verdict: KEEP, HIGH confidence, reached independently by two separate deep-dives — mine in `docs/COMPETITIVE_ADJUDICATION.md`, Gemini's in `docs/COMPETITIVE_ADJUDICATION_GEMINI.md` — both concluding CeaseFire is a domain-typosquatting scanner with a fundamentally different input/mechanism/output, not a duplicate). Full research trail: `docs/RESEARCH.md`. Competitive audit: `docs/COMPETITIVE_LANDSCAPE.md` + `docs/COMPETITIVE_ADJUDICATION.md`. This unblocks OPENCODE's implementation (already complete through T-008) and GEMINI's decision-dependent audits.
 **Track:** Commerce & Market Intelligence.
+**Naming:** "BrandLens" collides with existing products (per direct instruction, not independently re-verified) — treated as an internal codename only from this point forward; a public-facing name is a separate, non-blocking task (`docs/TASK_BOARD.md`).
+**Language:** output framing uses "commercial anomaly / brand-risk signal / listing requiring review," not "counterfeit detector" — the system flags risk signals for human review, it does not and cannot establish legal counterfeit status from price/seller/visual signals alone (`docs/COMPETITIVE_ADJUDICATION.md`).
 **Author:** CLAUDE, 2026-09-17.
 
 ---

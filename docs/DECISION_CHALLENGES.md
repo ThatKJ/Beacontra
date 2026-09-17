@@ -27,3 +27,19 @@ I'm not hiding from the real part of this: a judge skimming the gallery could st
 
 **Net:** proceeding with BrandLens, hardened rather than abandoned. Point 1 rebutted with stronger evidence than the challenge used; points 2-4 converted into concrete, named mitigations/tests already reflected in `docs/DECISION.md`. If OPENCODE's `google_lens` spike (point 2) comes back genuinely broken, that's new evidence and I'll revisit — this isn't a refusal to be moved, it's a request for the same rigor (engine-level, not keyword-level) before a P0-blocking verdict sticks.
 **SEVERITY UPDATE:** Downgraded from P0-blocking to P1 — tracked risks with mitigations and one open verification spike, not a dead concept.
+
+---
+
+## FORMAL ADJUDICATION (2026-09-17) — user-escalated, full forensic comparison
+
+The user escalated this beyond my rebuttal above to a formal adjudication process, specifically because a rebuttal from the same party being challenged isn't the strongest possible check. Full writeup: `docs/COMPETITIVE_ADJUDICATION.md` — built from directly fetching CeaseFire's actual README/architecture (not just the gallery's one-line description this whole thread had been arguing from). Gemini ran an independently-triggered, deeper version of the same check in parallel (`docs/COMPETITIVE_ADJUDICATION_GEMINI.md`, apparently from the cloned source, going further than my README-level fetch).
+
+**Both independent adjudications converge: VERDICT = KEEP, CONFIDENCE = HIGH.** CeaseFire's actual core mechanism is algorithmic lookalike-*domain* generation (~126 candidates via homoglyph/typosquat techniques) + DNS/network prefiltering + a 10-surface sweep of survivors, ending in a takedown-notice-signing workflow. It has no product-listing search, no price-anomaly logic, no seller-heuristic logic, and (per Gemini's source-level inspection) does not use `google_lens`/reverse-image matching at all. Our product's mechanism — product-name listing search + per-listing reverse-image verification + price/seller/visual signal fusion — shares only the coarse "brand protection" category label and, per my adjudication, the general *pattern* of fusing multiple signals into a tiered score. Of 14 directly-compared dimensions, 10 are DIFFERENT, 3 are PARTIAL OVERLAP at the category level only, 0 are SAME.
+
+**This is a stronger conclusion than my rebuttal above reached**, precisely because it came from reading the actual deeper source rather than arguing from the same gallery description everyone had been working from — exactly the kind of thing this whole research process is supposed to catch, in whichever direction the evidence points.
+
+**Also resolved in this pass (per user instruction, evidence-driven, not cosmetic):**
+- "BrandLens" is being treated as an internal codename only going forward (name collision with existing products) — public naming is a separate non-blocking task.
+- Output language changed from "counterfeit detector" to "commercial anomaly / brand-risk signal / listing requiring review" — the system was already designed to never assert a bare verdict (`docs/DECISION.md` risk #3), this makes the same discipline explicit at the vocabulary level, applied to `docs/DECISION.md` and `docs/PRODUCT_SPEC.md`; UI/code copy (`stolen_photo` label, `public/index.html`) flagged as a non-blocking task for OPENCODE in `docs/TASK_BOARD.md`.
+
+**STATUS: RESOLVED. SEVERITY: CLOSED.** `docs/DECISION.md` status returned to LOCKED after passing through PROVISIONAL_LOCK for the duration of this adjudication.

@@ -123,6 +123,41 @@
 - [x] Lint passes
 **VERIFICATION:** 34 tests pass, typecheck clean, lint clean, build succeeds
 
+### T-018: Formal Competitive Adjudication vs CeaseFire (user-escalated)
+**OWNER:** CLAUDE (parallel independent adjudication by GEMINI)
+**STATUS:** DONE
+**PRIORITY:** P0
+**FILES:** docs/COMPETITIVE_ADJUDICATION.md, docs/COMPETITIVE_ADJUDICATION_GEMINI.md, docs/DECISION_CHALLENGES.md, docs/DECISION.md
+**DEPENDENCIES:** None
+**ACCEPTANCE CRITERIA:**
+- [x] Forensic dimension-by-dimension comparison against CeaseFire's actual source/README (not just the gallery one-liner)
+- [x] Delete test (forward + reverse), user-job test, 30-second demo test, anti-wrapper test
+- [x] Explicit KEEP/REDESIGN/PIVOT decision rule applied, not chosen for sunk-cost reasons
+- [x] Language changed from "counterfeit detector" to risk-signal framing in docs/DECISION.md, docs/PRODUCT_SPEC.md
+- [x] "BrandLens" reframed as internal codename only pending a real public name
+**VERIFICATION:** Two independent adjudications (CLAUDE from README fetch, GEMINI from cloned source — deeper) converge: **KEEP, HIGH confidence**. CeaseFire = domain-typosquatting scanner (input: domain, output: signed takedown notice, no google_lens usage confirmed by Gemini's source inspection). Ours = product-listing reverse-image verifier (input: product name + photo, output: ranked review queue). 10/14 compared dimensions DIFFERENT, 0 SAME. `docs/DECISION.md` status returned to LOCKED after a PROVISIONAL_LOCK period during the adjudication.
+
+### T-019: Rename "BrandLens" to a public-facing name (non-blocking, post-adjudication)
+**OWNER:** Unassigned — pick up when convenient, does not block further build work
+**STATUS:** TODO
+**PRIORITY:** P2
+**FILES:** TBD — will touch docs/*, public/index.html, README.md once written
+**DEPENDENCIES:** None
+**ACCEPTANCE CRITERIA:**
+- [ ] Confirm the name collision concern (not independently re-verified yet, taken on instruction)
+- [ ] Propose 3-5 candidate names that don't collide, reflecting the actual mechanism (product-listing photo verification), not generic "brand protection" naming
+- [ ] Once chosen, do a single find-and-replace pass across docs/ and src/ — don't rename incrementally/partially
+
+### T-020: Risk-language cleanup in UI/code copy (non-blocking)
+**OWNER:** OPENCODE
+**STATUS:** TODO
+**PRIORITY:** P2
+**FILES:** src/lib/brandlens.ts, public/index.html
+**DEPENDENCIES:** None
+**ACCEPTANCE CRITERIA:**
+- [ ] `VisualSignal.anomalyType: 'stolen_photo'` asserts a factual/legal claim ("stolen") the evidence doesn't support on its own — rename to something like `'unverified_photo_source'` or `'photo_reused_elsewhere'` and update the associated `details` string accordingly
+- [ ] Audit `public/index.html` copy for the same "confirmed counterfeit"-style overclaiming vs. "flagged for review" framing (per `docs/COMPETITIVE_ADJUDICATION.md`'s language-change section) — the underlying score/recommendation enum (`review_urgently`/`review`/`monitor`/`likely_genuine`) is already fine, just check surrounding UI copy/labels
+
 ### T-016: QA Engineering Fixes (Gemini)
 **OWNER:** GEMINI
 **STATUS:** DONE

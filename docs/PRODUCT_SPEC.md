@@ -14,7 +14,11 @@ See who's really selling your product.
 
 ## ONE-LINE PITCH
 
-BrandLens cross-checks marketplace listings against your brand's real product photos — using live search and reverse-image matching — to surface counterfeit and unauthorized-seller listings you'd otherwise never find in time.
+BrandLens (internal codename — see Naming note below) cross-checks marketplace listings against your brand's real product photos — using live search and reverse-image matching — to surface commercial-anomaly and brand-risk signals worth your review, before they cost you money or trust.
+
+**Language note (2026-09-17, per `docs/COMPETITIVE_ADJUDICATION.md`):** the system produces risk signals for human review, not counterfeit determinations — it cannot and does not establish legal counterfeit status from price/seller/visual signals alone. "Counterfeit" below describes the real-world problem motivating this product, not a claim the product itself makes about any specific listing.
+
+**Naming note:** "BrandLens" collides with existing products and is being used as an internal codename only per `docs/COMPETITIVE_ADJUDICATION.md`. A public-facing name is a separate, non-blocking task (see `docs/TASK_BOARD.md`).
 
 ## 30-SECOND PITCH
 

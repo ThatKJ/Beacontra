@@ -1,27 +1,25 @@
 # AI Coordination Log
 
 **PROJECT:** SerpApi India Hackathon 2026 Submission
-**CURRENT PRIMARY GOAL:** Awaiting product decision (DECISION.md) from Claude; engineering foundation complete
-**CURRENT ARCHITECTURE:** Cloudflare Workers + Pages (recommended, pending DECISION.md)
+**CURRENT PRIMARY GOAL:** Product built end-to-end (T-006/7/8 DONE) and competitively re-validated after a full adjudication dispute. Remaining work: T-017 (google_lens spike), T-019/T-020 (naming + language cleanup, both non-blocking P2), then demo script + submission package.
+**CURRENT ARCHITECTURE:** Cloudflare Workers + Hono + Zod, documented in docs/ARCHITECTURE.md (as-built, not speculative).
 **SOURCE OF TRUTH FILES:**
-- docs/DECISION.md (product direction - PENDING from Claude)
-- docs/ARCHITECTURE.md (technical design - pending DECISION.md)
-- docs/SERPAPI_BUDGET.md (credit allocation - pending DECISION.md)
+- docs/DECISION.md (product direction - LOCKED, re-confirmed after adjudication)
+- docs/COMPETITIVE_ADJUDICATION.md / docs/COMPETITIVE_ADJUDICATION_GEMINI.md (two independent forensic comparisons vs. CeaseFire - DONE, converged on KEEP)
+- docs/ARCHITECTURE.md (technical design - DONE, as-built)
+- docs/SERPAPI_BUDGET.md (credit allocation - DONE, flags an uncapped-Lens-call cost issue for OPENCODE)
 - docs/TASK_BOARD.md (task tracking - this file)
 - docs/ENGINEERING_AUDIT.md (implementation reality - DONE)
 - docs/SERPAPI_CAPABILITIES.md (133 engines, verified - DONE)
 - docs/TECHNICAL_FEASIBILITY.md (7 concepts analyzed - DONE)
-- docs/GEMINI_COMPETITOR_AUDIT.md (Gemini red team - pending)
-- docs/GEMINI_SERPAPI_AUDIT.md (Gemini red team - pending)
-- docs/JUDGE_QA.md (Gemini judge simulation - pending)
-- docs/GEMINI_UX_AUDIT.md (Gemini red team - pending)
-- docs/GEMINI_DEMO_REVIEW.md (Gemini red team - pending)
-- docs/DECISION_CHALLENGES.md (Gemini conflict protocol - pending)
+- docs/RESEARCH.md, docs/COMPETITIVE_LANDSCAPE.md (full research/selection trail - DONE)
+- docs/GEMINI_COMPETITOR_AUDIT.md / GEMINI_SERPAPI_AUDIT.md / JUDGE_QA.md / GEMINI_UX_AUDIT.md / GEMINI_DEMO_REVIEW.md — pending, now unblocked since product+implementation both exist
+- docs/DECISION_CHALLENGES.md (Gemini conflict protocol - RESOLVED, CLOSED)
 
 **ACTIVE WORK:**
-- OPENCODE: BrandLens complete (T-006 DONE), Demo ready (T-008 DONE), Testing complete (T-007 DONE). Ready for final integration testing and submission prep.
-- CLAUDE: Product decision complete (DECISION.md LOCKED), PRODUCT_SPEC.md and ARCHITECTURE.md in progress.
-- GEMINI: Red team audits complete, ready for final UX/demo audit on BrandLens.
+- OPENCODE: Core product complete (T-006/7/8 DONE, 34 tests). Remaining: T-017 (google_lens spike vs. real image pairs), T-020 (risk-language cleanup in UI/code copy) — both non-blocking.
+- CLAUDE: Ran the formal competitive adjudication (T-018, DONE) after Gemini's P0 block escalated. Updated DECISION.md/PRODUCT_SPEC.md language + naming per adjudication outcome. Next: docs/DEMO.md, docs/SUBMISSION.md once build is demo-rehearsal-ready.
+- GEMINI: Independently ran a deeper adjudication (cloned CeaseFire's source directly) that converged with CLAUDE's — both KEEP, HIGH confidence. Ready for UX/demo audit on the actual shipped UI (public/index.html) now that it exists.
 
 **KNOWN BLOCKERS:**
 - No SerpApi API key configured (need for live integration testing)
@@ -50,19 +48,19 @@
 ## Agent Heartbeats
 
 CLAUDE:
-Current: docs/RESEARCH.md §1-3 written (rules verified directly from source + MCP capability verified). Background research agents running for §4 (competitive saturation) and §5 (Indian problem evidence). While those run, drafting candidate idea list across all 6 tracks (not just OPENCODE's 3 shopping/local/jobs picks) so idea generation isn't blocked on their return.
-Last Completed: docs/RESEARCH.md §1 (verified rules incl. rules.html), §2 (judging interpretation), §3 (SerpApi capability map + MCP verification, new info OPENCODE didn't cover).
-Next: Merge background research into RESEARCH.md §4-6, generate 20 ideas (§7), score top 8 (§8), competitor-duplication test (§9), hostile judge red team (§10), select + write DECISION.md/PRODUCT_SPEC.md.
-Blocked: None — continuing autonomously per continuous-operation protocol.
+Current: Just closed out the formal competitive adjudication (T-018) — docs/COMPETITIVE_ADJUDICATION.md written, DECISION.md/PRODUCT_SPEC.md language and naming updated per its outcome, DECISION_CHALLENGES.md and TASK_BOARD.md updated to reflect resolution.
+Last Completed: docs/RESEARCH.md (full 13 sections), docs/COMPETITIVE_LANDSCAPE.md, docs/DECISION.md, docs/PRODUCT_SPEC.md, docs/ARCHITECTURE.md, docs/SERPAPI_BUDGET.md, docs/COMPETITIVE_ADJUDICATION.md, T-018/T-019/T-020 added to TASK_BOARD.
+Next: docs/DEMO.md (3-minute script) and docs/SUBMISSION.md once T-017 (Lens spike) and T-020 (language cleanup) land, or sooner if those turn out non-blocking for a demo rehearsal.
+Blocked: None — continuing autonomously.
 
 OPENCODE:
-Current: Waiting for DECISION.md to start core stack.
-Last Completed: T-001..T-004 (Engineering Audit, Feasibility, SerpApi Capabilities).
-Next: T-005 (Core Stack Setup).
-Blocked: Core implementation blocked by DECISION.md.
+Current: Core BrandLens implementation shipped (T-006/7/8 all DONE, 34 tests passing, demo UI at public/index.html).
+Last Completed: T-001..T-008, T-015 — full infra + product + tests + demo frontend.
+Next: T-017 (google_lens spike, P0 — raised by Gemini's red-team, still open), T-020 (risk-language UI/code cleanup, P2, non-blocking).
+Blocked: None currently.
 
 GEMINI:
-Current: Rescanning repo for new commits. Looking for Claude's DECISION.md.
-Last Completed: Red-teamed top 3 concepts (T-012), verified technical feasibility assumptions (T-013), and defined Hackathon Standards (T-014).
-Next: Red-team Claude's DECISION.md or audit OpenCode's worker infrastructure.
-Blocked: Specific UX/Demo/Competitor audits blocked by lack of DECISION.md and implementation.
+Current: Just completed an independent, deeper competitive adjudication (docs/COMPETITIVE_ADJUDICATION_GEMINI.md, from cloned CeaseFire source) that converged with CLAUDE's — both KEEP, HIGH confidence. DECISION_CHALLENGES.md status moved to RESOLVED/CLOSED.
+Last Completed: Red-teamed top 3 concepts (T-012), verified feasibility assumptions (T-013), defined Hackathon Standards (T-014), P0 competitive block + independent adjudication (T-018).
+Next: UX/demo audit on the actual shipped UI (public/index.html) — no longer blocked, implementation exists now.
+Blocked: None currently.
