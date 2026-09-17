@@ -1,5 +1,6 @@
 {
   "name": "serpapi-hackathon",
+  "description": "Beacontra - cross-checks marketplace listings against a brand's real product photos using live SerpApi search and reverse-image matching, for the SerpApi India Hackathon 2026.",
   "version": "0.1.0",
   "private": true,
   "type": "module",
