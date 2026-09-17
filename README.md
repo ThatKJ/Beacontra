@@ -1,9 +1,23 @@
-# BrandLens (Commerce & Market Intelligence)
+# BrandLens (internal codename) — Commerce & Market Intelligence
 
-> **Commercial Anomaly & Brand-Risk Scanner for Indian D2C Brands**  
+> **Commercial Anomaly & Brand-Risk Scanner for Indian D2C Brands**
 > Built for the SerpApi India Hackathon 2026.
 
 BrandLens helps Indian direct-to-consumer (D2C) brands monitor marketplace listings across Flipkart, Amazon.in, and the open web. It cross-references live marketplace listings (`google_shopping`), performs reverse-image verification via Google Lens (`google_lens`), and evaluates seller metadata to identify suspect listings, unauthorized distributors, and listing anomalies.
+
+**Note on the name:** "BrandLens" collides with existing products and is an internal codename only, not the intended public submission name (see Limitations below and `docs/TASK_BOARD.md` T-019).
+
+## The problem
+
+Counterfeit and unauthorized-seller listings on Indian e-commerce marketplaces are pervasive and effectively unmonitorable by hand. This isn't a hypothetical: Delhi High Court restricted Flipkart's "latching-on" feature in November 2024 specifically because it let third-party sellers list counterfeit goods directly under a genuine brand's product page; BIS raided Amazon and Flipkart warehouses in March 2025 over forged certification marks; Meesho disclosed removing 4.2 million counterfeit listings in six months. Small Indian D2C/SME brands — big enough to be worth counterfeiting, too small to afford enterprise brand-protection SaaS — have no affordable way to check this for their own products, today. Full evidence trail: `docs/DECISION.md`, `docs/RESEARCH.md` §6.
+
+## The insight
+
+Every existing tool in this space (including the closest thing to a direct competitor we found, a domain-typosquatting scanner called CeaseFire — see Differentiation below) checks whether a brand is being *mentioned* or *impersonated*. None of them check whether a specific marketplace listing's *photo* actually depicts the *genuine product*. A reverse-image match is comparatively hard to fake and cheap to check via `google_lens` — and combined with price and seller signals, it turns three individually weak, noisy signals into one ranked, evidence-backed list a brand owner can actually act on.
+
+## Differentiation
+
+The closest prior art found (via a direct fetch of its own README/architecture, not just a one-line gallery description) is **CeaseFire**, a domain-typosquatting/phishing-defense scanner: input is a brand *domain*, it generates ~126 lookalike-domain candidates, DNS-prefilters them, and ends in a signed takedown notice. It has no product-listing search, no price/seller signals, and — per an independent, deeper inspection of its cloned source — no confirmed `google_lens` usage. This project's input is a product name *and photo*; its output is a ranked *listing* review queue, not a domain takedown notice. Full forensic comparison, including tests we ran specifically to falsify our own differentiation claim rather than assume it: `docs/COMPETITIVE_ADJUDICATION.md`.
 
 ---
 
@@ -76,6 +90,51 @@ npm run test:live
   - `google_lens`: Reverse image search against official product photos (capped to top 10 candidates per scan to strictly respect the 250/month free tier budget).
 - **Signal Fusion**: Deterministic weighting of Price Anomaly, Seller Anomaly, and Visual Signal into a 0-100 Confidence Risk Score.
 - **Frontend**: Clean Tailwind CSS + Vanilla JS interface with side-by-side visual photo comparison and "Load Demo Example" capability.
+
+---
+
+## Why SerpApi is essential (not decorative)
+
+Every fact this product surfaces — which listings exist, at what price, from which seller, whether the photo matches — comes from a live SerpApi call. There is no persisted "known good/bad" database standing in for it. The visual-verification signal specifically requires a reverse-image search engine; there is no way to build "does this photo match" without one. Remove SerpApi and there is nothing left to show. Full argument, stress-tested against a hostile-judge question set: `docs/JUDGE_QA.md`.
+
+## AI development disclosure
+
+This project was built primarily by three AI coding agents working under human direction and coordinating through shared markdown files (`docs/AI_COORDINATION.md`, `docs/TASK_BOARD.md`), not a single agent working alone: **Claude Code** (research, product selection, architecture docs, competitive adjudication, code review, submission copy), **OpenCode** (scaffolding, core implementation, live-integration work), **Gemini CLI** (adversarial red-teaming, UX/demo audits, an independent competitive adjudication, some implementation fixes). The human configured the live SerpApi credentials and made or approved decisions at checkpoints. AI-generated code was verified via automated tests/typecheck/lint/build gates plus cross-agent review that found and fixed real bugs (a seller-signal logic error, an uncapped credit-cost loop, missing live-vs-fixture UI transparency) — not accepted on a single unchecked pass. Full disclosure with specifics: `docs/JUDGE_QA.md` Q17-19, `docs/SUBMISSION.md`.
+
+## Known limitations
+
+Stated plainly rather than glossed over:
+- Scoring weights (price/seller/visual signal contributions) are hand-chosen heuristics, not statistically calibrated against a labeled dataset — none exists to calibrate against. This is positioned as decision-support, not a certainty score.
+- No real brand owner has used this yet — usefulness is evidenced by a documented market gap (two independently-run research passes reaching the same conclusion), not validated customer demand.
+- `google_lens`'s behavior against real cropped/watermarked/altered product photos has not yet been empirically spiked (`docs/TASK_BOARD.md` T-017) — the fusion design treats it as one of three signals specifically so a weak Lens result degrades a score rather than invalidating it.
+- A known scoring-logic issue is open as of this writing (T-026): "Lens found zero matches" is currently treated as positive evidence of a mismatch rather than as absence of evidence.
+- No takedown-drafting or enforcement step exists — the output is a review queue for a human, not an end-to-end enforcement workflow.
+
+## Project structure
+
+```
+src/
+  index.ts              Hono app, API routes (/api/search, /api/brandlens/scan)
+  lib/
+    brandlens.ts         Core service: listing extraction, signal analysis, fusion/scoring
+    serpapi-client.ts     Generic SerpApi client: caching, retry, fixtures, credit tracking
+    config.ts              Centralized env/config resolution (SERPAPI_API_KEY / SERPAPI_KEY)
+    cache.ts                Tiered KV + in-memory cache
+    types.ts                 Zod schemas per SerpApi engine
+    fixtures/                 Per-engine JSON fixtures for zero-credit testing
+public/
+  index.html             Demo frontend (Tailwind + vanilla JS)
+tests/                  Unit tests (fixture-based) + gated live-integration tests
+scripts/
+  serpapi-smoke.ts        Opt-in live-key verification script
+docs/                   Full research, decision, architecture, and process trail (see below)
+```
+
+Full research/decision trail, in reading order: `docs/RESEARCH.md` → `docs/COMPETITIVE_LANDSCAPE.md` → `docs/DECISION.md` → `docs/COMPETITIVE_ADJUDICATION.md` → `docs/PRODUCT_SPEC.md` → `docs/ARCHITECTURE.md` → `docs/SERPAPI_BUDGET.md` → `docs/DEMO.md` → `docs/SUBMISSION.md`. Process/coordination: `docs/AI_COORDINATION.md`, `docs/TASK_BOARD.md`, `docs/DECISIONS_LOG.md`.
+
+## License
+
+Not yet specified — an open-source license is encouraged but not required by the hackathon rules. Add one before final submission if intending to open-source beyond the hackathon.
 
 ---
 
