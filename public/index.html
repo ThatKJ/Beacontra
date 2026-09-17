@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BrandLens - Counterfeit Detection for Indian D2C Brands</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); }
+    .card-glass { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(148, 163, 184, 0.1); }
+    .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+    .btn-primary:hover { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }
+    .pulse-ring { animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes pulse-ring { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.3); opacity: 0; } }
+    .skeleton { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .confidence-high { border-left-color: #22c55e; }
+    .confidence-medium { border-left-color: #f59e0b; }
+    .confidence-low { border-left-color: #ef4444; }
+    .recommendation-urgent { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
+    .recommendation-review { background: rgba(245, 158, 11, 0.15); color: #fcd34d; }
+    .recommendation-monitor { background: rgba(59, 130, 246, 0.15); color: #93c5fd; }
+    .recommendation-genuine { background: rgba(34, 197, 94, 0.15); color: #86efac; }
+  </style>
+</head>
+<body class="gradient-bg min-h-screen text-slate-100">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <header class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-bold tracking-tight">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">BrandLens</span>
+          </h1>
+          <p class="text-slate-400 mt-1">Counterfeit Detection for Indian D2C Brands</p>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="px-3 py-1 text-xs font-medium rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+            Powered by SerpApi
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Scan Form -->
+    <section class="card-glass rounded-2xl p-6 md:p-8 mb-8">
+      <h2 class="text-xl font-semibold mb-6">Scan for Counterfeits</h2>
+      
+      <form id="scanForm" class="space-y-5">
+        <div class="grid md:grid-cols-2 gap-5">
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Product Name / SKU</label>
+            <input 
+              type="text" 
+              id="productName" 
+              name="productName"
+              placeholder="e.g., Nike Air Max 270, Boat Airdopes 141, Mamaearth Face Wash"
+              required
+              class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-slate-100 placeholder-slate-500 transition-all"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Official Product Image URL</label>
+            <input 
+              type="url" 
+              id="officialImageUrl" 
+              name="officialImageUrl"
+              placeholder="https://yourbrand.com/product-image.jpg"
+              required
+              class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-slate-100 placeholder-slate-500 transition-all"
+            >
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-5 pt-2 border-t border-slate-700">
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">MRP (₹)</label>
+            <input 
+              type="number" 
+              id="mrp" 
+              name="mrp"
+              placeholder="e.g., 2999"
+              class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-slate-100 placeholder-slate-500 transition-all"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Expected Price Range (₹)</label>
+            <div class="flex gap-2">
+              <input 
+                type="number" 
+                id="minPrice" 
+                name="minPrice"
+                placeholder="Min"
+                class="w-1/2 px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-slate-100 placeholder-slate-500 transition-all"
+              >
+              <input 
+                type="number" 
+                id="maxPrice" 
+                name="maxPrice"
+                placeholder="Max"
+                class="w-1/2 px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-slate-100 placeholder-slate-500 transition-all"
+              >
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Authorized Sellers (comma-separated)</label>
+            <input 
+              type="text" 
+              id="authorizedSellers" 
+              name="authorizedSellers"
+              placeholder="Flipkart, Amazon, Reliance Digital, Official Website"
+              class="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-slate-100 placeholder-slate-500 transition-all"
+            >
+          </div>
+        </div>
+
+        <button 
+          type="submit" 
+          id="scanBtn"
+          class="w-full btn-primary text-white font-semibold py-3 px-6 rounded-lg transition-all hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span id="btnText">Start Scan</span>
+          <span id="btnLoading" class="hidden flex items-center gap-2">
+            <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+            Scanning marketplaces...
+          </span>
+        </button>
+      </form>
+    </section>
+
+    <!-- Results Section -->
+    <section id="resultsSection" class="hidden">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-xl font-semibold">Scan Results</h2>
+          <p class="text-slate-400 text-sm" id="resultsMeta"></p>
+        </div>
+        <button 
+          id="newScanBtn"
+          class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-slate-100 bg-slate-800 border border-slate-700 rounded-lg transition-colors"
+        >
+          New Scan
+        </button>
+      </div>
+
+      <div id="resultsList" class="space-y-4">
+        <!-- Results will be rendered here -->
+      </div>
+    </section>
+
+    <!-- Empty State -->
+    <section id="emptyState" class="text-center py-16 hidden">
+      <svg class="mx-auto h-16 w-16 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <h3 class="mt-4 text-lg font-medium text-slate-300">Enter a product above to start scanning</h3>
+      <p class="mt-2 text-slate-500">BrandLens searches Indian marketplaces and verifies listing photos against your official product image</p>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 border-t border-slate-800 text-center text-slate-500 text-sm">
+      <p>BrandLens uses <a href="https://serpapi.com" target="_blank" rel="noopener" class="text-blue-400 hover:underline">SerpApi</a> for live marketplace data & visual verification</p>
+      <p class="mt-1">Built for SerpApi India Hackathon 2026</p>
+    </footer>
+  </div>
+
+  <script>
+    const API_BASE = '';
+    
+    const scanForm = document.getElementById('scanForm');
+    const scanBtn = document.getElementById('scanBtn');
+    const btnText = document.getElementById('btnText');
+    const btnLoading = document.getElementById('btnLoading');
+    const resultsSection = document.getElementById('resultsSection');
+    const resultsList = document.getElementById('resultsList');
+    const resultsMeta = document.getElementById('resultsMeta');
+    const emptyState = document.getElementById('emptyState');
+    const newScanBtn = document.getElementById('newScanBtn');
+
+    scanForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(scanForm);
+      const input = {
+        productName: formData.get('productName'),
+        officialImageUrl: formData.get('officialImageUrl'),
+        mrp: formData.get('mrp') ? parseInt(formData.get('mrp')) : undefined,
+        expectedPriceRange: formData.get('minPrice') && formData.get('maxPrice') ? {
+          min: parseInt(formData.get('minPrice')),
+          max: parseInt(formData.get('maxPrice'))
+        } : undefined,
+        knownAuthorizedSellers: formData.get('authorizedSellers') ? 
+          formData.get('authorizedSellers').split(',').map(s => s.trim()).filter(Boolean) : 
+          undefined
+      };
+
+      setLoading(true);
+      emptyState.classList.add('hidden');
+      resultsSection.classList.add('hidden');
+
+      try {
+        const response = await fetch('/api/brandlens/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(input)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Scan failed');
+        }
+
+        renderResults(data.data, input);
+      } catch (error) {
+        showError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    newScanBtn.addEventListener('click', () => {
+      resultsSection.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      scanForm.reset();
+    });
+
+    function setLoading(loading) {
+      scanBtn.disabled = loading;
+      btnText.classList.toggle('hidden', loading);
+      btnLoading.classList.toggle('hidden', !loading);
+    }
+
+    function renderResults(data, input) {
+      resultsMeta.textContent = `Found ${data.totalListingsFound} listings • ${data.results.length} analyzed • ${data.creditsUsed} credits used`;
+      
+      resultsList.innerHTML = data.results.map((result, index) => `
+        <div class="card-glass rounded-xl p-5 border-l-4 ${confidenceClass(result.confidence)} transition-all hover:border-l-8">
+          <div class="flex items-start justify-between gap-4 mb-4">
+            <div class="flex-1 min-w-0">
+              <h3 class="font-semibold text-lg truncate">${escapeHtml(result.listing.title)}</h3>
+              <div class="flex flex-wrap gap-3 mt-2 text-sm text-slate-400">
+                <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>${escapeHtml(result.listing.source)}</span>
+                <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-.895-2-3-2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.818 16.823a17.87 17.87 0 00-3.567 0 17.87 17.87 0 00-3.06 0A17.87 17.87 0 006.182 16.823c-1.296 1.007-3.286 1.884-4.127 1.884-.841 0-2.084-.879-4.127-1.884A17.87 17.87 0 000.182 16.823a17.87 17.87 0 000-3.567 17.87 17.87 0 003.06 0A17.87 17.87 0 006.182 0.182c1.296-1.007 3.286-1.884 4.127-1.884.841 0 2.084.879 4.127 1.884A17.87 17.87 0 0017.818 0.182a17.87 17.87 0 000 3.567A17.87 17.87 0 0019.818 4.18c1.007 1.296 1.884 3.286 1.884 4.127 0 .841-.879 2.084-1.884 4.127z"/></svg>${escapeHtml(result.listing.seller)}</span>
+                <span class="font-semibold text-blue-400">${result.listing.price}</span>
+              </div>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+              <span class="px-3 py-1 text-xs font-medium rounded-full ${recommendationClass(result.recommendation)}">
+                ${formatRecommendation(result.recommendation)}
+              </span>
+              <span class="px-2 py-1 text-xs font-mono text-slate-500 bg-slate-800 rounded">Score: ${result.compositeScore}</span>
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-4 mb-4">
+            ${signalCard('Price Signal', result.priceSignal, '💰')}
+            ${signalCard('Seller Signal', result.sellerSignal, '🏪')}
+            ${signalCard('Visual Signal', result.visualSignal, '🔍')}
+          </div>
+
+          <div class="pt-4 border-t border-slate-700">
+            <p class="text-sm text-slate-400"><strong>Evidence:</strong> ${escapeHtml(result.evidenceSummary)}</p>
+            ${renderLensEvidence(result.lensEvidence)}
+          </div>
+        </div>
+      `).join('');
+
+      resultsSection.classList.remove('hidden');
+    }
+
+    function signalCard(title, signal, icon) {
+      const isAnomalous = signal.isAnomalous;
+      return `
+        <div class="p-3 rounded-lg bg-slate-800/50 border ${isAnomalous ? 'border-amber-500/30' : 'border-green-500/30'}">
+          <div class="flex items-center gap-2 mb-2">
+            <span>${icon}</span>
+            <span class="font-medium">${title}</span>
+            <span class="ml-auto px-2 py-0.5 text-xs rounded ${isAnomalous ? 'bg-amber-500/20 text-amber-400' : 'bg-green-500/20 text-green-400'}">
+              ${isAnomalous ? 'Anomaly Detected' : 'Normal'}
+            </span>
+          </div>
+          <p class="text-sm text-slate-300">${escapeHtml(signal.details)}</p>
+          <p class="text-xs text-slate-500 mt-1">Type: ${signal.anomalyType.replace(/_/g, ' ')}</p>
+        </div>
+      `;
+    }
+
+    function renderLensEvidence(evidence) {
+      if (!evidence || Object.keys(evidence).length === 0) return '';
+      
+      const matchCount = (evidence.exactMatchSources?.length || 0) + (evidence.visualMatchSources?.length || 0);
+      if (matchCount === 0) return '';
+
+      return `
+        <div class="mt-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+          <p class="text-sm font-medium text-slate-300 mb-2">🔍 Google Lens Visual Matches</p>
+          <div class="flex flex-wrap gap-2">
+            ${(evidence.exactMatchSources || []).map(s => `<span class="px-2 py-1 text-xs bg-green-500/20 text-green-400 rounded">Exact: ${escapeHtml(s)}</span>`).join('')}
+            ${(evidence.visualMatchSources || []).map(s => `<span class="px-2 py-1 text-xs bg-blue-500/20 text-blue-400 rounded">Visual: ${escapeHtml(s)}</span>`).join('')}
+          </div>
+          <p class="text-xs text-slate-500 mt-1">Confidence: ${evidence.matchConfidence}</p>
+        </div>
+      `;
+    }
+
+    function confidenceClass(confidence) {
+      switch(confidence) {
+        case 'high': return 'confidence-high';
+        case 'medium': return 'confidence-medium';
+        case 'low': return 'confidence-low';
+        default: return '';
+      }
+    }
+
+    function recommendationClass(rec) {
+      switch(rec) {
+        case 'review_urgently': return 'recommendation-urgent';
+        case 'review': return 'recommendation-review';
+        case 'monitor': return 'recommendation-monitor';
+        case 'likely_genuine': return 'recommendation-genuine';
+        default: return '';
+      }
+    }
+
+    function formatRecommendation(rec) {
+      return rec.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showError(message) {
+      resultsList.innerHTML = `
+        <div class="card-glass rounded-xl p-5 border-l-4 border-red-500">
+          <div class="flex items-center gap-3">
+            <svg class="w-6 h-6 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <div>
+              <p class="font-medium text-red-300">Scan Failed</p>
+              <p class="text-sm text-slate-400">${escapeHtml(message)}</p>
+            </div>
+          </div>
+        </div>
+      `;
+      resultsSection.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

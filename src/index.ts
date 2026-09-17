@@ -17,6 +17,12 @@ app.use('*', cors());
 
 app.get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
+// Serve index.html for root and SPA routes
+app.get('/', async (c) => {
+  const html = await fetch(new URL('./public/index.html', import.meta.url)).then(r => r.text());
+  return c.html(html);
+});
+
 function createClient(env: Env) {
   return new SerpApiClient({
     apiKey: env.SERPAPI_KEY,
