@@ -1,11 +1,11 @@
-# BrandLens (internal codename) — Commerce & Market Intelligence
+# Beacontra — Commerce & Market Intelligence
 
-> **Commercial Anomaly & Brand-Risk Scanner for Indian D2C Brands**
+> **Where price, seller, and photo evidence meet.** *(tagline — see `docs/TAGLINE.md`; pending Gemini's red-team of 5 candidates, may still change before final submission)*
 > Built for the SerpApi India Hackathon 2026.
 
-BrandLens helps Indian direct-to-consumer (D2C) brands monitor marketplace listings across Flipkart, Amazon.in, and the open web. It cross-references live marketplace listings (`google_shopping`), performs reverse-image verification via Google Lens (`google_lens`), and evaluates seller metadata to identify suspect listings, unauthorized distributors, and listing anomalies.
+Beacontra helps Indian direct-to-consumer (D2C) brands monitor marketplace listings across Flipkart, Amazon.in, and the open web. It cross-references live marketplace listings (`google_shopping`), performs reverse-image verification via Google Lens (`google_lens`), and evaluates seller metadata to identify listings worth review, unauthorized distributors, and commercial anomalies.
 
-**Note on the name:** "BrandLens" collides with existing products and is an internal codename only, not the intended public submission name (see Limitations below and `docs/TASK_BOARD.md` T-019).
+**Note on the name:** formerly developed under the internal codename "BrandLens," which collided with existing products (`docs/NAMING_DECISION.md`). Renamed to Beacontra after two independent collision audits found it clean (`docs/NAMING_V2.md`, `docs/NAMING_AUDIT_V2.md`).
 
 ## The problem
 
@@ -56,7 +56,7 @@ Start the Cloudflare Workers development server:
 npm run dev
 ```
 
-Visit `http://localhost:8787` in your browser to access the interactive BrandLens UI.
+Visit `http://localhost:8787` in your browser to access the interactive Beacontra UI.
 
 ### 4. Running Tests
 

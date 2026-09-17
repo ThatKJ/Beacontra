@@ -9,7 +9,7 @@ This repo is built collaboratively by **three AI coding agents** (Claude Code, O
 
 ## What this project is
 
-A SerpApi India Hackathon 2026 submission (deadline Oct 5, 2026, 23:59 IST). Product (internal codename **BrandLens** — collides with existing products, do not build brand identity around this name, see `docs/TASK_BOARD.md` T-019): a visual + commercial cross-verification tool for Indian D2C/SME brand owners, checking marketplace listings (`google_shopping`/`amazon_product`) against a brand's official product photo via reverse-image matching (`google_lens`), fusing price/seller/visual signals into a ranked review queue.
+A SerpApi India Hackathon 2026 submission (deadline Oct 5, 2026, 23:59 IST). Product: **Beacontra** (`docs/NAMING_DECISION.md`, NAMING STATUS: FINAL — formerly developed under the internal codename "BrandLens," which collided with existing products and was retired) — a visual + commercial cross-verification tool for Indian D2C/SME brand owners, checking marketplace listings (`google_shopping`/`amazon_product`) against a brand's official product photo via reverse-image matching (`google_lens`), fusing price/seller/visual signals into a ranked review queue.
 
 ## Coordination protocol
 

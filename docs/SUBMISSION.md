@@ -6,11 +6,11 @@
 
 ## PROJECT NAME
 
-Internal codename: **BrandLens**. This collides with existing products and is not the intended public submission name — see Known Limitations. If a replacement name (`docs/TASK_BOARD.md` T-019) isn't chosen before submission, submit under a plain descriptive name (e.g., "Marketplace Listing Photo Verifier") rather than a colliding brand name.
+**Beacontra.** `docs/NAMING_DECISION.md` — NAMING STATUS: FINAL, selected after two independent collision audits (`docs/NAMING_V2.md`, `docs/NAMING_AUDIT_V2.md`) found it clean. Formerly developed under the internal codename "BrandLens," which collided with existing products and was retired.
 
 ## TAGLINE
 
-See who's really selling your product.
+**"Where price, seller, and photo evidence meet."** *(provisional — one of 5 candidates in `docs/TAGLINE.md`, pending Gemini's red-team; update this line once that lands if a different candidate wins.)*
 
 ## TRACK
 
@@ -50,8 +50,8 @@ Every fact the product surfaces — which listings exist, at what price, from wh
 
 ## GITHUB DESCRIPTION
 
-*(One-liner for the repo's About field — update once T-019 naming resolves.)*
-> Cross-checks marketplace listings against your brand's real product photos using live SerpApi search and reverse-image matching — commercial-anomaly signals for Indian D2C brands, not accusations.
+*(One-liner for the repo's About field)*
+> Beacontra cross-checks marketplace listings against your brand's real product photos using live SerpApi search and reverse-image matching — commercial-anomaly signals for Indian D2C brands, not accusations.
 
 ## DEMO DESCRIPTION
 
@@ -76,5 +76,5 @@ Stated plainly, matching `docs/JUDGE_QA.md`'s weaknesses rather than a softened 
 - No real brand owner has used this yet — usefulness is evidenced by a documented market gap (two independent research passes), not validated customer demand.
 - `google_lens` was initially thought not to return structured match data at all — that conclusion turned out to be caused by three implementation bugs (wrong parameter name, missing required `type` parameter, wrong response-parsing path), found via direct comparison against SerpApi's official docs and fixed. A live matrix test now confirms Lens genuinely returns structured `exact_matches`/`visual_matches`/`products` data when called correctly. **What's still open:** that matrix used an atypical test image (the Google logo, one of the most heavily-indexed images on the internet), not an ordinary marketplace product photo — the mechanism works, but its real-world hit rate on typical product images hasn't been separately confirmed.
 - The scoring-logic issue found during review (treating "no visual match" as positive mismatch evidence) has been fixed and independently verified by direct code reading — `no_evidence` and `unavailable` are now both neutral, non-scoring states, distinct from an actual positive finding.
-- "BrandLens" is an internal codename colliding with existing products; a public submission name has not been finalized (T-019).
+- Naming is finalized (Beacontra); one open follow-up is T-030 (price-signal wording overclaims an ordinary discount as "suspicious" — found this session, fix not yet applied).
 - No takedown-drafting or enforcement-action step exists — output is a review queue for a human, not an end-to-end enforcement workflow (unlike, e.g., CeaseFire's notice-signing step for its own different problem).
