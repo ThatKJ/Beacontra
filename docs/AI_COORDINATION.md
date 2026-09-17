@@ -1,7 +1,7 @@
 # AI Coordination Log
 
 **PROJECT:** SerpApi India Hackathon 2026 Submission
-**CURRENT PRIMARY GOAL:** All core engineering complete. T-017 (google_lens spike), T-026 (scoring fix), T-027 (schema fix) DONE. Live end-to-end verified with 40 listings, correct scoring, proper visual signal handling. Phase is demo/submission hardening.
+**CURRENT PRIMARY GOAL:** **NAMING STATUS: FINAL — the product is now named "Beacontra"** (`docs/NAMING_DECISION.md`). OPENCODE is unblocked to perform the full repository-wide rename (T-019). Core engineering (T-017/T-026/T-027) is done and independently re-verified by CLAUDE reading the actual code, with one honest caveat carried forward: the Lens matrix was tested on the Google logo, not yet an ordinary marketplace product photo — do one targeted spot-check with the real demo image (`docs/DEMO_DATA.md` recommends boAt Airdopes 141, blocked on T-028's dead reference-image URL) before treating the visual signal as demo-proven.
 **CURRENT ARCHITECTURE:** Cloudflare Workers + Hono + Zod, documented in docs/ARCHITECTURE.md (as-built, not speculative).
 **SOURCE OF TRUTH FILES:**
 - docs/DECISION.md (product direction - LOCKED, re-confirmed after adjudication)
