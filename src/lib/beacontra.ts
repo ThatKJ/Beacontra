@@ -7,7 +7,7 @@ import type {
   LensSearchResult,
 } from './types';
 
-export interface BrandLensInput {
+export interface BeacontraInput {
   productName: string;
   officialImageUrl: string;
   mrp?: number;
@@ -42,7 +42,7 @@ export interface LensEvidence {
 
 export interface PriceSignal {
   isAnomalous: boolean;
-  anomalyType: 'below_mrp' | 'below_range' | 'suspicious_discount' | 'normal';
+  anomalyType: 'below_mrp' | 'below_range' | 'moderate_discount' | 'normal';
   mrp?: number;
   priceRatio?: number;
   details: string;
@@ -78,7 +78,7 @@ export interface FusedResult {
   recommendation: 'review_urgently' | 'review' | 'monitor' | 'likely_genuine';
 }
 
-export interface BrandLensScanResult {
+export interface BeacontraScanResult {
   scanId: string;
   dataSource: 'live' | 'fixture';
   productName: string;
@@ -91,7 +91,7 @@ export interface BrandLensScanResult {
 
 const PRICE_ANOMALY_THRESHOLD = 0.7;
 
-export class BrandLensService {
+export class BeacontraService {
   private client: SerpApiClient;
 
   constructor(client: SerpApiClient) {
@@ -100,7 +100,7 @@ export class BrandLensService {
 
   private static readonly MAX_LENS_CALLS = 10;
 
-  async scan(input: BrandLensInput): Promise<BrandLensScanResult> {
+  async scan(input: BeacontraInput): Promise<BeacontraScanResult> {
     const scanId = `scan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const createdAt = new Date().toISOString();
 
@@ -127,7 +127,7 @@ export class BrandLensService {
 
       const currentLensCalls = results.filter(r => r.visualSignal.anomalyType !== 'not_verified').length;
 
-      if (currentLensCalls < BrandLensService.MAX_LENS_CALLS) {
+      if (currentLensCalls < BeacontraService.MAX_LENS_CALLS) {
         lensEvidence = await this.runVisualVerification(candidate.thumbnail, input.officialImageUrl);
         visualSignal = this.analyzeVisual(lensEvidence);
       } else {
@@ -340,7 +340,7 @@ export class BrandLensService {
     };
   }
 
-  private analyzePrice(candidate: ListingCandidate, input: BrandLensInput): PriceSignal {
+  private analyzePrice(candidate: ListingCandidate, input: BeacontraInput): PriceSignal {
     const price = candidate.extractedPrice;
     const mrp = input.mrp;
 
@@ -367,12 +367,13 @@ export class BrandLensService {
     }
 
     if (mrp && price < mrp * 0.9) {
+      const discountPct = Math.round((1 - price / mrp) * 100);
       return {
         isAnomalous: true,
-        anomalyType: 'suspicious_discount',
+        anomalyType: 'moderate_discount',
         mrp,
         priceRatio: price / mrp,
-        details: `Price ₹${price} has suspicious discount vs MRP ₹${mrp}`,
+        details: `Price ₹${price} is ${discountPct}% below MRP ₹${mrp}`,
       };
     }
 
@@ -383,7 +384,7 @@ export class BrandLensService {
     };
   }
 
-  private analyzeSeller(candidate: ListingCandidate, input: BrandLensInput): SellerSignal {
+  private analyzeSeller(candidate: ListingCandidate, input: BeacontraInput): SellerSignal {
     const seller = candidate.seller.toLowerCase();
     const authorizedSellers = (input.knownAuthorizedSellers || []).map(s => s.toLowerCase());
     const hasAuthorizedList = authorizedSellers.length > 0;
@@ -567,6 +568,6 @@ export class BrandLensService {
   }
 }
 
-export function createBrandLensService(client: SerpApiClient): BrandLensService {
-  return new BrandLensService(client);
+export function createBeacontraService(client: SerpApiClient): BeacontraService {
+  return new BeacontraService(client);
 }

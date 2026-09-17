@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { SerpApiClient, SerpApiError } from './lib/serpapi-client';
 import { createTieredCache } from './lib/cache';
-import { createBrandLensService, type BrandLensInput } from './lib/brandlens';
+import { createBeacontraService, type BeacontraInput } from './lib/beacontra';
 import { getSerpApiKey, isSerpApiConfigured, getSerpApiHealthStatus } from './lib/config';
 import type { BaseSearchParams, SerpApiEngine, SerpApiResponse } from './lib/types';
 
@@ -96,19 +96,19 @@ app.post('/api/search', async (c) => {
   }
 });
 
-app.post('/api/brandlens/scan', async (c) => {
+app.post('/api/beacontra/scan', async (c) => {
   const env = c.env;
   const client = createClient(env);
-  const brandLens = createBrandLensService(client);
+  const beacontra = createBeacontraService(client);
 
   try {
-    const input = await c.req.json<BrandLensInput>();
+    const input = await c.req.json<BeacontraInput>();
 
     if (!input.productName || !input.officialImageUrl) {
       return c.json({ error: 'productName and officialImageUrl are required' }, 400);
     }
 
-    const result = await brandLens.scan(input);
+    const result = await beacontra.scan(input);
 
     return c.json({
       data: result,
@@ -133,13 +133,13 @@ app.post('/api/brandlens/scan', async (c) => {
       );
     }
     const errMsg = error instanceof Error ? error.message : 'Internal error';
-    console.error('BrandLens scan error:', errMsg);
+    console.error('Beacontra scan error:', errMsg);
     return c.json({ error: 'Internal server error' }, 500);
   }
 });
 
 
-app.get('/api/brandlens/results/:scanId', async (c) => {
+app.get('/api/beacontra/results/:scanId', async (c) => {
   const scanId = c.req.param('scanId');
   return c.json({ error: 'Scan results retrieval not yet implemented - use scan endpoint', scanId }, 501);
 });

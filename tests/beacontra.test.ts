@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createSerpApiClient, SerpApiClient } from '../src/lib/serpapi-client';
-import { createBrandLensService, type BrandLensInput } from '../src/lib/brandlens';
+import { createBeacontraService, type BeacontraInput } from '../src/lib/beacontra';
 import { MemoryCache } from '../src/lib/cache';
 
-describe('BrandLensService', () => {
+describe('BeacontraService', () => {
   let client: SerpApiClient;
-  let brandLens: ReturnType<typeof createBrandLensService>;
+  let beacontra: ReturnType<typeof createBeacontraService>;
   let mockCache: MemoryCache;
 
   beforeEach(() => {
@@ -15,14 +15,14 @@ describe('BrandLensService', () => {
       cache: mockCache,
       fixtureMode: true,
     });
-    brandLens = createBrandLensService(client);
+    beacontra = createBeacontraService(client);
   });
 
   afterEach(() => {
     mockCache.clear();
   });
 
-  const validInput: BrandLensInput = {
+  const validInput: BeacontraInput = {
     productName: 'iPhone 15 128GB',
     officialImageUrl: 'https://example.com/official-iphone.jpg',
     mrp: 85000,
@@ -31,7 +31,7 @@ describe('BrandLensService', () => {
   };
 
   it('should scan and return ranked results', async () => {
-    const result = await brandLens.scan(validInput);
+    const result = await beacontra.scan(validInput);
 
     expect(result.scanId).toBeDefined();
     expect(result.productName).toBe('iPhone 15 128GB');
@@ -44,7 +44,7 @@ describe('BrandLensService', () => {
   });
 
   it('should return results sorted by composite score descending', async () => {
-    const result = await brandLens.scan(validInput);
+    const result = await beacontra.scan(validInput);
     const results = (result.results ?? []) as Array<{ compositeScore: number }>;
 
     for (let i = 0; i < results.length - 1; i++) {
@@ -55,7 +55,7 @@ describe('BrandLensService', () => {
   });
 
   it('should include all required fields in each result', async () => {
-    const result = await brandLens.scan(validInput);
+    const result = await beacontra.scan(validInput);
 
     for (const r of result.results) {
       expect(r.listing).toBeDefined();
@@ -71,7 +71,7 @@ describe('BrandLensService', () => {
   });
 
   it('should detect price anomaly for below-MRP listings', async () => {
-    const result = await brandLens.scan(validInput);
+    const result = await beacontra.scan(validInput);
     const results = result.results ?? [];
 
     const hasPriceAnomaly = results.some(r => r.priceSignal.isAnomalous);
@@ -79,7 +79,7 @@ describe('BrandLensService', () => {
   });
 
   it('should handle authorized sellers correctly', async () => {
-    const result = await brandLens.scan(validInput);
+    const result = await beacontra.scan(validInput);
     const results = result.results ?? [];
 
     const authorizedResult = results.find(r =>
@@ -101,7 +101,7 @@ describe('BrandLensService', () => {
       cache: mockCache,
       fixtureMode: true,
     });
-    const testBrandLens = createBrandLensService(testClient);
+    const testBeacontra = createBeacontraService(testClient);
     
     // Test the analyzeVisual logic directly with mock evidence that has exact match
     const mockEvidence = {
@@ -115,7 +115,7 @@ describe('BrandLensService', () => {
     };
     
     // Access private method via bracket notation for testing
-    const visualSignal = (testBrandLens as any).analyzeVisual(mockEvidence);
+    const visualSignal = (testBeacontra as any).analyzeVisual(mockEvidence);
     
     expect(visualSignal.isAnomalous).toBe(false);
     expect(visualSignal.anomalyType).toBe('matched');
@@ -124,7 +124,7 @@ describe('BrandLensService', () => {
   });
 
   it('should assign recommendation based on composite score', async () => {
-    const result = await brandLens.scan(validInput);
+    const result = await beacontra.scan(validInput);
 
     for (const r of result.results) {
       if (r.compositeScore >= 70) {
@@ -141,22 +141,22 @@ describe('BrandLensService', () => {
 
   it('should track credit usage', async () => {
     client.resetCreditUsage();
-    await brandLens.scan(validInput);
+    await beacontra.scan(validInput);
     expect(client.getCreditUsage()).toBeGreaterThan(0);
   });
 
   it('should handle missing MRP gracefully', async () => {
-    const inputWithoutMrp: BrandLensInput = {
+    const inputWithoutMrp: BeacontraInput = {
       productName: 'Test Product',
       officialImageUrl: 'https://example.com/official.jpg',
     };
 
-    const result = await brandLens.scan(inputWithoutMrp);
+    const result = await beacontra.scan(inputWithoutMrp);
     expect(result.results.length).toBeGreaterThan(0);
   });
 
   it('should mark authorized sellers as non-anomalous', async () => {
-    const result = await brandLens.scan(validInput);
+    const result = await beacontra.scan(validInput);
 
     const authorizedResult = result.results.find(r => 
       validInput.knownAuthorizedSellers?.some(auth => 
