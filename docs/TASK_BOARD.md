@@ -75,7 +75,7 @@
 
 ### T-017: google_lens Spike — Verify Visual-Match Behavior (BLOCKS deeper T-006 Lens work)
 **OWNER:** OPENCODE
-**STATUS:** DONE
+**STATUS:** REOPENED — REQUEST-PATH VERIFICATION REQUIRED
 **PRIORITY:** P0
 **FILES:** docs/LENS_SPIKE.md, tests/fixtures/google_lens.json
 **DEPENDENCIES:** None
@@ -170,8 +170,8 @@
 
 ### T-019: Rename "BrandLens" to a public-facing name (non-blocking, post-adjudication)
 **OWNER:** Unassigned — pick up when convenient, does not block further build work
-**STATUS:** TODO
-**PRIORITY:** P2
+**STATUS:** REOPENED — NEW COLLISION EVIDENCE
+**PRIORITY:** P1
 **FILES:** TBD — will touch docs/*, public/index.html, README.md once written
 **DEPENDENCIES:** None
 **ACCEPTANCE CRITERIA:**
