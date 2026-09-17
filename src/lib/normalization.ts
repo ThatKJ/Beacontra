@@ -1,5 +1,6 @@
 export function normalizeSellerName(raw: string): string {
-  if (!raw) return 'unknown';
+  if (raw === undefined || raw === null) return 'unknown';
+  if (typeof raw !== 'string' || raw.trim() === '') return '';
   
   let normalized = raw
     .toLowerCase()
@@ -11,7 +12,7 @@ export function normalizeSellerName(raw: string): string {
 
   const suffixes = [
     'official', 'store', 'shop', 'seller', 'retail', 'online', 'india',
-    'pvt', 'ltd', 'limited', 'private', 'llp', 'inc', 'corp', 'company',
+    'pvt', 'ltd', 'limited', 'private', 'llp', 'inc', 'corp',
     'officialstore', 'officialshop', 'flagshipstore', 'flagship',
     'authorised', 'authorized', 'distributor', 'dealer', 'reseller',
     'mart', 'bazaar', 'market', 'emporium', 'outlet', 'hub', 'zone'
@@ -38,12 +39,7 @@ export function extractDomain(url: string): string {
 
 export function normalizeDomain(domain: string): string {
   if (!domain) return 'unknown';
-  
-  return domain
-    .toLowerCase()
-    .trim()
-    .replace(/^www\./, '')
-    .replace(/\/$/, '');
+  return domain.toLowerCase().trim().replace(/^www\./, '').replace(/\/$/, '');
 }
 
 export function getMarketplaceFromSource(source: string): string {
@@ -79,13 +75,13 @@ export function getMarketplaceFromSource(source: string): string {
   return 'other';
 }
 
-export function isLikelyAuthorizedSeller(source: string, authorizedSellers: string[]): boolean {
-  const normalizedSource = normalizeSellerName(source);
-  const normalizedAuthorized = authorizedSellers.map(normalizeSellerName);
-  
-  return normalizedAuthorized.some(auth => 
-    normalizedSource.includes(auth) || auth.includes(normalizedSource)
-  );
+export function isLikelyAuthorizedSeller(seller: string, authorizedList: string[]): boolean {
+  if (!authorizedList || authorizedList.length === 0) return false;
+  const normalizedSeller = normalizeSellerName(seller);
+  return authorizedList.some(auth => {
+    const normalizedAuth = normalizeSellerName(auth);
+    return normalizedSeller.includes(normalizedAuth) || normalizedAuth.includes(normalizedSeller);
+  });
 }
 
 export function extractProductKey(title: string): string {
@@ -93,6 +89,7 @@ export function extractProductKey(title: string): string {
   
   let key = title
     .toLowerCase()
+    .replace(/(\d+)\s*(gb|mb|tb)\b/gi, '$1$2')
     .replace(/[^\w\s]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -128,22 +125,28 @@ export function calculateTitleSimilarity(title1: string, title2: string): number
   return union.size > 0 ? intersection.size / union.size : 0;
 }
 
-export function deduplicateListings(listings: Array<{ title: string; source: string; extractedPrice: number }>): Array<{ title: string; source: string; extractedPrice: number }> {
-  const groups = new Map<string, Array<{ title: string; source: string; extractedPrice: number }>>();
-  
-  for (const listing of listings) {
-    const key = `${extractProductKey(listing.title)}|${getMarketplaceFromSource(listing.source)}`;
-    if (!groups.has(key)) {
-      groups.set(key, []);
-    }
-    groups.get(key)!.push(listing);
-  }
-
+export function deduplicateListings(
+  listings: Array<{ title: string; source: string; extractedPrice: number }>
+): Array<{ title: string; source: string; extractedPrice: number }> {
   const deduplicated: Array<{ title: string; source: string; extractedPrice: number }> = [];
-  
-  for (const [, group] of groups) {
-    const best = group.reduce((a, b) => a.extractedPrice < b.extractedPrice ? a : b);
-    deduplicated.push(best);
+
+  for (const listing of listings) {
+    const marketplace = getMarketplaceFromSource(listing.source);
+    const existingIndex = deduplicated.findIndex(existing => {
+      const existingMarketplace = getMarketplaceFromSource(existing.source);
+      if (marketplace !== existingMarketplace) return false;
+      const sim = calculateTitleSimilarity(listing.title, existing.title);
+      return sim >= 0.7;
+    });
+
+    if (existingIndex >= 0) {
+      const existing = deduplicated[existingIndex];
+      if (existing && listing.extractedPrice < existing.extractedPrice) {
+        deduplicated[existingIndex] = listing;
+      }
+    } else {
+      deduplicated.push(listing);
+    }
   }
 
   return deduplicated;
@@ -187,7 +190,9 @@ export function estimateScanCredits(
 export function sanitizeForLogging(obj: unknown): unknown {
   if (obj === null || obj === undefined) return obj;
   if (typeof obj === 'string') {
-    return obj.replace(/api[_-]?key["'\s:=]+[^\s"'&]+/gi, 'api_key=***');
+    return obj
+      .replace(/api[_-]?key["'\s:=]+[^\s"'&]+/gi, 'api_key=***')
+      .replace(/bearer\s+[^\s"'&]+/gi, 'Bearer ***');
   }
   if (Array.isArray(obj)) {
     return obj.map(sanitizeForLogging);
@@ -195,7 +200,14 @@ export function sanitizeForLogging(obj: unknown): unknown {
   if (typeof obj === 'object') {
     const sanitized: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(obj)) {
-      if (key.toLowerCase().includes('key') || key.toLowerCase().includes('secret') || key.toLowerCase().includes('token')) {
+      const lower = key.toLowerCase();
+      if (
+        lower.includes('key') ||
+        lower.includes('secret') ||
+        lower.includes('token') ||
+        lower.includes('auth') ||
+        lower.includes('password')
+      ) {
         sanitized[key] = '***';
       } else {
         sanitized[key] = sanitizeForLogging(value);
