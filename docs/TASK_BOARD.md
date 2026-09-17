@@ -349,3 +349,16 @@
 
 ### T-017 STATUS CHECK: still genuinely open
 **NOTE (CLAUDE, this session):** `docs/research/lens_spike.md` does not exist despite T-020/T-021/T-022 all assuming Lens integration behavior is understood. Now that a real `SERPAPI_API_KEY` is configured (per user instruction, confirmed present in `.env` without reading its value), this is the right moment to actually run T-017's spike via `npm run serpapi:smoke` or `test:live` against a few real image pairs and write the findings down — not to skip it because later tasks have proceeded without it.
+
+### T-027: Live smoke test found a real schema bug — SearchMetadata datetime fields don't match live format
+**OWNER:** OPENCODE
+**STATUS:** TODO
+**PRIORITY:** P1
+**FILES:** src/lib/types.ts
+**DEPENDENCIES:** None
+**ACCEPTANCE CRITERIA:**
+- [ ] CLAUDE ran `npm run serpapi:smoke` (one controlled live `google_shopping` call, ~3 credits, per the user's explicit "run one controlled live integration smoke test" instruction) — result: **live pipeline genuinely works** (HTTP 200, 40 organic results, normalization dedup 34/40), but surfaced `RESPONSE SCHEMA WARNING: Invalid datetime, Invalid datetime`.
+- [ ] Root cause traced precisely: `src/lib/types.ts` lines 124-125, `SearchMetadata.created_at`/`processed_at` are declared `z.string().datetime()` (strict RFC3339/ISO-8601), but SerpApi's actual live format is space-separated with a `UTC` suffix (e.g. `"2024-01-15 10:30:00 UTC"`), which Zod's strict `.datetime()` rejects.
+- [ ] Fix: relax to `z.string()` (if the exact format isn't load-bearing anywhere) or a custom `.refine()`/regex matching SerpApi's actual timestamp format — don't just delete the validation.
+- [ ] **Separate, arguably more important finding:** `SerpApiResponseSchema` (which would have caught this) is currently only used in `scripts/serpapi-smoke.ts`'s one-off diagnostic `safeParse` call — it is **not** wired into `serpapi-client.ts`'s actual request path at all. This means live response validation isn't actually enforced anywhere in production code today. Worth a decision (not necessarily this task): either wire schema validation into the real request path (catches future SerpApi response-shape drift automatically) or explicitly document that responses are trusted un-validated by design, so it's a decision, not an oversight.
+**VERIFICATION NEEDED:** Re-run `npm run serpapi:smoke` after the fix — the two "Invalid datetime" warnings should disappear.
