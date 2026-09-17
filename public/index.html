@@ -14,7 +14,9 @@
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23173f35'/%3E%3Ccircle cx='20' cy='20' r='11' fill='none' stroke='%23c3e6c9' stroke-width='2'/%3E%3Ccircle cx='20' cy='20' r='4' fill='%23c3e6c9'/%3E%3C/svg%3E"
     />
     <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/experience.css" />
     <script src="/app.js" defer></script>
+    <script src="/experience.js" defer></script>
   </head>
   <body>
     <a class="skip" href="#main">Skip to workspace</a>
@@ -36,14 +38,134 @@
     </header>
     <main id="main" class="shell">
       <section id="home" class="home" aria-labelledby="homeTitle">
+        <section class="hero-banner" aria-labelledby="homeTitle">
+          <div class="hero-grain" aria-hidden="true"></div>
+          <div class="hero-copy">
+            <p class="eyebrow">
+              <span class="hero-status-dot" aria-hidden="true"></span>
+              Marketplace evidence. Human judgment.
+            </p>
+            <h1 id="homeTitle">
+              Every listing.<br />A <em>clearer signal.</em>
+            </h1>
+            <p class="hero-description">
+              Find marketplace listings worth a closer look. Bring price, seller
+              and visual evidence into one prioritized review queue.
+            </p>
+            <div class="hero-actions">
+              <a class="button hero-cta" href="#scanTitle" data-start
+                >Start a product scan <span aria-hidden="true">↗</span></a
+              ><button id="heroExample" class="hero-example" type="button">
+                Try an example <span aria-hidden="true">→</span>
+              </button>
+            </div>
+            <div class="hero-proof">
+              <span>Google Shopping</span><i aria-hidden="true">+</i
+              ><span>Google Lens</span><span class="hero-api">via SerpApi</span>
+            </div>
+          </div>
+          <figure
+            class="signal-scene"
+            id="signalScene"
+            aria-label="Workflow illustration: price, seller and visual evidence surround your product reference"
+          >
+            <div class="scene-coordinates" aria-hidden="true">
+              <span>REFERENCE / SIGNAL FIELD</span><span>03 DIMENSIONS</span>
+            </div>
+            <div class="signal-object" aria-hidden="true">
+              <div class="orbit-plane orbit-back"></div>
+              <div class="orbit-plane orbit-front"></div>
+              <svg class="scene-traces" viewBox="0 0 540 490" fill="none">
+                <path
+                  d="M106 138H209L270 245M456 170H355L270 245M385 390V327L270 245"
+                />
+                <circle cx="106" cy="138" r="3" />
+                <circle cx="456" cy="170" r="3" />
+                <circle cx="385" cy="390" r="3" />
+              </svg>
+              <div class="reference-shadow"></div>
+              <div class="reference-plate plate-back"></div>
+              <div class="reference-plate plate-middle"></div>
+              <div class="reference-plate plate-main">
+                <div class="plate-topline">
+                  <span>YOUR REFERENCE</span><span>↗</span>
+                </div>
+                <div id="heroReference" class="hero-reference">
+                  <svg
+                    class="reference-glyph"
+                    viewBox="0 0 200 200"
+                    fill="none"
+                  >
+                    <path
+                      d="M34 60V34H60M140 34H166V60M166 140V166H140M60 166H34V140"
+                    />
+                    <circle cx="100" cy="100" r="48" />
+                    <circle cx="100" cy="100" r="29" />
+                    <path d="M100 39V63M100 137V161M39 100H63M137 100H161" />
+                    <circle
+                      cx="100"
+                      cy="100"
+                      r="5"
+                      fill="currentColor"
+                      stroke="none"
+                    />
+                  </svg>
+                </div>
+                <div class="plate-baseline">
+                  <span id="heroReferenceName"
+                    >Your product,<br />at the center.</span
+                  ><span class="plate-index">01</span>
+                </div>
+              </div>
+              <div class="evidence-token token-price">
+                <span class="token-icon">₹</span
+                ><span
+                  ><strong>Price</strong
+                  ><small>Reference deviation</small></span
+                ><i></i>
+              </div>
+              <div class="evidence-token token-source">
+                <span class="token-icon"
+                  ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path
+                      d="M4 10h16l-2-6H6l-2 6Zm1 0v10h14V10M9 20v-6h6v6"
+                    /></svg></span
+                ><span
+                  ><strong>Source</strong><small>Seller context</small></span
+                ><i></i>
+              </div>
+              <div class="evidence-token token-visual">
+                <span class="token-icon"
+                  ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="4" y="4" width="16" height="16" rx="4" />
+                    <circle cx="12" cy="12" r="4" /></svg></span
+                ><span
+                  ><strong>Visual</strong
+                  ><small>Related image evidence</small></span
+                ><i></i>
+              </div>
+              <div class="scene-output">
+                <span class="output-mark">≋</span><span>REVIEW PRIORITY</span
+                ><span>→</span>
+              </div>
+            </div>
+            <figcaption>
+              <span>Three signals. One focused review.</span
+              ><span>Workflow illustration</span>
+            </figcaption>
+          </figure>
+          <div class="hero-bottom">
+            <span>CLARITY, NOT CERTAINTY.</span>
+            <p>Evidence to help you decide where to look next.</p>
+            <span aria-hidden="true">↓</span>
+          </div>
+        </section>
         <div class="intro">
           <p class="eyebrow">
             <span class="tiny-mark" aria-hidden="true"></span> A clearer view of
             your marketplace
           </p>
-          <h1 id="homeTitle">
-            Find the listings<br />worth a <em>closer look.</em>
-          </h1>
+          <h2 class="setup-title">Start with what<br /><em>you know.</em></h2>
           <p class="lede">
             Your product photo. Marketplace listings.<br />
             Price, source and visual evidence — together in one prioritized
@@ -53,21 +175,21 @@
             <div>
               <span class="step">01</span>
               <p>
-                <strong>Set your reference</strong
+                <strong>Reference</strong
                 ><span>Add your product and genuine photo.</span>
               </p>
             </div>
             <div>
               <span class="step">02</span>
               <p>
-                <strong>Search the marketplace</strong
+                <strong>Search</strong
                 ><span>Discover listings and related image evidence.</span>
               </p>
             </div>
             <div>
               <span class="step">03</span>
               <p>
-                <strong>Focus your review</strong
+                <strong>Review</strong
                 ><span>Compare the signals. Follow the sources.</span>
               </p>
             </div>
@@ -80,11 +202,11 @@
           <div class="section-heading">
             <div>
               <p class="eyebrow">New investigation</p>
-              <h2 id="scanTitle">Start with your product</h2>
+              <h2 id="scanTitle" tabindex="-1">Start with your product</h2>
             </div>
             <span class="index-mark" aria-hidden="true">01 / 03</span>
           </div>
-          <form id="scanForm">
+          <form id="scanForm" novalidate>
             <fieldset id="fields">
               <label for="productName"
                 >Product name <span class="required">Required</span></label
@@ -228,6 +350,20 @@
           Bringing the evidence into focus.
         </h1>
         <p id="loadingProduct" class="lede"></p>
+        <div class="scan-instrument" aria-hidden="true">
+          <div class="scan-orbit scan-orbit-one"></div>
+          <div class="scan-orbit scan-orbit-two"></div>
+          <div class="scan-reference-object">
+            <div id="scanReference" class="scan-reference"></div>
+            <span>YOUR REFERENCE</span>
+            <div class="scan-sweep"></div>
+          </div>
+          <span class="scan-label scan-label-left"
+            >SHOPPING<br /><small>Listing discovery</small></span
+          ><span class="scan-label scan-label-right"
+            >LENS<br /><small>Visual evidence</small></span
+          ><span class="scan-axis"></span>
+        </div>
         <div class="scan-line" aria-hidden="true"></div>
         <div class="loading-stages">
           <div>

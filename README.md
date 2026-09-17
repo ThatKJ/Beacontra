@@ -3,13 +3,20 @@
 > **Where price, seller, and photo evidence meet.** *(tagline — see `docs/TAGLINE.md`; pending Gemini's red-team of 5 candidates, may still change before final submission)*
 > Built for the SerpApi India Hackathon 2026.
 
-![Beacontra review queue with side-by-side photos, price deviation, source context and Google Lens evidence](docs/screenshots/review-queue.png)
+![Beacontra — Every listing. A clearer signal. Editorial hero with a layered 3D evidence illustration](docs/screenshots/hero.png)
 
 **One queue. Three evidence trails. Your judgment.** Add a product name and genuine product photo link, scan marketplaces, then review the highest-priority listing with its price, source and visual records together.
 
-*Screenshot: replay of the stored live response in `docs/FINAL_METRICS_DUMP.json`, explicitly labelled **CACHED LIVE RESULT**. These are recorded results, not a new live search or proof of authenticity; product variants still require human review.*
+*Hero: an illustrative workflow, not simulated search results. Review screenshots below replay `docs/FINAL_METRICS_DUMP.json`, explicitly labelled **CACHED LIVE RESULT**. These are recorded results, not a new live search or proof of authenticity; product variants still require human review.*
 
-[Product input](docs/screenshots/home.png) · [Expanded comparison](docs/screenshots/evidence-detail.png) · [Mobile workspace](docs/screenshots/mobile-review.png)
+[Reference input](docs/screenshots/reference-input.png) · [Scan experience](docs/screenshots/loading.png) · [Review queue](docs/screenshots/review-queue.png) · [Expanded comparison](docs/screenshots/evidence-detail.png) · [Mobile workspace](docs/screenshots/mobile-review.png)
+
+<details>
+<summary>See the evidence workspace</summary>
+
+![Cached-live evidence workspace with independent price, source and visual observations](docs/screenshots/review-queue.png)
+
+</details>
 
 Beacontra helps Indian direct-to-consumer (D2C) brands monitor marketplace listings across Flipkart, Amazon.in, and the open web. It cross-references live marketplace listings (`google_shopping`), performs reverse-image verification via Google Lens (`google_lens`), and evaluates seller metadata to identify listings worth review, unauthorized distributors, and commercial anomalies.
 
@@ -152,6 +159,8 @@ npm run test:ui
 ```
 
 This checks the actual served UI at six widths, runs axe accessibility checks, exercises error recovery, missing evidence, validation, keyboard focus and unsafe source data, and captures screenshots under `docs/screenshots/`. Every scan API request is intercepted: **zero live SerpApi credits**. Result screenshots replay the checked-in response with explicit cached provenance. `CHROMIUM_EXECUTABLE_PATH` can select an existing Chromium installation. Full results and remaining backend-dependent UX limitations: [Astra verification](docs/ASTRA_UI_VERIFICATION.md).
+
+`npm run test:ui:performance` measures local initial rendering, layout shifts, frame cadence, asset sizes and reduced-motion/enhancement fallbacks. The signature hero uses CSS perspective rather than a WebGL dependency. [Visual rebuild QA and measurements](docs/ASTRA_VISUAL_QA.md).
 
 ## License
 

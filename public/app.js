@@ -194,7 +194,7 @@
     wireImages($("evidencePanel"));
     $("expandComparison").addEventListener("click", () => {
       $("dialogContent").innerHTML =
-        `<p class="muted" style="margin-bottom:18px">${escape(r.listing.title)}</p>${comparison(r)}<div class="priority-strip">${badge(...p)}<p>${escape(price(r))} · ${escape(delta(r) || "No reference price")} · ${escape(v.title)}</p></div>`;
+        `<div class="dialog-provenance">${badge($("dataBadge").textContent, state.data.dataSource === "fixture" ? "amber" : ["live", "cache"].includes(state.data.dataSource) ? "teal" : "")}<span>Source evidence via SerpApi</span></div><p class="muted" style="margin-bottom:18px">${escape(r.listing.title)}</p>${comparison(r)}<div class="priority-strip">${badge(...p)}<p>${escape(price(r))} · ${escape(delta(r) || "No reference price")} · ${escape(v.title)}</p></div>`;
       wireImages($("dialogContent"));
       $("comparisonDialog").showModal();
     });

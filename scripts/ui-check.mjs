@@ -65,6 +65,14 @@ async function overflow(label) {
   );
 }
 async function axe(label) {
+  await page.evaluate(async () => {
+    await Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getTiming().iterations !== Infinity)
+        .map((a) => a.finished.catch(() => {})),
+    );
+  });
   const report = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
     .analyze();
@@ -85,11 +93,19 @@ async function edit() {
   await visible("#home");
 }
 async function capture(name) {
+  await page.evaluate(async () => {
+    await Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getTiming().iterations !== Infinity)
+        .map((a) => a.finished.catch(() => {})),
+    );
+  });
   if (name !== "loading")
     await page.evaluate(async () => {
       const images = [
         ...document.querySelectorAll(
-          ".image-well img, .photo-preview img, .queue-thumb img",
+          ".image-well img, .photo-preview img, .queue-thumb img, .hero-reference img, .scan-reference img",
         ),
       ].filter((img) => img.getBoundingClientRect().top < innerHeight);
       await Promise.race([
@@ -99,7 +115,7 @@ async function capture(name) {
     });
   await page.screenshot({
     path: `${output}/${name}.png`,
-    fullPage: name !== "evidence-detail",
+    fullPage: !["hero", "evidence-detail"].includes(name),
   });
 }
 
@@ -107,6 +123,7 @@ try {
   const response = await page.goto(base);
   assert.equal(response.status(), 200, "Worker must serve home successfully");
   await axe("home");
+  await capture("hero");
   await page.keyboard.press("Tab");
   assert.equal(
     await page.locator(".skip").evaluate((el) => el === document.activeElement),
@@ -121,10 +138,14 @@ try {
   );
   if (mrp) await page.locator("#mrp").fill(String(mrp));
   await capture("home");
-  delay = 900;
+  await page
+    .locator(".scan-card")
+    .screenshot({ path: `${output}/reference-input.png` });
+  delay = 3000;
   await page.locator("#scanBtn").click();
   await visible("#loading");
   await overflow("loading");
+  await axe("loading");
   await capture("loading");
   await visible("#resultsSection");
   delay = 0;
@@ -184,6 +205,11 @@ try {
     if (width === 390) await capture("mobile-review");
     await edit();
     await overflow(`home ${width}`);
+    if (width === 390) {
+      await axe("mobile home");
+      await capture("mobile-home");
+    }
+    if (width === 768) await capture("tablet-home");
     await submit();
     console.log(`PASS home / queue / comparison at ${width}px`);
   }

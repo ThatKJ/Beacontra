@@ -11,9 +11,22 @@
 
 ## Tasks
 
+### T-036: Signature 3D and motion experience — 80% calm / 20% wow
+**OWNER:** ASTRA — PRODUCT EXPERIENCE / UI OWNER
+**STATUS:** VERIFY — implementation and verification complete; committing
+**PRIORITY:** P1
+**FILES:** public/index.html, public/styles.css, public/app.js, public/experience.css, public/experience.js, scripts/ui-check.mjs, docs/ASTRA_VISUAL_REBUILD.md, docs/ASTRA_VISUAL_QA.md
+**ISSUE:** User requests a major visual upgrade beyond T-034's restrained evidence desk.
+**ACCEPTANCE CRITERIA:**
+- [x] Authored editorial hero and useful CSS-3D reference scene; no simulated metrics.
+- [x] Actual reference-photo continuity through input, scan and comparison; short nonblocking motion.
+- [x] Calm readable evidence workspace; reduced-motion and mobile fallbacks.
+- [x] Browser screenshots, six-width QA, accessibility/performance measurements and required gates.
+**VERIFICATION:** ASTRA_VISUAL_QA.md records seven visual passes, screenshots, 68 passing tests + 1 skipped, typecheck/lint/build, browser and local performance checks. Initial assets ~25.4 KiB gzip; no 3D runtime dependency. Backend request/scoring code unchanged.
+
 ### T-034: Evidence-first product experience and demo polish
 **OWNER:** ASTRA — PRODUCT EXPERIENCE / UI OWNER
-**STATUS:** VERIFY — implementation and checks complete; committing
+**STATUS:** DONE — committed as efbed21
 **PRIORITY:** P0/P1
 **FILES:** public/index.html, frontend assets/tests, src/index.ts (HTML serving only), docs/ASTRA_UI_AUDIT.md, docs/ASTRA_DESIGN_SYSTEM.md, README.md (visual section)
 **ISSUE:** Homepage returns 500; unavailable visual checks claim a confirmed match; repetitive cards lack an actionable investigation workspace.
@@ -22,7 +35,7 @@
 - [x] Compact ranked queue, side-by-side detail, three evidence areas, safe source links, truthful provenance and neutral uncertainty.
 - [x] Honest loading, partial/empty/error states; accessible responsive UI at six requested widths.
 - [x] Actual browser inspection/screenshots; unit/type/lint/build gates.
-- [ ] Coherent commit.
+- [x] Coherent commit: efbed21.
 **VERIFICATION:** Actual Worker root/CSS HTTP 200; 68 unit tests passed, 1 skipped; typecheck/lint/build passed; browser suite passed six widths plus axe on home/queue/modal/error/empty. Screenshots in docs/screenshots; full evidence in ASTRA_UI_VERIFICATION.md. No scoring or search-call changes.
 
 ### T-035: Backend contracts needed for fully truthful frontend evidence

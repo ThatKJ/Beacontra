@@ -1,0 +1,95 @@
+{
+  "environment": "Local Chromium lab; localhost; no network throttling; no live API requests",
+  "assets": [
+    {
+      "file": "index.html",
+      "rawBytes": 19069,
+      "gzipBytes": 4854
+    },
+    {
+      "file": "styles.css",
+      "rawBytes": 24237,
+      "gzipBytes": 5026
+    },
+    {
+      "file": "app.js",
+      "rawBytes": 24151,
+      "gzipBytes": 7636
+    },
+    {
+      "file": "experience.css",
+      "rawBytes": 30548,
+      "gzipBytes": 6824
+    },
+    {
+      "file": "experience.js",
+      "rawBytes": 4834,
+      "gzipBytes": 1655
+    }
+  ],
+  "runs": [
+    {
+      "name": "desktop",
+      "cpuSlowdown": 1,
+      "lcp": 60,
+      "layoutShifts": 0,
+      "longTasks": [],
+      "fcp": 60,
+      "frameMedianMs": 8.300000000000182,
+      "frameP95Ms": 8.799999999999727,
+      "framesOver32ms": 0,
+      "sampledFrames": 241,
+      "requests": [
+        {
+          "url": "http://localhost:8787/styles.css",
+          "transferBytes": 5316
+        },
+        {
+          "url": "http://localhost:8787/experience.css",
+          "transferBytes": 7115
+        },
+        {
+          "url": "http://localhost:8787/experience.js",
+          "transferBytes": 1940
+        },
+        {
+          "url": "http://localhost:8787/app.js",
+          "transferBytes": 7915
+        }
+      ]
+    },
+    {
+      "name": "mobile-4x-cpu",
+      "cpuSlowdown": 4,
+      "lcp": 100,
+      "layoutShifts": 0,
+      "longTasks": [],
+      "fcp": 100,
+      "frameMedianMs": 8.299999999999955,
+      "frameP95Ms": 10.199999999999818,
+      "framesOver32ms": 0,
+      "sampledFrames": 240,
+      "requests": [
+        {
+          "url": "http://localhost:8787/styles.css",
+          "transferBytes": 5316
+        },
+        {
+          "url": "http://localhost:8787/experience.css",
+          "transferBytes": 7115
+        },
+        {
+          "url": "http://localhost:8787/experience.js",
+          "transferBytes": 1940
+        },
+        {
+          "url": "http://localhost:8787/app.js",
+          "transferBytes": 7915
+        }
+      ]
+    }
+  ],
+  "enhancementFallback": "PASS: example input works with experience.js blocked",
+  "totalRawBytes": 102839,
+  "totalGzipBytes": 25995
+}

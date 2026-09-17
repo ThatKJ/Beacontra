@@ -13,6 +13,7 @@
     "fmt": "prettier --write \"src/**/*.ts\"",
     "test": "vitest run",
     "test:ui": "node scripts/ui-check.mjs",
+    "test:ui:performance": "node scripts/ui-performance.mjs",
     "test:watch": "vitest",
     "test:live": "vitest run --config vitest.live.config.ts",
     "serpapi:smoke": "tsx scripts/serpapi-smoke.ts",
