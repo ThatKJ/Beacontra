@@ -48,7 +48,7 @@ it('should return google search fixture', async () => {
       expect(result.organic_results).toBeDefined();
       expect(result.organic_results?.length).toBeGreaterThan(0);
       expect(result.local_results).toBeDefined();
-      expect((result.local_results as Array<{ title: string }>)?.length).toBeGreaterThan(0);
+      expect((result.local_results as { places?: Array<{ title: string }> })?.places?.length).toBeGreaterThan(0);
     });
 
     it('should return google_maps fixture', async () => {
@@ -79,7 +79,7 @@ it('should return google search fixture', async () => {
     });
 
     it('should return google_trends fixture', async () => {
-      const params: BaseSearchParams = { engine: 'google_trends', q: 'coffee', geo: 'IN-KA' };
+      const params: BaseSearchParams = { engine: 'google_trends', q: 'coffee' };
       const result = await client.search(params);
 
       expect(result.search_metadata.status).toBe('Success');

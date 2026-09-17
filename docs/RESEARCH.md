@@ -336,7 +336,40 @@ A pattern emerged while generating these: a large share of genuinely painful, fr
 
 ## 9. Top-5 Competitor Audit
 
-*(Pending §8.)*
+Already run inline for the top 2 during scoring (§7a, this section), rather than deferred — summarizing:
+
+### BrandGuard (Counterfeit & MRP-Violation Watch, rank 1)
+- **Exact duplicates:** None found across GitHub/Devpost/general web search for "counterfeit detection + reverse image search + SerpApi/google_lens" as a built hackathon product. SerpApi's own Lens API docs and third-party scraper marketing copy (Apify) describe the *technique* ("spot counterfeit listings using your product photos") as a known use-case pattern, but no shipped project doing it was found.
+- **Partial competitors:** `depositcheck` (different hackathon, different vertical — rental-photo fraud, not counterfeit/MRP) uses the same underlying `google_lens exact_matches` mechanism — a real but domain-distant precedent.
+- **Indirect alternatives:** Enterprise brand-protection SaaS (MarqVision, Bustem, IPMoat, LdotR) solve the business problem professionally, but at enterprise pricing, with web-crawling infrastructure far beyond a SerpApi call, and not positioned for India D2C/SMB brands. They validate the market rather than compete with a hackathon MVP.
+- **Verdict:** Low direct-duplication risk. Real but distant technical precedent (depositcheck) and a different-market indirect competitor (enterprise SaaS) — both strengthen rather than undermine the "meaningful, non-cosmetic SerpApi usage" story.
+
+### Job Market Analytics (rank 2, runner-up)
+- **Partial competitor found:** `India_jobs_predictor` (GitHub, unconfirmed hackathon status) — scrapes India tech job listings via unspecified "public APIs," trains an XGBoost salary predictor, dashboard, 42 unit tests. Meaningfully similar mechanism (salary/skill extraction + dashboard) though not confirmed as SerpApi-based or as a hackathon entry.
+- **Indirect alternatives:** Levels.fyi (US-centric, doesn't cover India well), Glassdoor/AmbitionBox (self-reported, not live-search-derived).
+- **Verdict:** Medium duplication risk — the core "extract structured salary/skills from India job postings" idea has real precedent. Would need the extraction-accuracy/technical-depth angle (Gemini's framing in `GEMINI_CONCEPT_RED_TEAM.md`) to differentiate, not the dashboard.
+
+### #3-5 (Local Business Intelligence, ClaimCheck, ExportScout)
+- Not run through a dedicated competitor search yet — deprioritized given BrandGuard's clear lead in §8; will only be revisited if BrandGuard fails a downstream check (build blocker, or the pending background research agents surface a direct BrandGuard duplicate).
+
+## 10. Hostile Judge Red Team (on BrandGuard, the leading candidate)
+
+Running the mission's adversarial question set directly, in the voice of an exhausted judge who's seen 150 demos:
+
+- **"Why should I care?"** — Because a specific, named legal mechanism (Delhi HC's "latching-on" ruling, Nov 2024) already recognizes this exact fraud pattern as a real, court-relevant problem costing India's economy an estimated $16.2B/year, and today the only tools that catch it are enterprise SaaS most small Indian brands can't afford.
+- **"Why can't ChatGPT do this?"** — It can't see current marketplace listings or verify photo provenance; both require live external data (SerpApi Shopping + Lens), not training-data knowledge. This is directly testable: ask ChatGPT to check today's Flipkart listing for a specific SKU and it will either refuse or hallucinate.
+- **"Why does this need SerpApi?"** — Live seller/price/photo data across marketplaces has no public structured alternative; `google_lens exact_matches` is the specific mechanism that makes photo-provenance checking possible at all without building our own reverse-image index.
+- **"Is this actually original?"** — Original as a *product* (no shipped duplicate found); the underlying *technique* (Lens for photo-authenticity) has precedent in one distant-domain hackathon project and vendor marketing copy — disclosed honestly in §9, not hidden.
+- **"Is the engineering real?"** — Yes if we build the three-signal fusion (price anomaly + seller anomaly + visual mismatch → ranked confidence) as actual logic, not just three API calls concatenated into a prompt. This is the load-bearing implementation risk — flagged for architecture.
+- **"Where is the hard part?"** — Product-variant/title matching across inconsistent seller listings (classic entity-resolution problem) and turning three weak, noisy signals into one defensible confidence score.
+- **"Could a developer build this in two hours?"** — No — the matching/fusion logic is the whole point and is not trivial; a two-hour version would just be a shopping-results list, which is explicitly what we're avoiding.
+- **"Would anybody use this?"** — Yes, directly usable by any of the thousands of Indian D2C sellers actively fighting exactly this problem today (evidenced: Meesho alone removed 4.2M counterfeit listings in 6 months — meaning there is an active, working, human process today that this tool would materially speed up).
+- **"What happens if search results are noisy / disagree?"** — This is explicitly the product's job — surfacing a *confidence* score, not a binary verdict, and showing the underlying evidence (price, seller, image match) so a human makes the final call. Framed as a decision-support tool, not an automated accusation engine (mitigates the defamation risk flagged in §7).
+- **"What if SerpApi disappears?"** — The product has zero function without it — Shopping/Lens data is the entire evidentiary basis, which is the *correct* answer for the "meaningful usage" criterion, not a weakness.
+- **"Why is this better than Google?"** — Google shows one listing at a time to a human searcher; this synthesizes many listings + reverse-image evidence into one ranked, evidence-backed action list — the synthesis is the product, not the underlying search.
+- **"Are these claims supported?"** — Yes, all quantitative claims in §7/§9 are sourced (Moneylife/BIS, EU IP Helpdesk/Delhi HC, Meesho's own disclosed removal figures); the $58.7B/$16.2B figures are single-sourced (the420.in) and flagged as needing a second corroborating source before use in the actual pitch deck — noted honestly rather than presented as fully verified.
+
+**Net read:** BrandGuard survives the hostile pass. The two genuine weaknesses are (1) needing a second source for the market-size figures before using them in the demo/pitch, and (2) the defamation-adjacent framing risk, both of which are addressable in product copy and UX (confidence bands + "evidence for your review," never "confirmed counterfeit") rather than being fatal to the concept.
 
 ## 10. Hostile Judge Red Team
 
