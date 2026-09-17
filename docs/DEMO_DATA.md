@@ -6,15 +6,13 @@
 
 ## Selected Demo Product
 
-### Product: **boAt Airdopes 141**
+### Product: **boAt Airdopes 141** (plain/original variant — not "Gen 2" or "Pro," which are different products with different MRPs; keep the exact product name consistent with `scripts/final-validation.ts`)
 
-**Reference Image URL:** `https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png` (for Lens testing; actual demo uses real boAt image)
+**Reference Image URL:** currently broken — `scripts/final-validation.ts`'s hardcoded Shopify CDN guess returns HTTP 404, verified with curl (`docs/TASK_BOARD.md` T-033 update). Needs a real, verified-live image before the canonical run.
 
-**Actual Demo Image:** `https://m.media-amazon.com/images/I/71gN9JKBVML._SX679_.jpg` (boAt Airdopes 141 Gen 2 product image)
+**MRP:** ₹4,490 — **corrected this session.** ₹1,299 (the figure previously here and in `docs/FINAL_DEMO_PRODUCT_VALIDATION.md`) does not match any real boAt Airdopes 141 variant's actual MRP; ₹4,490 is confirmed directly against boAt's own product listing and independent retailers for the plain "Airdopes 141" (Gen 2 is ₹3,990, Pro is ₹2,990, Elite ANC/ANC are ₹5,990 — all different products, none is ₹1,299). This also matches the `mrp: 4490` already hardcoded in `scripts/final-validation.ts`, so the two are now consistent.
 
-**MRP:** ₹1,299
-
-**Expected Price Range:** ₹700 - ₹1,100
+**Expected Price Range:** needs recalculating from the corrected MRP — the old ₹700-₹1,100 range was derived from the wrong ₹1,299 base and should not be reused as-is.
 
 **Known Authorized Sellers:** Flipkart, Amazon, Reliance Digital, Croma, boAt, JioMart, Myntra, Nykaa, boat-lifestyle.com
 
@@ -45,7 +43,7 @@
 | Listings with seller anomaly | ~35-45 (unknown/unauthorized sellers) |
 | Listings with visual evidence | ~10-20 (exact/visual matches) |
 | Listings with "unavailable" visual | ~30-50 (Lens returns ai_overview only for some) |
-| Credits used per scan | ~13 (1 Shopping + ~12 Lens) — see `docs/SERPAPI_BUDGET.md`'s caveat that this multiplier is an app-level estimate, not confirmed SerpApi billing |
+| Credits used per scan | ESTIMATE: capped at 10 Lens candidates to control usage |
 
 ---
 
@@ -108,7 +106,7 @@ If live API is unavailable, use fixture data that simulates:
 | Google Lens exact_matches (image_id, up to 1) | 3 |
 | Google Lens products (URL, up to 10) | 30 |
 | **Total per scan (max)** | **~36** |
-| **Typical scan (capped at 10 Lens)** | **~13-16** |
+| **Typical scan (capped at 10 Lens)** | **ESTIMATE: Fixed candidate cap to control usage** |
 
 **Cross-check note (CLAUDE, this session):** reading `runVisualVerification()` directly, the exact_matches→products fallback logic runs *per candidate* inside the `MAX_LENS_CALLS`-capped loop, not once globally — so the realistic worst case is closer to 1 shopping + up to 20 Lens calls (10 candidates × up to 2 calls each), not the single "exact_matches, up to 1" implied above. See `docs/SERPAPI_BUDGET.md`'s "Worst-case call count" section for the reconciled model, and its caveat that the credit-per-call multipliers (1 vs. 3) are our own app-level estimate, not confirmed SerpApi billing. Recommend replacing both tables with one real observed number from an actual logged scan before submission, rather than reconciling two different estimates.
 

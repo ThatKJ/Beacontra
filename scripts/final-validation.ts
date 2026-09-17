@@ -2,11 +2,42 @@ import { createBeacontraService } from '../src/lib/beacontra';
 import { createSerpApiClient } from '../src/lib/serpapi-client';
 import { getSerpApiKey } from '../src/lib/config';
 import fs from 'fs';
+import { resolve } from 'node:path';
+import { readFileSync, existsSync } from 'node:fs';
+
+function loadEnvFile(): void {
+  const candidates = ['.env', '.dev.vars', '.env.local'];
+  for (const file of candidates) {
+    const filePath = resolve(process.cwd(), file);
+    if (!existsSync(filePath)) continue;
+    try {
+      const content = readFileSync(filePath, 'utf-8');
+      for (const rawLine of content.split('\n')) {
+        const line = rawLine.trim();
+        if (!line || line.startsWith('#')) continue;
+        const eqIdx = line.indexOf('=');
+        if (eqIdx <= 0) continue;
+        const key = line.slice(0, eqIdx).trim();
+        let val = line.slice(eqIdx + 1).trim();
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.slice(1, -1);
+        }
+        if (key && val && !process.env[key]) {
+          process.env[key] = val;
+        }
+      }
+    } catch {
+      // Ignore read errors
+    }
+  }
+}
 
 async function main() {
+  loadEnvFile();
+  const env = { SERPAPI_API_KEY: process.env.SERPAPI_API_KEY, SERPAPI_KEY: process.env.SERPAPI_KEY };
   let apiKey: string;
   try {
-    apiKey = getSerpApiKey();
+    apiKey = getSerpApiKey(env);
   } catch {
     console.error('Missing SERPAPI_API_KEY in environment');
     process.exit(1);
@@ -16,9 +47,9 @@ async function main() {
   const service = createBeacontraService(client);
 
   const input = {
-    productName: 'Skechers Go Walk 6 Men',
-    referenceImageUrl: 'https://m.media-amazon.com/images/I/71Y1oX-H54L._SY695_.jpg',
-    referencePrice: 5499
+    productName: 'boAt Airdopes 141',
+    officialImageUrl: 'https://www.boat-lifestyle.com/cdn/shop/files/AD141-FI_Black06_600x.jpg',
+    mrp: 4490
   };
 
   console.log('Starting live scan for:', input.productName);
@@ -31,38 +62,39 @@ async function main() {
   console.log('Data Source:', result.dataSource);
   console.log('Total Results:', result.results.length);
   
-  let exactMatchCount = 0;
+  let matchedCount = 0;
   let visualMatchCount = 0;
-  let productMatchCount = 0;
   let noEvidenceCount = 0;
-  let anomalyCount = 0;
+  let unavailableCount = 0;
+  let anomalousCount = 0;
 
   for (const r of result.results) {
     const v = r.visualSignal;
-    if (v.status === 'matched') {
-      if (v.anomalyType === 'same_product') {
-        exactMatchCount++;
-      }
-    } else if (v.status === 'anomalous_evidence') {
-      anomalyCount++;
-    } else if (v.status === 'no_evidence' || v.status === 'unavailable') {
-      noEvidenceCount++;
-    }
+    if (v.status === 'matched') matchedCount++;
+    if (v.status === 'visual_match') visualMatchCount++;
+    if (v.status === 'no_evidence') noEvidenceCount++;
+    if (v.status === 'unavailable') unavailableCount++;
+    if (v.isAnomalous) anomalousCount++;
   }
 
   console.log('Visual Status Breakdown:');
-  console.log('  Exact Match:', exactMatchCount);
-  console.log('  Anomalous:', anomalyCount);
-  console.log('  No Evidence/Unavailable:', noEvidenceCount);
+  console.log('  Matched:', matchedCount);
+  console.log('  Visual Match:', visualMatchCount);
+  console.log('  No Evidence:', noEvidenceCount);
+  console.log('  Unavailable:', unavailableCount);
+  console.log('  Anomalous:', anomalousCount);
 
   // We need to write this to a file so we can view it
   fs.writeFileSync('docs/FINAL_METRICS_DUMP.json', JSON.stringify({
     latency,
     resultCount: result.results.length,
     creditsUsed: result.creditsUsed,
-    exactMatchCount,
-    anomalyCount,
-    noEvidenceCount
+    matchedCount,
+    visualMatchCount,
+    noEvidenceCount,
+    unavailableCount,
+    anomalousCount,
+    results: result.results
   }, null, 2));
 }
 
