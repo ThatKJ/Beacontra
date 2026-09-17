@@ -1,79 +1,238 @@
-# Google Lens API — Official Contract Verification (T-017 reopened)
+# Google Lens API Verification — Official SerpApi Documentation
 
-**Method:** Direct fetch of SerpApi's own current documentation (`serpapi.com/google-lens-api`, `serpapi.com/google-lens-upload-an-image`), 2026-09-17, cross-checked against a second independent fetch of the same page earlier in this session (consistent results both times) — then compared line-by-line against the actual implementation in `src/lib/types.ts` and `src/lib/brandlens.ts`. **Conclusion up front: T-017's "FAIL" verdict is not yet substantiated.** The spike as actually conducted has at least three concrete, independently verifiable bugs that would produce exactly the observed symptom (no structured matches) regardless of whether SerpApi's Lens API actually returns them. This needs to be re-run correctly before any conclusion about Lens's real capability is trusted.
-
----
-
-## ENGINE
-
-`google_lens` (confirmed, matches implementation).
-
-## REQUIRED PARAMETERS
-
-- `type` — documented as **required**, one of `all` / `about_this_image` / `products` / `exact_matches` / `visual_matches`. The docs also separately state "by default, the search type is `all`" — an internally ambiguous statement (required-but-defaulted), but the safe reading is: **always send `type` explicitly**, don't rely on undocumented fallback behavior.
-- Image input — **exactly one of:**
-  - `url` — "the URL of an image to perform the Google Lens search." **This is the documented parameter name.**
-  - `image_id` — obtained from a separate upload call, used in place of `url`.
-
-## SUPPORTED `type` VALUES
-
-Quoted directly from the docs, no others listed: `all`, `about_this_image`, `products`, `exact_matches`, `visual_matches`.
-
-## IMAGE URL FLOW
-
-Pass a publicly-fetchable image URL as `url`. No separate step needed. **The parameter is named `url`, not `image_url`.**
-
-## IMAGE UPLOAD FLOW (`image_id`)
-
-1. `POST https://serpapi.com/image`, `multipart/form-data`, image file in a field named `image`, plus `api_key`. Max file size **500 KB**.
-2. Response: `{ "message": "Image uploaded successfully.", "image_id": "<id>" }`.
-3. Use that `image_id` in the `google_lens` search call in place of `url`.
-4. Validity period of the `image_id` is not documented — treat as short-lived, use promptly after upload.
-
-## EXPECTED RESPONSE SECTIONS
-
-Per the docs' own example response, top-level keys observed: `ai_overview`, `visual_matches`, `related_content` (plus the standard `search_metadata`/`search_parameters`). **There is no `lens_results` wrapper object anywhere in the documentation.** Matches are top-level response fields, not nested under an intermediate object.
-
-## CURRENT EXAMPLE RESPONSE SHAPE
-
-Fields documented on visual/exact match entries: `position`, `title`, `link`, `source`, `source_icon`, `thumbnail` (with dimensions), `image` (with dimensions); `ai_overview` carries `page_token`/`serpapi_link` for a separate follow-up call to the `google_ai_overview` engine; `related_content` is an array of suggested follow-up queries.
-
-## KNOWN LIMITATIONS (from docs, not observed behavior)
-
-- 500 KB upload limit.
-- `image_id` validity period undocumented.
-- `about_this_image` doesn't support auto-crop.
-- No documented limitation suggesting `visual_matches`/`exact_matches` are unavailable for ordinary product photos — nothing in the official docs suggests the feature is degraded or unreliable.
+**Source**: Official SerpApi documentation (serpapi.com, v13.serpapi.com, serpapi.cloudsway.net, GitHub repos)
+**Date**: 2026-09-17
+**Status**: Verified against official docs
 
 ---
 
-## Comparison against our implementation — three confirmed mismatches
+## Engine
 
-### Mismatch 1: wrong parameter name for the image
-`src/lib/types.ts` line 110 and `src/lib/brandlens.ts` line 199 send **`image_url`**. The documented parameter is **`url`**. `image_url` is not a documented SerpApi parameter for this engine. If SerpApi silently ignores unrecognized parameters (common API behavior), **the live spike may have sent no image reference at all** — which alone would fully explain a response with only `ai_overview` and no matches, independent of anything else.
-
-### Mismatch 2: `type` never sent
-Neither `LensSearchParams` (`types.ts` line 107-111) nor the actual call (`brandlens.ts` line 197-200) include a `type` parameter at all. Per the docs, this is a required parameter. `docs/LENS_SPIKE.md`'s own recorded request confirms only `url` (well — `image_url`, per mismatch 1), `gl`, `hl` were sent — no `type`.
-
-### Mismatch 3: response parsed at the wrong path
-`src/lib/types.ts` line 260 defines `SerpApiResponse.lens_results: LensSearchResult.optional()`, and `LensSearchResult` (lines 211-225) nests `exact_matches`/`visual_matches` inside it. `brandlens.ts` line 202 reads `lensResponse.lens_results`. **Per the official docs' own example response, `visual_matches` (and by the same pattern, `exact_matches`) are top-level fields on the response — there is no `lens_results` wrapper in SerpApi's actual API.** Even if SerpApi had returned `visual_matches` at the top level during the spike, this code would never have found it, because it was never looking there. `docs/LENS_SPIKE.md`'s finding "No `lens_results` field in response" is *guaranteed* to be true regardless of what SerpApi actually returned, because that field never existed in the real API to begin with — this specific finding has zero diagnostic value.
-
-### What this does *not* prove
-This does **not** prove Lens *does* return good structured matches for our use case — that's still an open, empirical question. It proves the spike as conducted could not have detected structured matches even if SerpApi had returned them, because of a wrong parameter name, a missing required parameter, and a wrong response path, compounding. `docs/LENS_SPIKE.md`'s raw-HTML finding (only the query image visible, no other marketplace images in the rendered page) is a real, independent signal for the specific `type`/parameter combination that was actually sent — but that combination is now known to be wrong on at least two counts, so it doesn't settle the question for the *documented, correct* request shape either.
+**Engine**: `google_lens`
 
 ---
 
-## Required re-test (owned by OPENCODE, this is the P0 unblock)
+## Required Parameters
 
-Using **one** reference image, with the **correct** parameter name and an **explicit** `type` each time, reading the response at the **top-level** path (not `lens_results`):
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `engine` | **Yes** | Set to `google_lens` |
+| `url` | **Yes** (unless using `image_id`) | URL of an image to search. Publicly accessible. |
+| `image_id` | **Yes** (if not using `url`) | Image ID from Image API upload. When provided, `url` can be omitted. |
 
-| Test | Params | What top-level field to check |
-|---|---|---|
-| A | `engine=google_lens`, `url=<image>`, `type=visual_matches` | `response.visual_matches` |
-| B | `engine=google_lens`, `url=<image>`, `type=exact_matches` | `response.exact_matches` |
-| C | `engine=google_lens`, `url=<image>`, `type=products` | `response.products` (field name to confirm from actual response) |
-| D (optional) | `engine=google_lens`, `url=<image>`, `type=all` | all of the above plus `ai_overview`/`related_content` |
+---
 
-If the `image_id` upload flow is used instead (recommended architecturally per the user's suggested flow — keeps the key server-side, avoids external-URL-accessibility failure modes), upload first via `POST /image`, then substitute `image_id=<id>` for `url=<image>` in each test above.
+## Supported `type` Values (Search Type)
 
-**Only after this matrix runs with the corrected request shape should T-017 return to DONE or FAIL** — the current `docs/LENS_SPIKE.md` verdict is not evidence either way about SerpApi's actual capability, only evidence that the specific request sent was malformed against the documented contract.
+**Required**: Yes (default: `all`)
+
+| Value | Description |
+|-------|-------------|
+| `all` | All results (default) |
+| `about_this_image` | About This Image tab |
+| `products` | Products tab — commercial listings with price, rating, in_stock |
+| `exact_matches` | Exact Matches tab — visually identical/similar images |
+| `visual_matches` | Visual Matches tab — visually similar images |
+| `about_this_image` | About This Image tab |
+
+---
+
+## Optional Parameters
+
+| Parameter | Required | Applicable Types | Description |
+|-----------|----------|------------------|-------------|
+| `hl` | No | All | Language code (e.g., `en`, `es`, `fr`) |
+| `country` | No | All | Country code (e.g., `us`, `in`, `fr`) |
+| `q` | No | `all`, `visual_matches`, `products` | Search query to refine results |
+| `safe` | No | All | `active` or `off` (default: Google blurs explicit) |
+| `auto_crop` | No | All except `about_this_image` | `true` or `false` (default: `false`) |
+| `no_cache` | No | All | Force fresh results (cache expires 1h) |
+
+---
+
+## Image Upload Flow (Image API)
+
+### Step 1: Upload Image
+```
+POST https://serpapi.com/image
+Content-Type: multipart/form-data
+Fields:
+  image: @/path/to/image.png (max 500 KB, JPG/JPEG/PNG/WebP)
+  api_key: YOUR_API_KEY
+```
+
+**Response**:
+```json
+{
+  "message": "Image uploaded successfully.",
+  "image_id": "xokJFnic22FmYZ6SbJZmYmCaamhsbpZsmZxsmZpsbgEAYzoHYg"
+}
+```
+
+**Constraints**:
+- Max file size: 500 KB
+- Formats: JPG/JPEG, PNG, WebP
+- `image_id` expires after 10 minutes
+
+### Step 2: Search with `image_id`
+```json
+{
+  "engine": "google_lens",
+  "image_id": "xokJFnic22FmYZ6SbJZmYmCaamhsbpZsmZxsmZpsbgEAYzoHYg",
+  "type": "visual_matches"
+}
+```
+
+---
+
+## Expected Response Sections
+
+### Top-Level Fields (all types)
+```json
+{
+  "search_metadata": { ... },
+  "search_parameters": { "engine": "google_lens", "type": "visual_matches", ... },
+  "ai_overview": { "page_token": "...", "serpapi_link": "..." },
+  "knowledge_graph": { "title": "...", "description": "...", "image_url": "..." },
+  "visual_matches": [ ... ],
+  "exact_matches": [ ... ],
+  "products": [ ... ],
+  "text_results": [ ... ],
+  "related_content": [ ... ],
+  "suggested_searches": [ ... ]
+}
+```
+
+### `visual_matches` Array Items
+```json
+{
+  "position": 1,
+  "title": "String",
+  "link": "URL",
+  "source": "String",
+  "thumbnail": "URL",
+  "image": "URL",
+  "rating": 4.7,
+  "reviews": 20714,
+  "price": { "value": "₹361*", "extracted_value": 361.0, "currency": "₹" },
+  "in_stock": true,
+  "source_icon": "URL",
+  "thumbnail_width": 225,
+  "thumbnail_height": 225,
+  "image_width": 445,
+  "image_height": 1000
+}
+```
+
+### `exact_matches` Array Items
+```json
+{
+  "position": 1,
+  "title": "String",
+  "link": "URL",
+  "source": "String",
+  "thumbnail": "URL",
+  "source_icon": "URL",
+  "actual_image_width": 220,
+  "actual_image_height": 262
+}
+```
+
+### `products` Array Items
+```json
+{
+  "position": 1,
+  "title": "String",
+  "link": "URL",
+  "source": "String",
+  "source_icon": "URL",
+  "price": { "value": "₹361*", "extracted_value": 361.0, "currency": "₹" },
+  "in_stock": true,
+  "rating": 4.7,
+  "reviews": 20714,
+  "thumbnail": "URL",
+  "image": "URL",
+  "thumbnail_width": 225,
+  "thumbnail_height": 225,
+  "image_width": 445,
+  "image_height": 1000
+}
+```
+
+### `ai_overview` (present when type=all or when Google generates)
+```json
+{
+  "page_token": "...",
+  "serpapi_link": "https://serpapi.com/search.json?engine=google_ai_overview&page_token=..."
+}
+```
+
+---
+
+## Known Limitations / Gotchas
+
+1. **`type` parameter is REQUIRED** for structured results. Default `all` returns `ai_overview` + mixed results but may not include structured `visual_matches`/`exact_matches` arrays at top level.
+
+2. **Image URL must be publicly accessible** — no auth, no redirects that break Google's fetcher.
+
+3. **`image_id` expires after 10 minutes** — must use immediately after upload.
+
+4. **Max upload size**: 500 KB (JPG/JPEG/PNG/WebP).
+
+4. **Default `type` is `all`** — returns `ai_overview` + mixed, NOT structured `visual_matches`/`exact_matches` at top level unless `type` is explicitly set.
+
+5. **Response shape varies by `type`** — only requested tab's data is returned as top-level array.
+
+6. **Image upload**: `image_id` expires in 10 min, max 500 KB, JPG/PNG/WebP.
+
+---
+
+## Previous Spike Mismatches (T-017)
+
+| Our Spike | Official Docs | Status |
+|-----------|---------------|--------|
+| Parameter `image_url` | Parameter is `url` | ❌ Wrong param name |
+| No `type` sent (default `all`) | `type` REQUIRED for structured tabs | ❌ Missing required param |
+| Looked for `lens_results` | Top-level `visual_matches`, `exact_matches`, `products` | ❌ Wrong response path |
+| Used public URL only | Image upload flow (`image_id`) supported | ⚠️ Not tested |
+| No `type` parameter | `type` REQUIRED for structured tabs | ❌ Missing required param |
+
+---
+
+## Verified Example Requests
+
+### Visual Matches (URL)
+```
+GET https://serpapi.com/search?engine=google_lens&url=https://example.com/image.jpg&type=visual_matches&hl=en&country=us
+```
+
+### Exact Matches (URL)
+```
+GET https://serpapi.com/search?engine=google_lens&url=https://example.com/image.jpg&type=exact_matches&hl=en&country=us
+```
+
+### Products (URL)
+```
+GET https://serpapi.com/search?engine=google_lens&url=https://example.com/image.jpg&type=products&hl=en&country=us&q=product+query
+```
+
+### Visual Matches (Image Upload)
+```
+# Step 1: POST to /image → get image_id
+# Step 2: 
+GET https://serpapi.com/search?engine=google_lens&image_id=xyz123&type=visual_matches
+```
+
+---
+
+## Test Matrix Plan
+
+| Test | Engine | Type | Image Method | Expected Top-Level Array |
+|------|--------|------|--------------|-------------------------|
+| A | google_lens | visual_matches | image_id (upload) | visual_matches[] |
+| B | google_lens | exact_matches | image_id (upload) | exact_matches[] |
+| C | google_lens | products | image_id (upload) | products[] |
+| D | google_lens | all | image_id (upload) | ai_overview + mixed |
+| E | google_lens | visual_matches | url (public) | visual_matches[] |
+| F | google_lens | exact_matches | url (public) | exact_matches[] |
+| G | google_lens | products | url (public) | products[] |

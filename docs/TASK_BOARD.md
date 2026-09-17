@@ -170,16 +170,24 @@
 - [x] "BrandLens" reframed as internal codename only pending a real public name
 **VERIFICATION:** Two independent adjudications (CLAUDE from README fetch, GEMINI from cloned source — deeper) converge: **KEEP, HIGH confidence**. CeaseFire = domain-typosquatting scanner (input: domain, output: signed takedown notice, no google_lens usage confirmed by Gemini's source inspection). Ours = product-listing reverse-image verifier (input: product name + photo, output: ranked review queue). 10/14 compared dimensions DIFFERENT, 0 SAME. `docs/DECISION.md` status returned to LOCKED after a PROVISIONAL_LOCK period during the adjudication.
 
-### T-019: Rename "BrandLens" to a public-facing name (non-blocking, post-adjudication)
-**OWNER:** Unassigned — pick up when convenient, does not block further build work
+### T-019: Rename "BrandLens" to a public-facing name (post-adjudication)
+**OWNER:** CLAUDE (naming strategy lead) / GEMINI (collision audit) / OPENCODE (implementation)
 **STATUS:** REOPENED — NEW COLLISION EVIDENCE
 **PRIORITY:** P1
-**FILES:** TBD — will touch docs/*, public/index.html, README.md once written
+**FILES:** docs/NAMING_V2.md, docs/NAMING_AUDIT_V2.md, docs/NAMING_DECISION.md, docs/NAMING_AUDIT_V2.md, public/index.html, src/**, docs/**
 **DEPENDENCIES:** None
 **ACCEPTANCE CRITERIA:**
-- [ ] Confirm the name collision concern (not independently re-verified yet, taken on instruction)
-- [ ] Propose 3-5 candidate names that don't collide, reflecting the actual mechanism (product-listing photo verification), not generic "brand protection" naming
-- [ ] Once chosen, do a single find-and-replace pass across docs/ and src/ — don't rename incrementally/partially
+- [ ] REJECT all three current finalists: Vantle (vantle.ai active AI/e-learning product), Marqline (Swiss company + MARQLINE INDUSTRIES INDIA PRIVATE LIMITED), Glintra (Alkem Laboratories trademark for pharma/skincare)
+- [ ] Generate 30+ NEW candidates (avoiding all previously rejected names: BrandLens, Vantle, Marqline, Glintra, and all Phase 2 eliminated names)
+- [ ] Prioritize invented/brandable names over dictionary mashups
+- [ ] Phase 2: First elimination to TOP 10
+- [ ] Phase 3: Gemini independent collision audit (web, GitHub, Product Hunt, startup databases, Indian trademark surface check)
+- [ ] Phase 4: Gemini red-team on remaining candidates
+- [ ] Phase 5: Final decision with documented rationale
+- [ ] Create docs/NAMING_V2.md, docs/NAMING_AUDIT_V2.md, docs/NAMING_DECISION.md
+- [ ] Only then set NAMING STATUS = FINAL in docs/NAMING_DECISION.md
+- [ ] Only then OPENCODE performs repository-wide rename
+**VERIFICATION:** All three current finalists have verified collisions. Vantle → vantle.ai (AI/e-learning), Marqline → Swiss company + Indian company, Glintra → Alkem Laboratories pharma trademark.
 
 ### T-020: Risk-language cleanup in UI/code copy (non-blocking)
 **OWNER:** GEMINI / OPENCODE
@@ -418,3 +426,25 @@
 - [ ] The page's own `onerror` fallback means this won't show a broken-image icon — it'll silently swap to a generic "Official Image" placeholder SVG. That's worse for the demo, not better: it means the side-by-side comparison — the product's entire central "gotcha" moment (`docs/DEMO.md`) — has *nothing real* on the official-photo side, and a presenter clicking the demo button on stage wouldn't get a visual warning that anything's wrong until they look closely.
 - [ ] Fix: replace with a verified-working, stable image URL. Recommend testing the replacement with `curl -o /dev/null -w '%{http_code}' <url>` (or equivalent) before committing it, and re-testing periodically — a hardcoded external CDN URL for a demo asset is inherently fragile (this is presumably exactly how the current one died). Consider hosting the demo reference image as a static asset within this repo/deployment instead of depending on an external brand's CDN staying stable.
 **VERIFICATION NEEDED:** Load the demo example and manually confirm the "Official Brand Photo" panel actually renders a real product photo, not the placeholder SVG.
+
+### T-029: Lens Matrix Verification + Image Upload Flow
+**OWNER:** OPENCODE
+**STATUS:** IN_PROGRESS
+**PRIORITY:** P0
+**FILES:** scripts/lens-matrix.ts, docs/LENS_API_VERIFICATION.md, tests/fixtures/google_lens*.json, docs/LENS_SPIKE_V2.md
+**DEPENDENCIES:** T-017 (reopened)
+**ACCEPTANCE CRITERIA:**
+- [ ] Create docs/LENS_API_VERIFICATION.md with current official SerpApi documentation: ENGINE, REQUIRED PARAMETERS, SUPPORTED `type` VALUES, IMAGE URL FLOW, IMAGE UPLOAD FLOW, EXPECTED RESPONSE SECTIONS, CURRENT EXAMPLE RESPONSE SHAPES, KNOWN LIMITATIONS
+- [ ] Implement Image API upload flow: upload image → get image_id → call google_lens with image_id
+- [ ] Run controlled matrix tests:
+  - TEST A: engine=google_lens, type=visual_matches, image_id=<uploaded>
+  - TEST B: engine=google_lens, type=exact_matches, image_id=<same>
+  - TEST C: engine=google_lens, type=products, image_id=<same>
+  - OPTIONAL TEST D: engine=google_lens, type=all, image_id=<same>
+- [ ] Also test public URL flow once if safe
+- [ ] For each call record: HTTP status, search_parameters.type, top-level response keys, visual_matches count, exact_matches count, products/relevant product-result count, ai_overview present?, error present?, image fields present?, source fields present?, price fields present?
+- [ ] Document in docs/LENS_API_VERIFICATION.md and docs/LENS_SPIKE_V2.md
+- [ ] If structured results work: update fixtures, normalizers, visual scoring, architecture, demo, README with ACTUAL response shape. Retest variants.
+- [ ] If structured results still don't work: document exact request parameters, response top-level keys, HTTP success/error, image accessibility, image upload success, SerpApi search id. Classify as API BEHAVIOR LIMITATION.
+- [ ] Compare against our previous spike implementation (scripts/lens-spike.ts) — identify mismatches
+**VERIFICATION:** Previous T-017 conclusion may have tested wrong request path. Official SerpApi docs show dedicated tabs (visual_matches, exact_matches, products) and Image API upload flow. Need controlled verification of each mode.

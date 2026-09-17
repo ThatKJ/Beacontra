@@ -9,9 +9,72 @@
   },
   "search_parameters": {
     "engine": "google_lens",
-    "image_url": "https://example.com/official-product.jpg"
+    "url": "https://example.com/official-product.jpg",
+    "type": "products",
+    "hl": "en",
+    "country": "in"
   },
   "search_information": {},
+  "visual_matches": [
+    {
+      "position": 1,
+      "title": "Official Product - Brand Website",
+      "link": "https://www.brandwebsite.com/product/official",
+      "source": "brandwebsite.com",
+      "thumbnail": "https://example.com/official-product.jpg",
+      "image": "https://example.com/official-product.jpg",
+      "source_icon": "https://example.com/favicon.ico",
+      "rating": 4.5,
+      "reviews": 1240,
+      "price": {
+        "value": "₹2,999",
+        "extracted_value": 2999,
+        "currency": "₹"
+      },
+      "in_stock": true,
+      "source_icon": "https://example.com/favicon.ico",
+      "thumbnail_width": 225,
+      "thumbnail_height": 225,
+      "image_width": 445,
+      "image_height": 1000
+    }
+  ],
+  "exact_matches": [
+    {
+      "position": 1,
+      "title": "Official Product - Brand Website",
+      "link": "https://www.brandwebsite.com/product/official",
+      "source": "brandwebsite.com",
+      "thumbnail": "https://example.com/official-product.jpg",
+      "source_icon": "https://example.com/favicon.ico",
+      "actual_image_width": 445,
+      "actual_image_height": 1000
+    }
+  ],
+  "products": [
+    {
+      "position": 1,
+      "title": "Official Product - Brand Website",
+      "link": "https://www.brandwebsite.com/product/official",
+      "source": "brandwebsite.com",
+      "thumbnail": "https://example.com/official-product.jpg",
+      "image": "https://example.com/official-product.jpg",
+      "source_icon": "https://example.com/favicon.ico",
+      "price": {
+        "value": "₹2,999",
+        "extracted_value": 2999,
+        "currency": "₹"
+      },
+      "in_stock": true,
+      "rating": 4.5,
+      "reviews": 1240,
+      "source_icon": "https://example.com/favicon.ico",
+      "thumbnail_width": 225,
+      "thumbnail_height": 225,
+      "image_width": 445,
+      "image_height": 1000
+    }
+  ],
   "ai_overview": {
     "page_token": "test-page-token",
     "serpapi_link": "https://serpapi.com/search.json?engine=google_ai_overview&page_token=test-page-token"

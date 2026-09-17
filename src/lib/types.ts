@@ -107,7 +107,13 @@ export type TrendsSearchParams = z.infer<typeof TrendsSearchParams>;
 export const LensSearchParams = BaseSearchParams.extend({
   engine: z.literal('google_lens'),
   url: z.string().url().optional(),
-  image_url: z.string().url().optional(),
+  image_id: z.string().optional(),
+  type: z.enum(['all', 'about_this_image', 'products', 'exact_matches', 'visual_matches']).optional(),
+  hl: z.string().length(2).optional(),
+  country: z.string().length(2).optional(),
+  q: z.string().optional(),
+  safe: z.enum(['active', 'off']).optional(),
+  auto_crop: z.boolean().optional(),
 });
 export type LensSearchParams = z.infer<typeof LensSearchParams>;
 
@@ -201,16 +207,34 @@ export const JobResult = z.object({
 export type JobResult = z.infer<typeof JobResult>;
 
 export const LensMatchResult = z.object({
-  thumbnail: z.string().url().optional(),
-  link: z.string().url().optional(),
+  position: z.number().optional(),
   title: z.string().optional(),
+  link: z.string().url().optional(),
   source: z.string().optional(),
+  thumbnail: z.string().url().optional(),
+  image: z.string().url().optional(),
+  source_icon: z.string().url().optional(),
+  rating: z.number().optional(),
+  reviews: z.number().optional(),
+  price: z.object({
+    value: z.string().optional(),
+    extracted_value: z.number().optional(),
+    currency: z.string().optional(),
+  }).optional(),
+  in_stock: z.boolean().optional(),
+  thumbnail_width: z.number().optional(),
+  thumbnail_height: z.number().optional(),
+  image_width: z.number().optional(),
+  image_height: z.number().optional(),
+  actual_image_width: z.number().optional(),
+  actual_image_height: z.number().optional(),
 });
 export type LensMatchResult = z.infer<typeof LensMatchResult>;
 
 export const LensSearchResult = z.object({
-  exact_matches: z.array(LensMatchResult).optional(),
   visual_matches: z.array(LensMatchResult).optional(),
+  exact_matches: z.array(LensMatchResult).optional(),
+  products: z.array(LensMatchResult).optional(),
   text_results: z.array(z.object({
     text: z.string(),
     source: z.string().optional(),
@@ -220,6 +244,25 @@ export const LensSearchResult = z.object({
     title: z.string().optional(),
     description: z.string().optional(),
     image_url: z.string().url().optional(),
+  }).optional(),
+  related_content: z.array(z.object({
+    title: z.string().optional(),
+    link: z.string().url().optional(),
+    source: z.string().optional(),
+  })).optional(),
+  organic_results: z.array(z.object({
+    position: z.number().optional(),
+    title: z.string().optional(),
+    link: z.string().url().optional(),
+    snippet: z.string().optional(),
+  })).optional(),
+  suggested_searches: z.array(z.object({
+    name: z.string().optional(),
+    link: z.string().url().optional(),
+  })).optional(),
+  ai_overview: z.object({
+    page_token: z.string().optional(),
+    serpapi_link: z.string().url().optional(),
   }).optional(),
 });
 export type LensSearchResult = z.infer<typeof LensSearchResult>;
@@ -248,6 +291,14 @@ export const TrendsDataPoint = z.object({
 });
 export type TrendsDataPoint = z.infer<typeof TrendsDataPoint>;
 
+const RelatedTopicSchema = z.object({
+  topic: z.object({
+    title: z.string(),
+    topic_type: z.string(),
+  }),
+  value: z.number(),
+});
+
 export const SerpApiResponseSchema = z.object({
   search_metadata: SearchMetadata,
   search_parameters: BaseSearchParams,
@@ -257,7 +308,13 @@ export const SerpApiResponseSchema = z.object({
   place_results: LocalResult.optional(),
   shopping_results: z.array(ShoppingResult).optional(),
   jobs_results: z.array(JobResult).optional(),
-  lens_results: LensSearchResult.optional(),
+  visual_matches: z.array(LensMatchResult).optional(),
+  exact_matches: z.array(LensMatchResult).optional(),
+  products: z.array(LensMatchResult).optional(),
+  ai_overview: z.object({
+    page_token: z.string().optional(),
+    serpapi_link: z.string().url().optional(),
+  }).optional(),
   amazon_product: AmazonProductResult.optional(),
   interest_over_time: z.object({
     timeline_data: z.array(TrendsDataPoint),
@@ -266,13 +323,7 @@ export const SerpApiResponseSchema = z.object({
     location: z.string(),
     value: z.number(),
   })).optional(),
-  related_topics: z.array(z.object({
-    topic: z.object({
-      title: z.string(),
-      type: z.string(),
-    }),
-    value: z.number(),
-  })).optional(),
+  related_topics: z.array(RelatedTopicSchema).optional(),
   related_queries: z.array(z.object({
     query: z.string(),
     value: z.number(),

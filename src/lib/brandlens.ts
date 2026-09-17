@@ -194,51 +194,137 @@ export class BrandLensService {
     officialImageUrl: string
   ): Promise<LensEvidence> {
     try {
-      const lensParams: LensSearchParams = {
-        engine: 'google_lens',
-        image_url: listingImageUrl,
-      };
-      const lensResponse = await this.client.search(lensParams);
-      const lensResults = lensResponse.lens_results;
+      // First, try to upload the image to get image_id for better exact_matches
+      let imageId: string | undefined;
+      try {
+        imageId = await this.uploadImage(listingImageUrl);
+      } catch {
+        // Upload failed, continue with URL
+      }
 
-      // Lens returned no structured results (ai_overview only)
-      if (!lensResults) {
+      // Try multiple Lens modes for best coverage
+      // 1. Try exact_matches with image_id (best for exact matches)
+      // 2. Try products with URL (best for commercial product matches)
+      // 3. Try all with URL (broad coverage)
+      
+      let lensResponse: SerpApiResponse;
+
+      if (imageId) {
+        // Try exact_matches with image_id first (best for finding exact matches)
+        const exactParams: LensSearchParams = {
+          engine: 'google_lens',
+          image_id: imageId,
+          type: 'exact_matches',
+        };
+        lensResponse = await this.client.search(exactParams);
+        
+        // If no exact matches, try products with URL
+        if (!lensResponse.exact_matches?.length) {
+          const productParams: LensSearchParams = {
+            engine: 'google_lens',
+            url: listingImageUrl,
+            type: 'products',
+          };
+          lensResponse = await this.client.search(productParams);
+        }
+      } else {
+        // No image_id, use URL with products type
+        const productParams: LensSearchParams = {
+          engine: 'google_lens',
+          url: listingImageUrl,
+          type: 'products',
+        };
+        lensResponse = await this.client.search(productParams);
+      }
+
+      // Check for structured results
+      const visualMatches = lensResponse.visual_matches || [];
+      const exactMatches = lensResponse.exact_matches || [];
+      const products = lensResponse.products || [];
+      const allMatches = [...visualMatches, ...exactMatches, ...products];
+
+      if (allMatches.length === 0 && !lensResponse.ai_overview) {
         return {
           ...this.emptyLensEvidence(),
           hasLensData: false,
         };
       }
 
-      const exactMatches = lensResults.exact_matches || [];
-      const visualMatches = lensResults.visual_matches || [];
-
       const exactMatchSources = exactMatches.map(m => m.source).filter((s): s is string => Boolean(s));
       const visualMatchSources = visualMatches.map(m => m.source).filter((s): s is string => Boolean(s));
+      const productSources = products.map(m => m.source).filter((s): s is string => Boolean(s));
 
+      // Check for exact match with official image
       const hasExactMatch = exactMatches.some(
         m => m.link?.includes(officialImageUrl) || m.source?.includes('official') || m.source?.includes('brand')
       );
-      const hasVisualMatch = visualMatches.length > 0;
+
+      // Check for visual match with official image
+      const hasVisualMatch = visualMatches.some(
+        m => m.link?.includes(officialImageUrl) || m.source?.includes('official') || m.source?.includes('brand')
+      );
+
+      // Check for product match with official image
+      const hasProductMatch = products.some(
+        m => m.link?.includes(officialImageUrl) || m.source?.includes('official') || m.source?.includes('brand')
+      );
 
       let matchConfidence: 'high' | 'medium' | 'low' | 'none' = 'none';
       if (hasExactMatch) matchConfidence = 'high';
-      else if (visualMatches.length >= 3) matchConfidence = 'medium';
-      else if (visualMatches.length > 0) matchConfidence = 'low';
+      else if (hasVisualMatch || hasProductMatch) {
+        if (visualMatches.length >= 3 || products.length >= 3) matchConfidence = 'medium';
+        else matchConfidence = 'low';
+      }
 
       return {
         hasExactMatch,
-        hasVisualMatch,
+        hasVisualMatch: hasVisualMatch || hasProductMatch,
         hasLensData: true,
         exactMatchSources,
-        visualMatchSources,
+        visualMatchSources: [...visualMatchSources, ...productSources],
         matchConfidence,
-        details: lensResults,
+        details: {
+          visual_matches: visualMatches,
+          exact_matches: exactMatches,
+          products: products,
+          ai_overview: lensResponse.ai_overview,
+        },
       };
     } catch {
       return {
         ...this.emptyLensEvidence(),
         hasLensData: false,
       };
+    }
+  }
+
+  private async uploadImage(imageUrl: string): Promise<string | undefined> {
+    try {
+      const apiKey = this.client.getApiKey?.() || '';
+      if (!apiKey) return undefined;
+
+      const imgResponse = await fetch(imageUrl);
+      if (!imgResponse.ok) return undefined;
+
+      const imageBuffer = await imgResponse.arrayBuffer();
+      if (imageBuffer.byteLength > 500 * 1024) return undefined;
+
+      const formData = new FormData();
+      const blob = new Blob([imageBuffer]);
+      formData.append('image', blob, 'upload.jpg');
+      formData.append('api_key', apiKey);
+
+      const uploadResponse = await fetch('https://serpapi.com/image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) return undefined;
+
+      const uploadResult = await uploadResponse.json() as { image_id?: string };
+      return uploadResult.image_id;
+    } catch {
+      return undefined;
     }
   }
 

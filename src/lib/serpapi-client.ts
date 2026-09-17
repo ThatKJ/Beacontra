@@ -74,6 +74,10 @@ export class SerpApiClient {
     return this.fixtureMode;
   }
 
+  getApiKey(): string {
+    return this.options.apiKey || '';
+  }
+
   getCreditUsage(): number {
     return this.creditUsage;
   }
