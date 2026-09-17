@@ -1,0 +1,23 @@
+{
+  "search_metadata": {
+    "id": "test-ai-overview-1",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/test-ai-overview-1.json",
+    "created_at": "2026-09-17T10:00:00Z",
+    "processed_at": "2026-09-17T10:00:01Z",
+    "total_time_taken": 1.23
+  },
+  "search_parameters": {
+    "engine": "google_ai_overview",
+    "q": "test query",
+    "gl": "us",
+    "hl": "en"
+  },
+  "search_information": {
+    "total_results": 0
+  },
+  "ai_overview": {
+    "page_token": "test-page-token",
+    "serpapi_link": "https://serpapi.com/search.json?engine=google_ai_overview&page_token=test-page-token"
+  }
+}

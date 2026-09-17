@@ -121,8 +121,8 @@ export const SearchMetadata = z.object({
   id: z.string(),
   status: z.string(),
   json_endpoint: z.string().url(),
-  created_at: z.string().datetime(),
-  processed_at: z.string().datetime(),
+  created_at: z.string(),
+  processed_at: z.string(),
   total_time_taken: z.number(),
 });
 export type SearchMetadata = z.infer<typeof SearchMetadata>;

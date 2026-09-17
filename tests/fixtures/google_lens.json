@@ -12,33 +12,8 @@
     "image_url": "https://example.com/official-product.jpg"
   },
   "search_information": {},
-  "lens_results": {
-    "exact_matches": [
-      {
-        "thumbnail": "https://example.com/official-product.jpg",
-        "link": "https://www.brandwebsite.com/product/official",
-        "title": "Official Product - Brand Website",
-        "source": "brandwebsite.com"
-      }
-    ],
-    "visual_matches": [
-      {
-        "thumbnail": "https://marketplace.com/listing/suspect-product.jpg",
-        "link": "https://www.flipkart.com/suspect-product/p/123456",
-        "title": "Similar Product - Unauthorized Seller",
-        "source": "flipkart.com"
-      },
-      {
-        "thumbnail": "https://marketplace.com/listing/another-fake.jpg",
-        "link": "https://www.amazon.in/dp/B00FAKE123",
-        "title": "Another Listing with Different Branding",
-        "source": "amazon.in"
-      }
-    ],
-    "knowledge_graph": {
-      "title": "Official Product Name",
-      "description": "Genuine product from authorized brand",
-      "image_url": "https://example.com/official-product.jpg"
-    }
+  "ai_overview": {
+    "page_token": "test-page-token",
+    "serpapi_link": "https://serpapi.com/search.json?engine=google_ai_overview&page_token=test-page-token"
   }
 }

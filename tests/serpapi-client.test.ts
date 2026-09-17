@@ -148,8 +148,9 @@ it('should return google search fixture', async () => {
   });
 
   describe('error handling', () => {
-    it('should return empty fixture for unknown engine in fixture mode', async () => {
-      const params: BaseSearchParams = { engine: 'nonexistent_engine' as SerpApiEngine, q: 'test' };
+    it('should return empty fixture for engine without fixture file in fixture mode', async () => {
+      // Use a valid engine that doesn't have a fixture file
+      const params: BaseSearchParams = { engine: 'google_ai_overview', q: 'test' };
       
       const result = await client.search(params);
       

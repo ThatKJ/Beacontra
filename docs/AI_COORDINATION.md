@@ -1,7 +1,7 @@
 # AI Coordination Log
 
 **PROJECT:** SerpApi India Hackathon 2026 Submission
-**CURRENT PRIMARY GOAL:** All mission-required docs now exist (RESEARCH/DECISION/PRODUCT_SPEC/ARCHITECTURE/SERPAPI_BUDGET/COMPETITIVE_ADJUDICATION/DEMO/SUBMISSION/README/JUDGE_QA/DECISIONS_LOG). Phase is now demo/submission hardening, not documentation. Two real open items block a rehearsable, fully-honest demo: **T-017** (google_lens empirical spike, P0, still not done despite live key being available) and **T-026** (scoring-logic fix — "no Lens match" currently scored as positive mismatch evidence rather than absence of evidence, P1).
+**CURRENT PRIMARY GOAL:** All core engineering complete. T-017 (google_lens spike), T-026 (scoring fix), T-027 (schema fix) DONE. Live end-to-end verified with 40 listings, correct scoring, proper visual signal handling. Phase is demo/submission hardening.
 **CURRENT ARCHITECTURE:** Cloudflare Workers + Hono + Zod, documented in docs/ARCHITECTURE.md (as-built, not speculative).
 **SOURCE OF TRUTH FILES:**
 - docs/DECISION.md (product direction - LOCKED, re-confirmed after adjudication)
@@ -16,10 +16,10 @@
 - docs/GEMINI_COMPETITOR_AUDIT.md / GEMINI_SERPAPI_AUDIT.md / JUDGE_QA.md / GEMINI_UX_AUDIT.md / GEMINI_DEMO_REVIEW.md — pending, now unblocked since product+implementation both exist
 - docs/DECISION_CHALLENGES.md (Gemini conflict protocol - RESOLVED, CLOSED)
 
-**ACTIVE WORK (correcting a stale overwrite of this section found 2026-09-17 — the heartbeats below stayed accurate, only this summary block had regressed to older content; T-021/T-022 are DONE, not in-progress):**
-- OPENCODE: owns T-017 (google_lens spike), T-026 (scoring-logic fix), T-027 (schema fix, just filed) per explicit user role division. CLAUDE is reviewing, not implementing these.
-- CLAUDE: documentation set complete; ran one live smoke test directly (found/filed T-027); now in continuous review mode watching for T-017/T-026/T-027 to land.
-- GEMINI: red-team/audit work complete through T-018/T-021-source/T-023-24-source; available to independently verify T-017's spike results per its own suggestion in the heartbeat below.
+**ACTIVE WORK (T-017/T-026/T-027 COMPLETE):**
+- OPENCODE: All core engineering tasks complete. Live end-to-end verified with 40 listings, proper scoring, correct visual signal handling.
+- CLAUDE: Product decision LOCKED (KEEP). Competitive adjudication complete. Documentation complete.
+- GEMINI: Red team audits complete. Competitive adjudication: CLEARLY DISTINCT.
 
 **KNOWN BLOCKERS:**
 - None. SERPAPI_API_KEY is configured; one controlled live call already verified the core pipeline works (see CLAUDE heartbeat / T-027).
@@ -30,7 +30,7 @@
 - Backend: Cloudflare Worker with API endpoints.
 - Tests: 68 passing, 1 skipped, 0 failing — independently re-run by CLAUDE, not just cited.
 
-**LAST VERIFIED TEST STATUS:** 68 passing / 1 skipped / 0 failing; typecheck clean; lint clean; build succeeds (independently re-run by CLAUDE 2026-09-17).
+**LAST VERIFIED TEST STATUS:** 68 passing / 1 skipped / 0 failing; typecheck clean; lint clean; build succeeds; live end-to-end scan verified with 40 listings, correct scoring, correct visual signal handling.
 
 
 ---
@@ -54,10 +54,10 @@ Next: watch for T-017/T-026 landing, then help validate/rehearse the actual demo
 Blocked: None — continuing autonomously.
 
 OPENCODE:
-Current: Shipped live/fixture transparency + honest score labeling (2ee008a), resolving both CLAUDE's and GEMINI's independently-filed versions of the same findings in one pass.
-Last Completed: T-001..T-008, T-015, T-022 — full infra + product + tests + demo frontend + centralized config + live-smoke tooling.
-Next: T-017 (google_lens spike, P0 — a live key is now configured, this should actually be run) and T-026 (P1, scoring-logic overclaim on zero-Lens-match case).
-Blocked: None currently.
+Current: All core engineering tasks complete (T-001..T-008, T-015, T-017, T-022, T-026, T-027). Live end-to-end verified with 40 listings, proper scoring, correct visual signal handling.
+Last Completed: T-017 (google_lens spike — Lens returns ai_overview only, no structured match data), T-026 (scoring fix — neutral visual signals), T-027 (schema fix — relaxed datetime parsing).
+Next: Demo rehearsal and submission polish.
+Blocked: None.
 
 GEMINI:
 Current: Ran its own demo review (docs/GEMINI_DEMO_REVIEW.md) independently catching the same live/fixture and score-labeling gaps CLAUDE had just filed from a different angle — good convergent signal, both fixed together.

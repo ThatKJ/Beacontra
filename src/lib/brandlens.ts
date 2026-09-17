@@ -33,6 +33,7 @@ export interface ListingCandidate {
 export interface LensEvidence {
   hasExactMatch: boolean;
   hasVisualMatch: boolean;
+  hasLensData: boolean;
   exactMatchSources: string[];
   visualMatchSources: string[];
   matchConfidence: 'high' | 'medium' | 'low' | 'none';
@@ -57,10 +58,11 @@ export interface SellerSignal {
 
 export interface VisualSignal {
   isAnomalous: boolean;
-  anomalyType: 'mismatch' | 'stolen_photo' | 'unverified_photo_source' | 'different_product' | 'match' | 'not_verified';
+  anomalyType: 'matched' | 'visual_match' | 'no_evidence' | 'unavailable' | 'unverified_photo_source' | 'different_product' | 'match' | 'not_verified';
   confidence: 'high' | 'medium' | 'low';
   matchSources: string[];
   details: string;
+  status?: 'matched' | 'visual_match' | 'no_evidence' | 'unavailable';
 }
 
 
@@ -161,7 +163,6 @@ export class BrandLensService {
     const params: BaseSearchParams = {
       engine: 'google_shopping',
       q: productName,
-      location: 'Bangalore, Karnataka, India',
       gl: 'in',
       hl: 'en',
     };
@@ -200,8 +201,12 @@ export class BrandLensService {
       const lensResponse = await this.client.search(lensParams);
       const lensResults = lensResponse.lens_results;
 
+      // Lens returned no structured results (ai_overview only)
       if (!lensResults) {
-        return this.emptyLensEvidence();
+        return {
+          ...this.emptyLensEvidence(),
+          hasLensData: false,
+        };
       }
 
       const exactMatches = lensResults.exact_matches || [];
@@ -223,13 +228,17 @@ export class BrandLensService {
       return {
         hasExactMatch,
         hasVisualMatch,
+        hasLensData: true,
         exactMatchSources,
         visualMatchSources,
         matchConfidence,
         details: lensResults,
       };
     } catch {
-      return this.emptyLensEvidence();
+      return {
+        ...this.emptyLensEvidence(),
+        hasLensData: false,
+      };
     }
   }
 
@@ -237,6 +246,7 @@ export class BrandLensService {
     return {
       hasExactMatch: false,
       hasVisualMatch: false,
+      hasLensData: false,
       exactMatchSources: [],
       visualMatchSources: [],
       matchConfidence: 'none',
@@ -337,47 +347,65 @@ export class BrandLensService {
   }
 
   private analyzeVisual(evidence: LensEvidence): VisualSignal {
+    // Lens unavailable or returned no structured data (ai_overview only)
+    if (!evidence.hasLensData) {
+      return {
+        isAnomalous: false,
+        anomalyType: 'unavailable',
+        confidence: 'low',
+        matchSources: [],
+        details: 'Visual verification unavailable (Lens returned AI overview only, no structured match data)',
+        status: 'unavailable',
+      };
+    }
+
+    // Lens worked and found exact match
     if (evidence.hasExactMatch) {
       return {
         isAnomalous: false,
-        anomalyType: 'match',
+        anomalyType: 'matched',
         confidence: 'high',
         matchSources: evidence.exactMatchSources,
         details: 'Listing photo matches official product image',
+        status: 'matched',
       };
     }
 
-    if (!evidence.hasVisualMatch) {
+    // Lens worked and found visual matches
+    if (evidence.hasVisualMatch) {
+      const hasBrandMismatch = evidence.visualMatchSources.some(
+        s => !s.includes('official') && !s.includes('brand') && !s.includes('manufacturer')
+      );
+
+      if (hasBrandMismatch) {
+        return {
+          isAnomalous: true,
+          anomalyType: 'unverified_photo_source',
+          confidence: 'high',
+          matchSources: evidence.visualMatchSources,
+          details: `Listing photo matches other sources (${evidence.visualMatchSources.join(', ')}) but not official brand - unverified photo origin requiring review`,
+          status: 'visual_match',
+        };
+      }
+
       return {
-        isAnomalous: true,
-        anomalyType: 'different_product',
+        isAnomalous: false,
+        anomalyType: 'visual_match',
         confidence: 'medium',
-        matchSources: [],
-        details: 'No visual matches found - listing photo appears to be different product',
-      };
-    }
-
-    const hasBrandMismatch = evidence.visualMatchSources.some(
-      s => !s.includes('official') && !s.includes('brand') && !s.includes('manufacturer')
-    );
-
-    if (hasBrandMismatch) {
-      return {
-        isAnomalous: true,
-        anomalyType: 'unverified_photo_source',
-        confidence: 'high',
         matchSources: evidence.visualMatchSources,
-        details: `Listing photo matches other sources (${evidence.visualMatchSources.join(', ')}) but not official brand - unverified photo origin requiring review`,
+        details: `Visual matches found but not with official brand - possible variant or similar product`,
+        status: 'visual_match',
       };
     }
 
-
+    // Lens worked but found no matches
     return {
-      isAnomalous: true,
-      anomalyType: 'mismatch',
-      confidence: 'medium',
-      matchSources: evidence.visualMatchSources,
-      details: `Visual match found but not with official product - possible different variant`,
+      isAnomalous: false,
+      anomalyType: 'no_evidence',
+      confidence: 'low',
+      matchSources: [],
+      details: 'Visual search completed but no matches found - inconclusive',
+      status: 'no_evidence',
     };
   }
 
@@ -405,12 +433,21 @@ export class BrandLensService {
       score += 15;
     }
 
+    // Visual signal scoring - only add risk for actual anomalies
+    // matched, visual_match, no_evidence, unavailable are NEUTRAL (not anomalous)
     if (visualSignal.isAnomalous) {
       const visualWeight = visualSignal.confidence === 'high' ? 40 : visualSignal.confidence === 'medium' ? 25 : 10;
       score += visualWeight;
       reasons.push(`Visual anomaly: ${visualSignal.details}`);
     } else {
-      score += 20;
+      // Neutral visual signals (matched, visual_match, no_evidence, unavailable) add minimal base score
+      // matched reduces risk slightly, others add small base
+      if (visualSignal.status === 'matched') {
+        score -= 5; // Slight reduction for confirmed match
+      } else {
+        score += 5; // Small base for other neutral statuses
+      }
+      reasons.push(`Visual: ${visualSignal.details}`);
     }
 
     let confidence: 'high' | 'medium' | 'low';

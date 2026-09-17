@@ -58,7 +58,10 @@ export class SerpApiClient {
     this.maxRetries = options.maxRetries ?? MAX_RETRIES;
     this.cache = options.cache ?? createTieredCache();
     this.fixtureMode = options.fixtureMode ?? false;
+    this.options = options;
   }
+
+  private options: SerpApiClientOptions;
 
   estimateCredits(params: BaseSearchParams): CreditEstimate {
     const engine = params.engine;
@@ -232,8 +235,10 @@ export class SerpApiClient {
   }
 
   private async loadFixture<T>(engine: SerpApiEngine): Promise<SerpApiResponse<T>> {
+    const fixturesPath = this.options.fixturesPath ?? '../../tests/fixtures';
     try {
-      const module = await import(`../../tests/fixtures/${engine}.json`);
+      // Use dynamic import - this works in the Vitest Worker environment
+      const module = await import(`${fixturesPath}/${engine}.json`);
       return module.default as SerpApiResponse<T>;
     } catch {
       return this.getEmptyFixture<T>(engine);
