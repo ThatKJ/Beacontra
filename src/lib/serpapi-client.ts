@@ -67,6 +67,10 @@ export class SerpApiClient {
     return { estimatedCredits, engine, isAdvanced: isAdvanced as boolean };
   }
 
+  isFixtureMode(): boolean {
+    return this.fixtureMode;
+  }
+
   getCreditUsage(): number {
     return this.creditUsage;
   }

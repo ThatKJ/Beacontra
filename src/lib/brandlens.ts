@@ -57,11 +57,12 @@ export interface SellerSignal {
 
 export interface VisualSignal {
   isAnomalous: boolean;
-  anomalyType: 'mismatch' | 'stolen_photo' | 'different_product' | 'match' | 'not_verified';
+  anomalyType: 'mismatch' | 'stolen_photo' | 'unverified_photo_source' | 'different_product' | 'match' | 'not_verified';
   confidence: 'high' | 'medium' | 'low';
   matchSources: string[];
   details: string;
 }
+
 
 export interface FusedResult {
   listing: ListingCandidate;
@@ -77,6 +78,7 @@ export interface FusedResult {
 
 export interface BrandLensScanResult {
   scanId: string;
+  dataSource: 'live' | 'fixture';
   productName: string;
   officialImageUrl: string;
   totalListingsFound: number;
@@ -145,6 +147,7 @@ export class BrandLensService {
 
     return {
       scanId,
+      dataSource: this.client.isFixtureMode() ? 'fixture' : 'live',
       productName: input.productName,
       officialImageUrl: input.officialImageUrl,
       totalListingsFound: candidates.length,
@@ -361,12 +364,13 @@ export class BrandLensService {
     if (hasBrandMismatch) {
       return {
         isAnomalous: true,
-        anomalyType: 'stolen_photo',
+        anomalyType: 'unverified_photo_source',
         confidence: 'high',
         matchSources: evidence.visualMatchSources,
-        details: `Listing photo matches other sources (${evidence.visualMatchSources.join(', ')}) but not official brand - likely stolen/reused image`,
+        details: `Listing photo matches other sources (${evidence.visualMatchSources.join(', ')}) but not official brand - unverified photo origin requiring review`,
       };
     }
+
 
     return {
       isAnomalous: true,

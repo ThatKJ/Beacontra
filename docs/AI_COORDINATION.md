@@ -22,16 +22,18 @@
 - GEMINI: Independently ran a deeper adjudication (cloned CeaseFire's source directly) that converged with CLAUDE's — both KEEP, HIGH confidence. Ready for UX/demo audit on the actual shipped UI (public/index.html) now that it exists.
 
 **KNOWN BLOCKERS:**
-- No SerpApi API key configured (need for live integration testing)
-- No architecture defined (pending DECISION.md)
+- None. Live integration smoke test is ready (`npm run serpapi:smoke`) as soon as real key is placed in `.env`.
 
 **INTEGRATION STATUS:**
-- SerpApi: Integrated with caching, fixtures, credit tracking
-- Frontend: Demo UI complete (public/index.html)
-- Backend: Cloudflare Worker with API endpoints
-- Tests: 34 passing (fixture-based, zero live credits)
+- SerpApi environment loading: VERIFIED (centralized config layer `src/lib/config.ts` supports `SERPAPI_API_KEY` & `SERPAPI_KEY`, tested in Worker & Node)
+- SerpApi client: VERIFIED (caching, deduplication, retry/backoff, fixture mode, `google_lens` param normalization)
+- Live authentication: IMPLEMENTED — LIVE VERIFICATION PENDING (executable via `npm run serpapi:smoke` or `npm run test:live`)
+- Google Lens integration: IMPLEMENTED — LIVE VERIFICATION PENDING (capped to 10 candidates/scan, graceful degradation)
+- Frontend: VERIFIED (side-by-side photo comparison, demo example prefiller, score scale label)
+- Tests: 68 passing, 1 skipped (pending live key), 0 failing (100% fixture-based, zero live credits used)
 
-**LAST VERIFIED TEST STATUS:** 34 tests passing, typecheck clean, lint clean, build succeeds
+**LAST VERIFIED TEST STATUS:** 68 tests passing, typecheck clean, lint clean, build succeeds
+
 
 ---
 

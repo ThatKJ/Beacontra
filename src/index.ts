@@ -3,10 +3,13 @@ import { cors } from 'hono/cors';
 import { SerpApiClient, SerpApiError } from './lib/serpapi-client';
 import { createTieredCache } from './lib/cache';
 import { createBrandLensService, type BrandLensInput } from './lib/brandlens';
+import { getSerpApiKey, isSerpApiConfigured, getSerpApiHealthStatus } from './lib/config';
 import type { BaseSearchParams, SerpApiEngine, SerpApiResponse } from './lib/types';
 
+
 interface Env {
-  SERPAPI_KEY: string;
+  SERPAPI_API_KEY?: string;
+  SERPAPI_KEY?: string;
   CACHE_KV: KVNamespace;
   ENVIRONMENT: string;
 }
@@ -15,7 +18,16 @@ const app = new Hono<{ Bindings: Env }>();
 
 app.use('*', cors());
 
-app.get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));
+app.get('/health', (c) => {
+  const health = getSerpApiHealthStatus(c.env as unknown as Record<string, unknown>);
+  return c.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    serpApi: {
+      configured: health.configured,
+    },
+  });
+});
 
 // Serve index.html for root and SPA routes
 app.get('/', async (c) => {
@@ -24,12 +36,23 @@ app.get('/', async (c) => {
 });
 
 function createClient(env: Env) {
+  const configured = isSerpApiConfigured(env as unknown as Record<string, unknown>);
+  let apiKey = '';
+  if (configured) {
+    try {
+      apiKey = getSerpApiKey(env as unknown as Record<string, unknown>);
+    } catch {
+      apiKey = '';
+    }
+  }
+
   return new SerpApiClient({
-    apiKey: env.SERPAPI_KEY,
+    apiKey,
     cache: createTieredCache(env.CACHE_KV),
-    fixtureMode: env.ENVIRONMENT === 'development' && !env.SERPAPI_KEY,
+    fixtureMode: !configured || (env.ENVIRONMENT === 'development' && !configured),
   });
 }
+
 
 app.post('/api/search', async (c) => {
   const env = c.env;
@@ -67,7 +90,8 @@ app.post('/api/search', async (c) => {
         statusCode as 400 | 401 | 403 | 404 | 429 | 500 | 502 | 503
       );
     }
-    console.error('Search error:', error);
+    const errMsg = error instanceof Error ? error.message : 'Internal error';
+    console.error('Search error:', errMsg);
     return c.json({ error: 'Internal server error' }, 500);
   }
 });
@@ -90,6 +114,7 @@ app.post('/api/brandlens/scan', async (c) => {
       data: result,
       meta: {
         scanId: result.scanId,
+        dataSource: result.dataSource,
         creditsUsed: result.creditsUsed,
         totalListingsFound: result.totalListingsFound,
       },
@@ -107,10 +132,12 @@ app.post('/api/brandlens/scan', async (c) => {
         statusCode as 400 | 401 | 403 | 404 | 429 | 500 | 502 | 503
       );
     }
-    console.error('BrandLens scan error:', error);
+    const errMsg = error instanceof Error ? error.message : 'Internal error';
+    console.error('BrandLens scan error:', errMsg);
     return c.json({ error: 'Internal server error' }, 500);
   }
 });
+
 
 app.get('/api/brandlens/results/:scanId', async (c) => {
   const scanId = c.req.param('scanId');

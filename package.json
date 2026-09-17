@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:live": "vitest run --config vitest.live.config.ts",
+    "serpapi:smoke": "tsx scripts/serpapi-smoke.ts",
     "cf-typegen": "wrangler types"
   },
   "dependencies": {
@@ -26,6 +27,7 @@
     "@types/node": "^22.0.0",
     "eslint": "^9.10.0",
     "prettier": "^3.3.0",
+    "tsx": "^4.23.13",
     "typescript": "^5.6.0",
     "typescript-eslint": "^8.0.0",
     "vitest": "^1.5.0",
