@@ -2,7 +2,7 @@
 
 **Status: draft, close to rehearsable — updated this session.** T-021 (visual side-by-side rendering in `public/index.html`) is DONE, verified directly. T-017 (`google_lens` spike) is substantially resolved — the request-path bugs (wrong param name, missing `type`, wrong response path) are fixed and verified, and a live matrix confirms Lens genuinely returns structured `exact_matches`/`visual_matches`/`products` data (`docs/LENS_SPIKE_V2.md`). **One real caveat before treating this as demo-proven:** that matrix was tested against the Google logo (an atypical, maximally-indexed image), not an ordinary marketplace product photo — the mechanism works, but whether it reliably produces a clean, camera-ready "gotcha" on the *actual* demo product/photo pair is not yet confirmed. Do one credit-conscious spot-check with the real chosen demo image (not another full parameter matrix) before rehearsing on camera.
 
-**Naming note:** the product is referred to below only as "this tool" / descriptively — a public name is still open (`docs/TASK_BOARD.md` T-019); do not record a demo that bakes in the "BrandLens" internal codename as a public-facing brand name.
+**Naming note:** naming is now FINAL — the product is **Beacontra** (`docs/NAMING_DECISION.md`). The script below has been updated to say the name naturally rather than "this tool."
 
 ---
 
@@ -14,7 +14,7 @@
 
 ### 0:15-0:30 — PRODUCT
 
-> "This tool takes your product name and your real product photo, finds live listings for it across marketplaces, and reverse-image-checks every one of them against your actual photo — not just the price or the seller name, the picture itself."
+> "This is Beacontra. It takes your product name and your real product photo, finds live listings for it across marketplaces, and reverse-image-checks every one of them against your actual photo — not just the price or the seller name, the picture itself."
 
 ### 0:30-1:45 — LIVE WORKFLOW (the magic)
 
@@ -25,7 +25,7 @@
 
 ### 1:45-2:15 — WHY IT'S DIFFERENT
 
-> "The closest thing that already exists in the SerpApi community gallery is a project called CeaseFire — but it's a domain-typosquatting scanner: you give it a brand name, it finds lookalike domains like `yourbrand-shop.com` and drafts takedown notices for phishing sites. That's a real, different problem. This tool doesn't look at domains at all — it looks at whether the photo on a real marketplace listing actually matches your real product. We checked this carefully, in both directions, before building on it — not just describing it as different, but proving it."
+> "The closest thing that already exists in the SerpApi community gallery is a project called CeaseFire — but it's a domain-typosquatting scanner: you give it a brand name, it finds lookalike domains like `yourbrand-shop.com` and drafts takedown notices for phishing sites. That's a real, different problem. Beacontra doesn't look at domains at all — it looks at whether the photo on a real marketplace listing actually matches your real product. We checked this carefully, in both directions, before building on it — not just describing it as different, but proving it."
 
 *(This is the CeaseFire-comparison beat from `docs/DECISION.md` mitigation #4 and `docs/COMPETITIVE_ADJUDICATION.md` — say it proactively and specifically, don't wait for a judge to ask. Naming the actual mechanism difference — domains vs. product photos — is what makes this land as a real answer instead of a defensive dodge.)*
 
@@ -49,5 +49,5 @@
 
 1. ~~T-021 (visual side-by-side rendering)~~ — DONE, verified.
 2. ~~T-017 (`google_lens` spike)~~ — request-path bugs fixed and verified; mechanism confirmed to return real structured data (tested on the Google logo, not yet on a realistic product photo — see status note above).
-3. A specific, pre-tested product+photo demo pair still needs to be chosen and spot-checked live (one targeted check, not another full matrix — credit-conscious per `docs/SERPAPI_BUDGET.md`) before the first full rehearsal. This is now the single remaining real blocker.
-4. The product's public name is still open (`docs/NAMING_V2.md`/`docs/NAMING_DECISION.md`) — this script deliberately avoids baking in "BrandLens," and should get the real name once `NAMING STATUS: FINAL`.
+3. A specific, pre-tested product+photo demo pair still needs to be chosen and spot-checked live (one targeted check, not another full matrix — credit-conscious per `docs/SERPAPI_BUDGET.md`) before the first full rehearsal, and the demo's reference-image URL is currently dead (T-028). This is now the single remaining real blocker.
+4. ~~Naming~~ — DONE. `NAMING STATUS: FINAL` — Beacontra. Script updated above.
