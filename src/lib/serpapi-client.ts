@@ -163,16 +163,31 @@ export class SerpApiClient {
       return this.loadFixture<T>(params.engine);
     }
 
+    if (!this.apiKey || !this.apiKey.trim()) {
+      throw new SerpApiError('SERPAPI_API_KEY is not configured.', params.engine, false, 401);
+    }
+
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         searchParams.append(key, String(value));
       }
     });
-    searchParams.set('api_key', this.apiKey);
+
+    // Normalize google_lens image parameter: SerpApi expects 'url'
+    if (params.engine === 'google_lens') {
+      const lensUrl = (params as Record<string, unknown>).url ?? (params as Record<string, unknown>).image_url;
+      if (lensUrl) {
+        searchParams.set('url', String(lensUrl));
+        searchParams.delete('image_url');
+      }
+    }
+
+    searchParams.set('api_key', this.apiKey.trim());
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.defaultTimeout);
+
 
     try {
       const response = await fetch(`${this.baseUrl}?${searchParams.toString()}`, {

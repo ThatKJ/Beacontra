@@ -1,9 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import process from 'node:process';
 import {
   getSerpApiKey,
   isSerpApiConfigured,
   getSerpApiHealthStatus,
 } from '../src/lib/config';
+
 
 describe('Centralized SerpApi Config Layer', () => {
   const originalApiKey = process.env.SERPAPI_API_KEY;
@@ -44,6 +46,8 @@ describe('Centralized SerpApi Config Layer', () => {
     expect(getSerpApiKey()).toBe('env-key-789');
     expect(isSerpApiConfigured()).toBe(true);
   });
+
+
 
   it('should reject blank or whitespace-only keys', () => {
     const env = { SERPAPI_API_KEY: '   ' };

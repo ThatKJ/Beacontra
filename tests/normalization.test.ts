@@ -201,7 +201,7 @@ describe('sanitizeForLogging', () => {
   it('should handle arrays', () => {
     const arr = [{ api_key: 'key1' }, { api_key: 'key2' }];
     const sanitized = sanitizeForLogging(arr) as Array<Record<string, unknown>>;
-    expect(sanitized[0].api_key).toBe('***');
-    expect(sanitized[1].api_key).toBe('***');
+    expect(sanitized[0]?.api_key).toBe('***');
+    expect(sanitized[1]?.api_key).toBe('***');
   });
 });
