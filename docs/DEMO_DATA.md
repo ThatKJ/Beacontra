@@ -88,13 +88,13 @@ If live API is unavailable, use fixture data that simulates:
 
 - [ ] Reference image URL returns 200 OK
 - [ ] `npm run serpapi:smoke` passes
-- [ ] `curl -X POST /api/brandlens/scan` returns live data with `dataSource: "live"`
+- [ ] `curl -X POST /api/brandlens/scan` (route path keeps the internal identifier; product is now Beacontra) returns live data with `dataSource: "live"`
 - [ ] Results show price anomalies, seller anomalies, visual signals
 - [ ] UI shows "⚡ LIVE SERPAPI RESULT" badge
 - [ ] Side-by-side image comparison renders
 - [ ] Heuristic score label shows "Heuristic Risk Score" (not "Risk Score: XX/100")
 - [ ] dataSource badge shows "live" or "fixture"
-- [ ] No "BrandLens" references in UI (internal codename only)
+- [ ] No "BrandLens" references in the UI (renamed to Beacontra, `docs/NAMING_DECISION.md` — NAMING STATUS: FINAL)
 
 ---
 
@@ -107,6 +107,8 @@ If live API is unavailable, use fixture data that simulates:
 | Google Lens products (URL, up to 10) | 30 |
 | **Total per scan (max)** | **~36** |
 | **Typical scan (capped at 10 Lens)** | **~13-16** |
+
+**Cross-check note (CLAUDE, this session):** reading `runVisualVerification()` directly, the exact_matches→products fallback logic runs *per candidate* inside the `MAX_LENS_CALLS`-capped loop, not once globally — so the realistic worst case is closer to 1 shopping + up to 20 Lens calls (10 candidates × up to 2 calls each), not the single "exact_matches, up to 1" implied above. See `docs/SERPAPI_BUDGET.md`'s "Worst-case call count" section for the reconciled model, and its caveat that the credit-per-call multipliers (1 vs. 3) are our own app-level estimate, not confirmed SerpApi billing. Recommend replacing both tables with one real observed number from an actual logged scan before submission, rather than reconciling two different estimates.
 
 ---
 

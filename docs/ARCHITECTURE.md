@@ -1,4 +1,4 @@
-# Architecture: BrandLens
+# Architecture: Beacontra (implemented as `BrandLensService`/`brandlens.ts` internally — see `docs/NAMING_DECISION.md`)
 
 **Status:** Documents the as-built system (implementation led by OPENCODE, T-005/T-006/T-015). Product rationale: `docs/DECISION.md`. Scope: `docs/PRODUCT_SPEC.md`.
 
@@ -33,7 +33,7 @@ results.sort(by compositeScore desc)  →  BrandLensScanResult  →  JSON respon
 
 ## Components
 
-- **`src/index.ts`** — Hono app, CORS, `/health`, `/api/search` (generic passthrough, pre-existing), `/api/engines`, and the BrandLens-specific endpoints (`POST /api/brandlens/scan`, `GET /api/brandlens/results/:scanId` — per T-006).
+- **`src/index.ts`** — Hono app, CORS, `/health`, `/api/search` (generic passthrough, pre-existing), `/api/engines`, and the Beacontra-specific endpoints (`POST /api/brandlens/scan`, `GET /api/brandlens/results/:scanId` — per T-006; route path retains the internal `brandlens` identifier, see `docs/NAMING_DECISION.md` on internal-identifier rename judgment).
 - **`src/lib/serpapi-client.ts`** — generic SerpApi HTTP client: request dedup (in-flight promise cache), response caching (KV + in-memory), retry/backoff, fixture mode, credit tracking. Engine-agnostic — used by both the generic `/api/search` route and `BrandLensService`.
 - **`src/lib/cache.ts`** — tiered cache (KV for cross-request persistence, in-memory `Map` for hot/duplicate requests within a single Worker invocation).
 - **`src/lib/types.ts`** — Zod schemas per engine (`BaseSearchParams`, `ShoppingResult`, `LensSearchParams`/`LensSearchResult`, `AmazonProductSearchParams`, etc.) — defensive parsing at the SerpApi response boundary, per the mission's "don't send raw results to an LLM blindly" requirement (there is no LLM in this pipeline at all — see below).
@@ -66,7 +66,7 @@ Every `FusedResult` carries its `listing` (with `productLink`, `source`, `thumbn
 
 - SerpApi's own server-side cache (1hr default) is free on hit — already handled transparently by `serpapi-client.ts`.
 - KV + in-memory tiered cache adds a second layer keyed on `engine + normalized params` (existing generic infra from T-015).
-- **BrandLens-specific consideration:** `google_lens` calls are keyed per listing thumbnail URL, which is mostly stable per listing but not deduplicated across different scans of the *same* listing yet — worth adding if the demo re-runs the same scan repeatedly (see `docs/SERPAPI_BUDGET.md`).
+- **Beacontra-specific consideration:** `google_lens` calls are keyed per listing thumbnail URL, which is mostly stable per listing but not deduplicated across different scans of the *same* listing yet — worth adding if the demo re-runs the same scan repeatedly (see `docs/SERPAPI_BUDGET.md`).
 
 ## Failure handling
 
@@ -82,7 +82,7 @@ Every `FusedResult` carries its `listing` (with `productLink`, `source`, `thumbn
 
 - Unit tests run entirely against fixtures (`src/lib/fixtures/*.json`, `tests/fixtures/*.json`) — zero live SerpApi credits, per `docs/ENGINEERING_AUDIT.md`'s credit-discipline requirement.
 - `npm run test:live` (separate Vitest config) is the only path that spends real credits — intentionally gated, not run in the default `npm test`/CI path.
-- T-007 (pending) should add a BrandLens-specific fixture-based test asserting the fusion math itself (e.g., a listing with matching price + authorized seller + Lens exact-match should score low/`likely_genuine`; a listing with below-MRP price + unauthorized seller + Lens mismatch should score high/`review_urgently`) — this is the test that actually verifies the "real fused logic, not a dashboard" claim in `docs/DECISION_CHALLENGES.md`.
+- T-007 (pending) should add a Beacontra-specific fixture-based test asserting the fusion math itself (e.g., a listing with matching price + authorized seller + Lens exact-match should score low/`likely_genuine`; a listing with below-MRP price + unauthorized seller + Lens mismatch should score high/`review_urgently`) — this is the test that actually verifies the "real fused logic, not a dashboard" claim in `docs/DECISION_CHALLENGES.md`.
 
 ## Open item carried from DECISION_CHALLENGES.md
 
