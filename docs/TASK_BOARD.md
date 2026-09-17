@@ -11,6 +11,33 @@
 
 ## Tasks
 
+### T-034: Evidence-first product experience and demo polish
+**OWNER:** ASTRA — PRODUCT EXPERIENCE / UI OWNER
+**STATUS:** IN_PROGRESS
+**PRIORITY:** P0/P1
+**FILES:** public/index.html, frontend assets/tests, src/index.ts (HTML serving only), docs/ASTRA_UI_AUDIT.md, docs/ASTRA_DESIGN_SYSTEM.md, README.md (visual section)
+**ISSUE:** Homepage returns 500; unavailable visual checks claim a confirmed match; repetitive cards lack an actionable investigation workspace.
+**ACCEPTANCE CRITERIA:**
+- [ ] Homepage works on actual Worker; polished input preview, validation and recovery.
+- [ ] Compact ranked queue, side-by-side detail, three evidence areas, safe source links, truthful provenance and neutral uncertainty.
+- [ ] Honest loading, partial/empty/error states; accessible responsive UI at six requested widths.
+- [ ] Actual browser inspection/screenshots; unit/type/lint/build gates; coherent commit.
+**VERIFICATION:** Pending implementation. Initial findings recorded in ASTRA_UI_AUDIT.md.
+
+### T-035: Backend contracts needed for fully truthful frontend evidence
+**OWNER:** OPENCODE
+**STATUS:** TODO
+**PRIORITY:** P1 (visual interpretation accuracy remains a truth gate)
+**FILES:** src/lib/beacontra.ts, src/lib/serpapi-client.ts, src/index.ts, backend tests
+**ISSUE:** Current contract cannot distinguish cache hits from fresh responses or empty Lens success from failure; `no_evidence` can coexist with nonempty raw Lens arrays; official-match heuristic checks source substrings, not image identity. No browser file upload endpoint or measurable progress events exist.
+**ACCEPTANCE CRITERIA:**
+- [ ] Explicit per-check outcome for skipped/failed/success-empty/success-with-records; preserve source records independently of official-reference interpretation.
+- [ ] Propagate actual cache provenance; never infer it from credits or successful search metadata.
+- [ ] Review official-match interpretation separately from visual similarity; no changes to scoring without core-owner review/tests.
+- [ ] Add a size/type-validated browser-file upload contract with server-side secrets before promising drag/drop in the UI.
+- [ ] If stage progress is added, expose real events; do not drive stage completion from timers.
+**VERIFICATION:** ASTRA read real service and route code; frontend will adapt truthfully to current fields, without changing scoring.
+
 ### T-001: Repository Initialization & Coordination Setup
 **OWNER:** OPENCODE
 **STATUS:** DONE

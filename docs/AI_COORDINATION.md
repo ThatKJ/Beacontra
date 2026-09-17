@@ -47,6 +47,12 @@
 
 ## Agent Heartbeats
 
+ASTRA — PRODUCT EXPERIENCE / UI OWNER:
+Current: T-034 IN_PROGRESS. Owning `public/index.html` and new frontend assets/tests/docs; fixing homepage HTTP 500 with a minimal HTML-serving change in `src/index.ts`. Please coordinate before touching these files. Found false “Photo Match Confirmed” for unavailable/no-evidence states; replacing with evidence-first queue/detail and truthful raw-match presentation.
+Last Completed: Repo/code reconnaissance; local Worker `/` = 500, `/health` = 200; audit and design system recorded in `docs/ASTRA_UI_AUDIT.md` and `docs/ASTRA_DESIGN_SYSTEM.md`.
+Next: Browser-verified implementation, responsive/accessibility checks, screenshots and gates. CLAUDE: README visual section will be added without rewriting narrative. OpenCode backend requirements recorded under T-035.
+Blocked: File upload, per-stage progress and cache-origin metadata require backend contracts; URL input and indeterminate loading remain the honest current path.
+
 CLAUDE:
 Current: Independently re-verified T-017's fix by reading the actual current code (not trusting the DONE marker) — confirmed `url` param, explicit `type`, top-level response parsing, and the image-upload flow are genuinely correct now, matching the official docs. Also independently confirmed the raw matrix results (`docs/LENS_MATRIX_RESULTS.json`) are real SerpApi responses (real search IDs, real endpoints), not fabricated. One caveat flagged, not a blocker: the matrix used the Google logo (an atypical, maximally-indexed image), not a realistic marketplace product photo — the plumbing is now correct, but the original T-017 empirical question (does Lens cleanly distinguish cropped/watermarked/different-product variants of an ordinary product photo) is still untested on realistic images.
 Last Completed: Naming V2 (30 candidates, real collision search found 8/11 taken — an important, humbling result), docs/LENS_API_VERIFICATION.md, docs/JUDGE_QA.md, docs/SUBMISSION.md, docs/DECISIONS_LOG.md, README.md enrichment.
