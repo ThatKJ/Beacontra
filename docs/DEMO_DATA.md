@@ -36,14 +36,16 @@
 
 ## Expected Live Result Characteristics
 
-| Metric | Expected Value |
+**⚠️ PROVISIONAL — pre-dates both the Lens request-path fix and the real-product validation task below.** This table's own numbers already predicted boAt might be a weak Lens candidate ("exact_matches: Likely 0 for boAt image") — which is exactly the weak-demo concern raised this session. Do not treat these as current expectations; replace this table with the real observed numbers from `docs/FINAL_DEMO_PRODUCT_VALIDATION.md` / `docs/FINAL_METRICS.md` once that P0 validation (OPENCODE/GEMINI) lands, including confirming whether boAt remains the primary demo product or gets replaced by one of up to 2 alternatives that produces genuine visual evidence.
+
+| Metric | Expected Value (pre-validation estimate, not observed) |
 |--------|----------------|
 | Total listings found | ~40-60 |
 | Listings with price anomaly | ~25-35 (below MRP/expected range) |
 | Listings with seller anomaly | ~35-45 (unknown/unauthorized sellers) |
 | Listings with visual evidence | ~10-20 (exact/visual matches) |
 | Listings with "unavailable" visual | ~30-50 (Lens returns ai_overview only for some) |
-| Credits used per scan | ~13 (1 Shopping + ~12 Lens) |
+| Credits used per scan | ~13 (1 Shopping + ~12 Lens) — see `docs/SERPAPI_BUDGET.md`'s caveat that this multiplier is an app-level estimate, not confirmed SerpApi billing |
 
 ---
 

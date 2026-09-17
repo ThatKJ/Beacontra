@@ -1,4 +1,8 @@
-# Google Lens Real-World Spike (T-017)
+# Google Lens Real-World Spike (T-017) — ORIGINAL RUN, SUPERSEDED
+
+**⚠️ This document's "FAIL" verdict is superseded.** The original spike below used a wrong parameter name (`image_url` instead of the documented `url`), never sent the required `type` parameter, and parsed the response at a nonexistent `lens_results` path — see `docs/LENS_API_VERIFICATION.md` for the full analysis. A corrected run confirming Lens does return structured data is in `docs/LENS_SPIKE_V2.md`. Kept below as an accurate historical record of the original (flawed) test, not as current guidance.
+
+---
 
 ## Objective
 
