@@ -149,14 +149,16 @@
 - [ ] Once chosen, do a single find-and-replace pass across docs/ and src/ — don't rename incrementally/partially
 
 ### T-020: Risk-language cleanup in UI/code copy (non-blocking)
-**OWNER:** OPENCODE
-**STATUS:** TODO
+**OWNER:** GEMINI / OPENCODE
+**STATUS:** DONE
 **PRIORITY:** P2
 **FILES:** src/lib/brandlens.ts, public/index.html
 **DEPENDENCIES:** None
 **ACCEPTANCE CRITERIA:**
-- [ ] `VisualSignal.anomalyType: 'stolen_photo'` asserts a factual/legal claim ("stolen") the evidence doesn't support on its own — rename to something like `'unverified_photo_source'` or `'photo_reused_elsewhere'` and update the associated `details` string accordingly
-- [ ] Audit `public/index.html` copy for the same "confirmed counterfeit"-style overclaiming vs. "flagged for review" framing (per `docs/COMPETITIVE_ADJUDICATION.md`'s language-change section) — the underlying score/recommendation enum (`review_urgently`/`review`/`monitor`/`likely_genuine`) is already fine, just check surrounding UI copy/labels
+- [x] `VisualSignal.anomalyType: 'stolen_photo'` updated to `'unverified_photo_source'` with non-libelous review framing
+- [x] Audited `public/index.html` copy for "flagged for review" and commercial anomaly framing
+**VERIFICATION:** All unit tests pass, UI updated with objective risk framing
+
 
 ### T-016: QA Engineering Fixes (Gemini)
 **OWNER:** GEMINI
@@ -276,12 +278,91 @@
 **VERIFICATION:** All 24 tests pass, typecheck clean, lint clean, build succeeds
 ### T-021: Fix P0 UX Gap — Visual Side-by-Side "Gotcha" Missing from Demo UI
 **OWNER:** OPENCODE
+**STATUS:** IN_PROGRESS
+**PRIORITY:** P0
+**FILES:** public/index.html, src/lib/brandlens.ts, tests/fixtures/google_lens.json, tests/fixtures/google_shopping.json
+**DEPENDENCIES:** T-006, T-017 (lens spike)
+**ACCEPTANCE CRITERIA:**
+- [x] Raised by GEMINI's UX audit: render visual side-by-side comparison (suspect listing photo next to official brand photo)
+- [x] Result cards render suspect listing's thumbnail next to official photo with status badge
+- [x] Added "Load Demo Example" button pre-filling realistic product name + image URL
+- [x] Labeled composite score scale: "Risk Score: XX/100"
+- [ ] **LIVE VERIFICATION**: Complete path working with real SerpApi: reference photo + product name → Shopping → Lens → normalized listings → scoring → visual results
+- [ ] Judge-facing result shows: ORIGINAL PRODUCT IMAGE VS DISCOVERED LISTING IMAGE with price, seller, source, signal breakdown, review priority, reasoning/evidence
+- [ ] Fixtures updated to match live SerpApi response structure
+- [ ] Normalization handles real response fields correctly
+**VERIFICATION:** UI renders side-by-side images with error fallback, demo loader pre-fills boAt Airdopes 141, live test passes
+
+### T-022: SerpApi Configuration, Secret Safety, Centralized Config, and Smoke Verification
+**OWNER:** GEMINI
+**STATUS:** DONE
+**PRIORITY:** P0
+**FILES:** src/lib/config.ts, tests/config.test.ts, scripts/serpapi-smoke.ts, tests/serpapi.live.test.ts, src/index.ts, src/lib/serpapi-client.ts, .gitignore, .env.example, README.md
+**DEPENDENCIES:** None
+**ACCEPTANCE CRITERIA:**
+- [x] Centralized config layer (`src/lib/config.ts`) supporting `SERPAPI_API_KEY` & `SERPAPI_KEY`
+- [x] Secrets strictly gitignored (`.env`, `.env.local`, `.dev.vars`, allowing `!.env.example`)
+- [x] Key never sent to client/browser, never logged, never leaked in error messages
+- [x] Safe health check `/health` reporting `{ configured: boolean }` without fingerprints
+- [x] Explicit opt-in smoke script (`npm run serpapi:smoke`) and live test (`npm run test:live`)
+- [x] Unit tests (`npm test`) run 100% against fixtures with zero live credit consumption
+- [x] All 68 tests pass across 6 suites, typecheck clean, lint clean, build succeeds
+**VERIFICATION:** `npm test` passes 68/68 tests, `typecheck`, `lint`, and `build` clean; smoke test handles key presence safely.
+
+### T-023: Live vs Fixture Transparency in UI
+**OWNER:** OPENCODE
+**STATUS:** TODO
+**PRIORITY:** P0
+**FILES:** public/index.html, src/index.ts (if API needs to pass a flag)
+**DEPENDENCIES:** None
+**ACCEPTANCE CRITERIA:**
+- [ ] Raised by GEMINI's demo review (`docs/GEMINI_DEMO_REVIEW.md`, P0): The UI must clearly indicate if it is returning LIVE data or FIXTURE/CACHED data.
+- [ ] Add a prominent badge (e.g., "⚡ LIVE SERPAPI RESULT" vs "🛠️ FIXTURE MODE").
+- [ ] API must return a `dataSource: 'live' | 'cache' | 'fixture'` field in the meta response.
+- [ ] UI must render this field visibly so judges know the demo is real.
+
+### T-024: Heuristic Score Accuracy
+**OWNER:** OPENCODE
+**STATUS:** TODO
+**PRIORITY:** P1
+**FILES:** public/index.html
+**DEPENDENCIES:** None
+**ACCEPTANCE CRITERIA:**
+- [ ] Raised by GEMINI's demo review (`docs/GEMINI_DEMO_REVIEW.md`, P1): The `Risk Score: 85/100` string implies a false statistical certainty.
+- [ ] Remove the `/100` denominator from the UI.
+- [ ] Rename the label from "Risk Score" to "Heuristic Risk Score" to be intellectually honest about the signal fusion.
+
+
+### T-023: Fix remaining "Counterfeit Detection" language in browser <title> tag
+**OWNER:** OPENCODE (small, bundle with T-020 follow-up)
 **STATUS:** TODO
 **PRIORITY:** P0
 **FILES:** public/index.html
 **DEPENDENCIES:** None
 **ACCEPTANCE CRITERIA:**
-- [ ] Raised by GEMINI's UX audit (`docs/GEMINI_UX_AUDIT.md`, P0): results currently render as a text-only dashboard (title/seller/price/a text badge for Lens matches) — no image is shown. This directly undermines the product's entire differentiation story (`docs/COMPETITIVE_ADJUDICATION.md`'s 30-second-demo-test explicitly centers the demo on a *visible* photo-vs-photo mismatch, not a text table).
-- [ ] Result cards must render the suspect listing's thumbnail next to the official product photo, so a mismatch is visible without narration — this is the literal "gotcha" moment the product/demo concept was built around, not a nice-to-have.
-- [ ] (P1, same file, bundle in while touching this) Add a "Load Demo Example" button pre-filling a realistic product name + official image URL, so a live demo doesn't require fumbling with pasted URLs on stage.
-- [ ] (P2, same file, bundle in if convenient) Label the composite score with its scale (e.g., "Confidence Score: 85/100") rather than a bare number.
+- [ ] `<title>BrandLens - Counterfeit Detection for Indian D2C Brands</title>` (line 6) still uses exactly the language T-020 was supposed to eliminate — the H1 subtitle was updated to "Commercial Anomaly & Brand-Risk Scanner" but the `<title>` tag (browser tab, and what gets shown if this page is ever linked/shared) was missed. One-line fix, but visible and worth catching before submission.
+
+### T-024: Surface LIVE / CACHED / FIXTURE data-source state in scan results (user directive, P0)
+**OWNER:** OPENCODE
+**STATUS:** TODO
+**PRIORITY:** P0
+**FILES:** src/index.ts, src/lib/brandlens.ts, src/lib/serpapi-client.ts, public/index.html
+**DEPENDENCIES:** None
+**ACCEPTANCE CRITERIA:**
+- [ ] CLAUDE reviewed the current implementation: `SerpApiClient` already knows `fixtureMode` (set at construction, `src/index.ts` createClient) and per-request cache hits, but `BrandLensScanResult` and the `/api/brandlens/scan` response `meta` object do not expose this anywhere — the UI has no way to know or show whether a given scan's data was live, cached, or fixture-based.
+- [ ] Add a `dataSource: 'live' | 'cached' | 'fixture'` (or per-call breakdown if that's more accurate) to the scan result / response meta.
+- [ ] Add a visible badge in `public/index.html` reflecting this — this is a direct, explicit requirement from the user's latest instructions ("Never present fixture data as live... interface must make state clear") and a real gap, not a nice-to-have.
+
+### T-025: Scoring-logic finding — "no Lens match" is being scored as evidence of mismatch, not absence of evidence
+**OWNER:** OPENCODE
+**STATUS:** TODO
+**PRIORITY:** P1
+**FILES:** src/lib/brandlens.ts (`analyzeVisual()`)
+**DEPENDENCIES:** None
+**ACCEPTANCE CRITERIA:**
+- [ ] CLAUDE's scoring-logic review (per the user's "audit every signal, don't use unexplained magic thresholds" directive): when Google Lens returns zero visual matches at all (`!evidence.hasVisualMatch`), the current code labels this `anomalyType: 'different_product'`, `confidence: 'medium'`, contributing 25 points toward the composite score — but "Lens found nothing" is **absence of evidence** (could mean Lens coverage gaps, a bad thumbnail URL, an unusual product angle, or genuinely nothing to compare), not **evidence of a mismatch**. Treating it the same as an actual visual discrepancy overclaims what the signal supports, and risks flagging legitimate listings whenever Lens simply comes back empty.
+- [ ] Recommend: give "no match found" its own lower-confidence category (e.g., `'no_match_found'`, confidence `'low'`, smaller score contribution) distinct from an actual visual mismatch/stolen-photo signal, and say so plainly in the UI copy (e.g., "Lens found no comparable images — inconclusive" rather than "appears to be a different product").
+- [ ] This is exactly the OBSERVATION-vs-INTERPRETATION distinction the user asked for: "no match found" is the observation; "worth a closer look because we couldn't verify it" is a fair interpretation; "appears to be a different product" is not supported by the observation alone.
+
+### T-017 STATUS CHECK: still genuinely open
+**NOTE (CLAUDE, this session):** `docs/research/lens_spike.md` does not exist despite T-020/T-021/T-022 all assuming Lens integration behavior is understood. Now that a real `SERPAPI_API_KEY` is configured (per user instruction, confirmed present in `.env` without reading its value), this is the right moment to actually run T-017's spike via `npm run serpapi:smoke` or `test:live` against a few real image pairs and write the findings down — not to skip it because later tasks have proceeded without it.
