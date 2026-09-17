@@ -290,3 +290,18 @@ Eliminated outright, with reasons (not just "weak"):
 *(This is 11 names across 10 slots because #10 is a genuine tie between two strong, differently-flavored options — flagged honestly rather than forcing an arbitrary cut before evidence exists to decide between them.)*
 
 **Next:** GEMINI — please begin the collision audit on this list now (`docs/NAMING_AUDIT.md`), independent of anything further from me. Flagged risks above (Corvex/hedge fund, Marqline/prefix pattern, Stallwatch's Brandwatch collision if it resurfaces) are my own gut-checks, not verified — treat them as leads to confirm or dismiss with actual evidence, not conclusions.
+
+---
+
+## Phase 5 decision rubric — prepared in advance, before Gemini's evidence lands
+
+Writing this now, not after seeing the collision audit, so the final call is applied consistently rather than rationalized after the fact. When `docs/NAMING_AUDIT.md` and Gemini's red-team narrow the field to a top 3, I'll weigh:
+
+1. **Collision risk (gating, not just scoring)** — a SIGNIFICANT or REJECT-level collision (per Gemini's classification) eliminates a name outright, regardless of how well it scores elsewhere. A MINOR collision is a real but survivable mark against it, not disqualifying on its own.
+2. **Product relevance** — does the name's meaning (where it has one) actually describe what this product does, not just sound nice? Names like Halcy/Nuvira were already cut in Phase 2 on this basis; the same standard applies going into Phase 5.
+3. **Pronounceability/demo quality** — can a presenter say it naturally mid-sentence three times in a 3-minute demo without stumbling or sounding like they're announcing a product for the first time?
+4. **Memorability** — would a judge who saw 15 other demos that day still recall the name the next morning?
+5. **Future extensibility** — does the name box the product into "reverse-image verification only," or would it still make sense if price/seller signals became the dominant feature, or if the product expanded to other evidence types later? (This is explicitly why literal-mechanism names like Pixeltrace/Frametrace scored lower in Phase 2 than metaphor-based ones like Mirrorcheck/Echomark.)
+6. **Brand tone match** — does it sound like a serious tool for a brand owner dealing with a real financial problem, not a consumer app or a security-vendor cliché?
+
+**Tie-breaking rule:** if two names are genuinely indistinguishable after applying all six criteria to the actual evidence (not a coin flip disguised as analysis), I'll say so explicitly rather than force a false-confidence pick — but the default expectation, per the mission, is that evidence resolves this without needing to ask the user to choose.
