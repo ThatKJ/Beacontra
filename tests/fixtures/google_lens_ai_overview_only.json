@@ -1,0 +1,22 @@
+{
+  "search_metadata": {
+    "id": "test-lens-ai-overview-only",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/test-lens-ai-overview.json",
+    "created_at": "2026-09-17T10:00:00Z",
+    "processed_at": "2026-09-17T10:00:02Z",
+    "total_time_taken": 1.87
+  },
+  "search_parameters": {
+    "engine": "google_lens",
+    "url": "https://example.com/no-match-image.jpg",
+    "type": "products",
+    "hl": "en",
+    "country": "in"
+  },
+  "search_information": {},
+  "ai_overview": {
+    "page_token": "test-page-token",
+    "serpapi_link": "https://serpapi.com/search.json?engine=google_ai_overview&page_token=test-page-token"
+  }
+}

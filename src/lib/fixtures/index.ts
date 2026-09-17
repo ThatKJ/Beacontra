@@ -4,5 +4,7 @@ export { default as google_shopping } from './google_shopping.json';
 export { default as google_jobs } from './google_jobs.json';
 export { default as google_trends } from './google_trends.json';
 export { default as google_lens } from './google_lens.json';
+export { default as google_lens_ai_overview_only } from './google_lens_ai_overview_only.json';
+export { default as google_lens_exact_matches } from './google_lens_exact_matches.json';
 export { default as amazon_product } from './amazon_product.json';
 export type { SerpApiResponse } from '../types';

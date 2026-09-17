@@ -1,0 +1,54 @@
+{
+  "search_metadata": {
+    "id": "test-lens-exact-1",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/test-lens-exact-1.json",
+    "created_at": "2026-09-17T10:00:00Z",
+    "processed_at": "2026-09-17T10:00:02Z",
+    "total_time_taken": 2.45
+  },
+  "search_parameters": {
+    "engine": "google_lens",
+    "image_id": "test-image-id-123",
+    "type": "exact_matches",
+    "hl": "en",
+    "country": "us"
+  },
+  "search_information": {},
+  "exact_matches": [
+    {
+      "position": 1,
+      "title": "Google Logo - Official",
+      "link": "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png",
+      "source": "google.com",
+      "thumbnail": "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png",
+      "source_icon": "https://www.google.com/favicon.ico",
+      "actual_image_width": 272,
+      "actual_image_height": 92
+    },
+    {
+      "position": 2,
+      "title": "Google Logo - Wikipedia",
+      "link": "https://en.wikipedia.org/wiki/Google",
+      "source": "wikipedia.org",
+      "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png",
+      "source_icon": "https://en.wikipedia.org/static/favicon/wikipedia.ico",
+      "actual_image_width": 1200,
+      "actual_image_height": 408
+    },
+    {
+      "position": 3,
+      "title": "Google Logo - Wikimedia Commons",
+      "link": "https://commons.wikimedia.org/wiki/File:Google_2015_logo.svg",
+      "source": "wikimedia.org",
+      "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png",
+      "source_icon": "https://commons.wikimedia.org/static/favicon/wikipedia.ico",
+      "actual_image_width": 1200,
+      "actual_image_height": 408
+    }
+  ],
+  "ai_overview": {
+    "page_token": "test-exact-page-token",
+    "serpapi_link": "https://serpapi.com/search.json?engine=google_ai_overview&page_token=test-exact-page-token"
+  }
+}
