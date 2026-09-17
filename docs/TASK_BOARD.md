@@ -333,27 +333,10 @@
 - [x] Rename the label from "Risk Score" to "Heuristic Risk Score" to be intellectually honest about the signal fusion.
 
 
-### T-023: Fix remaining "Counterfeit Detection" language in browser <title> tag
-**OWNER:** OPENCODE (small, bundle with T-020 follow-up)
-**STATUS:** TODO
-**PRIORITY:** P0
-**FILES:** public/index.html
-**DEPENDENCIES:** None
-**ACCEPTANCE CRITERIA:**
-- [ ] `<title>BrandLens - Counterfeit Detection for Indian D2C Brands</title>` (line 6) still uses exactly the language T-020 was supposed to eliminate — the H1 subtitle was updated to "Commercial Anomaly & Brand-Risk Scanner" but the `<title>` tag (browser tab, and what gets shown if this page is ever linked/shared) was missed. One-line fix, but visible and worth catching before submission.
+### [SUPERSEDED — see T-023 "Live vs Fixture Transparency" and T-024 "Heuristic Score Accuracy" above, lines 312/324] Fix remaining "Counterfeit Detection" language in browser <title> tag
+**STATUS:** DONE — **ID COLLISION NOTE:** this was independently filed as T-023/T-024 by CLAUDE at the same time GEMINI filed a different pair of tasks under the *same* IDs (line 312/324) after its own demo review. Both pairs are now resolved by the same commit (`2ee008a`) — verified directly: `<title>` tag now reads "BrandLens - Commercial Anomaly & Brand-Risk Scanner..." (no more "Counterfeit Detection"), and `BrandLensScanResult`/API meta now carries `dataSource: 'live' | 'fixture'` surfaced in the UI. Renumbering going forward: **next free ID is T-026** — please grep `^### T-` for the current max before adding a new task to avoid a repeat of this collision.
 
-### T-024: Surface LIVE / CACHED / FIXTURE data-source state in scan results (user directive, P0)
-**OWNER:** OPENCODE
-**STATUS:** TODO
-**PRIORITY:** P0
-**FILES:** src/index.ts, src/lib/brandlens.ts, src/lib/serpapi-client.ts, public/index.html
-**DEPENDENCIES:** None
-**ACCEPTANCE CRITERIA:**
-- [ ] CLAUDE reviewed the current implementation: `SerpApiClient` already knows `fixtureMode` (set at construction, `src/index.ts` createClient) and per-request cache hits, but `BrandLensScanResult` and the `/api/brandlens/scan` response `meta` object do not expose this anywhere — the UI has no way to know or show whether a given scan's data was live, cached, or fixture-based.
-- [ ] Add a `dataSource: 'live' | 'cached' | 'fixture'` (or per-call breakdown if that's more accurate) to the scan result / response meta.
-- [ ] Add a visible badge in `public/index.html` reflecting this — this is a direct, explicit requirement from the user's latest instructions ("Never present fixture data as live... interface must make state clear") and a real gap, not a nice-to-have.
-
-### T-025: Scoring-logic finding — "no Lens match" is being scored as evidence of mismatch, not absence of evidence
+### T-026: Scoring-logic finding — "no Lens match" is being scored as evidence of mismatch, not absence of evidence
 **OWNER:** OPENCODE
 **STATUS:** TODO
 **PRIORITY:** P1
