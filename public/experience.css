@@ -41,6 +41,65 @@
   border-color: var(--accent-2);
 }
 
+/* ───────────── Custom cursor ─────────────
+   Augments, never replaces, the native cursor. pointer-events: none is load-
+   bearing — this element must never intercept a click. */
+
+#cursorDot,
+#cursorRing {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 998;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%)
+    translate(var(--cx, -100px), var(--cy, -100px));
+}
+
+#cursorDot.is-active,
+#cursorRing.is-active {
+  opacity: 1;
+}
+
+#cursorDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+#cursorRing {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--accent-2);
+  transition:
+    width 0.2s ease,
+    height 0.2s ease,
+    border-color 0.2s ease,
+    border-style 0.2s ease;
+}
+
+html[data-cursor="cta"] #cursorRing {
+  width: 44px;
+  height: 44px;
+  border-color: var(--accent);
+}
+
+html[data-cursor="evidence"] #cursorRing {
+  border-style: dashed;
+}
+
+html[data-cursor="image"] #cursorDot {
+  opacity: 0;
+}
+
+html.cursor-suppress #cursorDot,
+html.cursor-suppress #cursorRing {
+  opacity: 0 !important;
+}
+
 /* ───────────── Boot splash ─────────────
    Pure-CSS auto-hide: works even with experience.js blocked (see
    scripts/ui-performance.mjs's fallback check). The inline gating script in

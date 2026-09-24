@@ -84,6 +84,98 @@
     }
   });
 
+  // Custom cursor: subtle dot + ring, desktop fine-pointer only. Its own rAF
+  // flag — the tilt/magnetic listener above only fires when hovering specific
+  // targets, but the cursor has to track pointer position everywhere.
+  let cursorDot = null,
+    cursorRing = null,
+    cursorFrame = 0;
+  function createCursor() {
+    if (cursorDot) return;
+    cursorDot = document.createElement("div");
+    cursorDot.id = "cursorDot";
+    cursorDot.setAttribute("aria-hidden", "true");
+    cursorRing = document.createElement("div");
+    cursorRing.id = "cursorRing";
+    cursorRing.setAttribute("aria-hidden", "true");
+    document.body.append(cursorDot, cursorRing);
+  }
+  function destroyCursor() {
+    cursorDot?.remove();
+    cursorRing?.remove();
+    cursorDot = cursorRing = null;
+    delete document.documentElement.dataset.cursor;
+  }
+  function syncCursor() {
+    if (reduce.matches || !fine.matches) destroyCursor();
+    else createCursor();
+  }
+  syncCursor();
+  reduce.addEventListener("change", syncCursor);
+  fine.addEventListener("change", syncCursor);
+  document.addEventListener(
+    "pointermove",
+    (event) => {
+      if (!cursorDot || document.hidden || cursorFrame) return;
+      const x = event.clientX,
+        y = event.clientY;
+      const hover = event.target.closest(
+        ".cta, .magnetic, .image-well, .en-node-signal, .queue-item",
+      );
+      cursorFrame = requestAnimationFrame(() => {
+        cursorFrame = 0;
+        if (!cursorDot) return;
+        cursorDot.style.setProperty("--cx", `${x}px`);
+        cursorDot.style.setProperty("--cy", `${y}px`);
+        cursorRing.style.setProperty("--cx", `${x}px`);
+        cursorRing.style.setProperty("--cy", `${y}px`);
+        cursorDot.classList.add("is-active");
+        cursorRing.classList.add("is-active");
+        document.documentElement.dataset.cursor = !hover
+          ? ""
+          : hover.matches(".cta, .magnetic")
+            ? "cta"
+            : hover.matches(".image-well")
+              ? "image"
+              : "evidence";
+      });
+    },
+    { passive: true },
+  );
+  document.addEventListener(
+    "pointerleave",
+    () => {
+      cursorDot?.classList.remove("is-active");
+      cursorRing?.classList.remove("is-active");
+    },
+    { passive: true },
+  );
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      cursorDot?.classList.remove("is-active");
+      cursorRing?.classList.remove("is-active");
+    }
+  });
+  // Suppress the cursor while a real form control is focused or the
+  // comparison dialog is open, so it never fights native focus/validation
+  // affordances. Neither the dialog's own controls nor the form are inputs
+  // that overlap, so a shared toggle is safe here.
+  function setCursorSuppressed(on) {
+    document.documentElement.classList.toggle("cursor-suppress", on);
+  }
+  document.addEventListener("focusin", (event) => {
+    if (event.target.matches("input, textarea, select, [contenteditable]"))
+      setCursorSuppressed(true);
+  });
+  document.addEventListener("focusout", (event) => {
+    if (event.target.matches("input, textarea, select, [contenteditable]"))
+      setCursorSuppressed(false);
+  });
+  const dialog = $("comparisonDialog");
+  new MutationObserver(() =>
+    setCursorSuppressed(dialog.hasAttribute("open")),
+  ).observe(dialog, { attributes: true, attributeFilter: ["open"] });
+
   function goToForm() {
     $("scanTitle").focus({ preventScroll: true });
     $("scanTitle").scrollIntoView({
