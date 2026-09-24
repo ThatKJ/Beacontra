@@ -55,6 +55,7 @@
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) resetDepth();
   });
+
   function goToForm() {
     $("scanTitle").focus({ preventScroll: true });
     $("scanTitle").scrollIntoView({
@@ -62,14 +63,100 @@
       block: "start",
     });
   }
-  document.querySelector("[data-start]").addEventListener("click", (event) => {
-    event.preventDefault();
-    goToForm();
+  document.querySelectorAll("[data-start]").forEach((el) =>
+    el.addEventListener("click", (event) => {
+      event.preventDefault();
+      goToForm();
+    }),
+  );
+  for (const id of ["heroExample", "ctaExample"]) {
+    $(id)?.addEventListener("click", () => {
+      $("loadDemoBtn").click();
+      goToForm();
+    });
+  }
+
+  // Header state, mobile nav and scroll-linked pipeline (throttled to one rAF/scroll).
+  const header = $("siteHeader");
+  const navToggle = $("navToggle");
+  const siteNav = $("siteNav");
+  function setNav(open) {
+    navToggle.setAttribute("aria-expanded", String(open));
+    siteNav.classList.toggle("open", open);
+  }
+  navToggle.addEventListener("click", () =>
+    setNav(navToggle.getAttribute("aria-expanded") !== "true"),
+  );
+  siteNav.querySelectorAll("a").forEach((a) =>
+    a.addEventListener("click", () => setNav(false)),
+  );
+  document.addEventListener("keydown", (event) => {
+    if (
+      event.key === "Escape" &&
+      navToggle.getAttribute("aria-expanded") === "true"
+    ) {
+      setNav(false);
+      navToggle.focus();
+    }
   });
-  $("heroExample").addEventListener("click", () => {
-    $("loadDemoBtn").click();
-    goToForm();
+  addEventListener("resize", () => {
+    if (matchMedia("(min-width: 901px)").matches) setNav(false);
+    paintPipeline();
   });
+
+  const pipeline = document.querySelector("[data-pipeline]");
+  function paintPipeline() {
+    if (!pipeline) return;
+    const rect = pipeline.getBoundingClientRect();
+    const vh = innerHeight;
+    const span = rect.height - vh * 0.65;
+    const p = Math.min(1, Math.max(0, (vh * 0.8 - rect.top) / span));
+    pipeline.querySelector(".pipeline-fill").style.width =
+      `${Math.round(p * 100)}%`;
+    const stages = pipeline.querySelectorAll(".ps-stage");
+    stages.forEach((stage) => {
+      const i = Number(stage.dataset.step || 1);
+      const lo = (i - 1) / stages.length;
+      const hi = i / stages.length;
+      stage.classList.toggle("is-done", p >= hi);
+      stage.classList.toggle("is-active", p >= lo && p < hi);
+    });
+  }
+  let scrollTick = false;
+  function onScrollFrame() {
+    scrollTick = false;
+    header.classList.toggle("scrolled", scrollY > 12);
+    paintPipeline();
+  }
+  addEventListener(
+    "scroll",
+    () => {
+      if (!scrollTick) {
+        scrollTick = true;
+        requestAnimationFrame(onScrollFrame);
+      }
+    },
+    { passive: true },
+  );
+  onScrollFrame();
+
+  const spyLinks = document.querySelectorAll(".site-nav a[data-spy]");
+  const spySections = [...spyLinks]
+    .map((a) => $(a.dataset.spy))
+    .filter(Boolean);
+  if ("IntersectionObserver" in window) {
+    const spy = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          for (const a of spyLinks)
+            a.classList.toggle("is-active", a.dataset.spy === entry.target.id);
+        }
+      },
+      { rootMargin: "-38% 0px -55% 0px", threshold: 0 },
+    );
+    spySections.forEach((section) => spy.observe(section));
+  }
 
   // Only propagate an image that the existing preview has successfully loaded.
   const previewObserver = new MutationObserver(() => {
@@ -92,6 +179,7 @@
       $("heroReferenceName").textContent =
         $("productName").value.trim() || "Your product reference";
   });
+
   const states = [$("loading"), $("resultsSection")];
   const stateObserver = new MutationObserver((entries) => {
     for (const { target } of entries) {

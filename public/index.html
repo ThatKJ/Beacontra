@@ -3,348 +3,758 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#173f35" />
+    <meta name="theme-color" content="#080D0C" />
     <meta
       name="description"
-      content="Prioritize marketplace listings for human review. See price, source and visual evidence together with Beacontra."
+      content="Beacontra — marketplace evidence, in focus. Bring price, seller and visual signals from marketplace listings into one prioritized review queue. Powered by SerpApi."
     />
     <title>Beacontra — Marketplace evidence, in focus</title>
     <link
       rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23173f35'/%3E%3Ccircle cx='20' cy='20' r='11' fill='none' stroke='%23c3e6c9' stroke-width='2'/%3E%3Ccircle cx='20' cy='20' r='4' fill='%23c3e6c9'/%3E%3C/svg%3E"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23080D0C'/%3E%3Ccircle cx='20' cy='20' r='12' fill='none' stroke='%23C9E6A6' stroke-width='1.5'/%3E%3Ccircle cx='20' cy='20' r='4' fill='%23C9E6A6'/%3E%3Cpath d='M20 4v4M20 32v4M4 20h4M32 20h4' stroke='%238FBF9A' stroke-width='1.5'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap"
     />
     <link rel="stylesheet" href="/styles.css" />
     <link rel="stylesheet" href="/experience.css" />
-    <script src="/app.js" defer></script>
     <script src="/experience.js" defer></script>
+    <script src="/app.js" defer></script>
   </head>
   <body>
-    <a class="skip" href="#main">Skip to workspace</a>
-    <header class="header">
-      <div class="shell header-inner">
-        <a class="brand" href="/" aria-label="Beacontra home"
-          ><span class="brand-mark" aria-hidden="true"><i></i></span
-          >Beacontra<span class="brand-period">.</span></a
-        >
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="siteHeader">
+      <div class="wrap header-inner">
+        <a class="brand" href="#top" aria-label="Beacontra home">
+          <span class="brand-mark" aria-hidden="true"><span class="bm-core"></span></span>
+          <span class="brand-word"
+            >Beacontra<span class="brand-period">.</span></span
+          >
+        </a>
+        <span class="header-divider" aria-hidden="true"></span>
         <span class="header-label">Marketplace intelligence</span>
-        <a
-          class="powered"
-          href="https://serpapi.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          >Search infrastructure by <strong>SerpApi ↗</strong></a
-        >
+        <nav class="site-nav" id="siteNav" aria-label="On this page">
+          <a href="#product" data-spy="product"><i aria-hidden="true"></i>Product</a>
+          <a href="#how" data-spy="how"><i aria-hidden="true"></i>How it works</a>
+          <a href="#signals" data-spy="signals"><i aria-hidden="true"></i>Signals</a>
+          <a href="#technology" data-spy="technology"><i aria-hidden="true"></i>Technology</a>
+        </nav>
+        <div class="header-right">
+          <span class="header-infra">Search infrastructure</span>
+          <a
+            class="serpapi-link"
+            href="https://serpapi.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            >SerpApi <span aria-hidden="true">↗</span
+            ><span class="sr-only"> (opens in a new tab)</span></a
+          >
+        </div>
+        <button id="navToggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="siteNav">
+          <span class="sr-only">Menu</span><i aria-hidden="true"></i><i aria-hidden="true"></i>
+        </button>
       </div>
     </header>
-    <main id="main" class="shell">
-      <section id="home" class="home" aria-labelledby="homeTitle">
-        <section class="hero-banner" aria-labelledby="homeTitle">
+    <main id="main">
+      <div id="home">
+        <!-- ════════════════════ HERO ════════════════════ -->
+        <section class="hero" id="top" aria-labelledby="heroTitle">
           <div class="hero-grain" aria-hidden="true"></div>
-          <div class="hero-copy">
-            <p class="eyebrow">
-              <span class="hero-status-dot" aria-hidden="true"></span>
-              Marketplace evidence. Human judgment.
-            </p>
-            <h1 id="homeTitle">
-              Every listing.<br />A <em>clearer signal.</em>
-            </h1>
-            <p class="hero-description">
-              Find marketplace listings worth a closer look. Bring price, seller
-              and visual evidence into one prioritized review queue.
-            </p>
-            <div class="hero-actions">
-              <a class="button hero-cta" href="#scanTitle" data-start
-                >Start a product scan <span aria-hidden="true">↗</span></a
-              ><button id="heroExample" class="hero-example" type="button">
-                Try an example <span aria-hidden="true">→</span>
-              </button>
+          <div class="wrap hero-grid">
+            <div class="hero-copy">
+              <p class="tech hero-eyebrow">
+                MARKETPLACE EVIDENCE <span aria-hidden="true">·</span> HUMAN JUDGMENT
+              </p>
+              <h1 id="heroTitle" class="hero-title">
+                Every listing.<br /><em>A clearer signal.</em>
+              </h1>
+              <p class="hero-lede">
+                Find marketplace listings worth a closer look.<br />
+                Bring price, seller and visual evidence into one prioritized
+                review queue.
+              </p>
+              <div class="hero-actions">
+                <a class="cta cta-solid" href="#investigate" data-start
+                  >START A PRODUCT SCAN <span aria-hidden="true">→</span></a
+                >
+                <button id="heroExample" class="cta cta-ghost" type="button">
+                  TRY AN EXAMPLE <span aria-hidden="true">→</span>
+                </button>
+              </div>
+              <p class="hero-proof">
+                <span>Google Shopping</span><i aria-hidden="true">+</i
+                ><span>Google Lens</span><span class="via">via SerpApi</span>
+              </p>
             </div>
-            <div class="hero-proof">
-              <span>Google Shopping</span><i aria-hidden="true">+</i
-              ><span>Google Lens</span><span class="hero-api">via SerpApi</span>
-            </div>
-          </div>
-          <figure
-            class="signal-scene"
-            id="signalScene"
-            aria-label="Workflow illustration: price, seller and visual evidence surround your product reference"
-          >
-            <div class="scene-coordinates" aria-hidden="true">
-              <span>REFERENCE / SIGNAL FIELD</span><span>03 DIMENSIONS</span>
-            </div>
-            <div class="signal-object" aria-hidden="true">
-              <div class="orbit-plane orbit-back"></div>
-              <div class="orbit-plane orbit-front"></div>
-              <svg class="scene-traces" viewBox="0 0 540 490" fill="none">
-                <path
-                  d="M106 138H209L270 245M456 170H355L270 245M385 390V327L270 245"
-                />
-                <circle cx="106" cy="138" r="3" />
-                <circle cx="456" cy="170" r="3" />
-                <circle cx="385" cy="390" r="3" />
+
+            <figure
+              class="signal-board"
+              id="signalScene"
+              aria-label="Illustration: a reference product photo with price, visual and seller signal stations attached through thin measurement lines"
+            >
+              <svg class="board-grid" viewBox="0 0 560 470" aria-hidden="true">
+                <path d="M0 0H560M0 47H560M0 94H560M0 141H560M0 188H560M0 235H560M0 282H560M0 329H560M0 376H560M0 423H560M0 470H560" />
+                <path d="M0 0V470M56 0V470M112 0V470M168 0V470M224 0V470M280 0V470M336 0V470M392 0V470M448 0V470M504 0V470M560 0V470" />
               </svg>
-              <div class="reference-shadow"></div>
-              <div class="reference-plate plate-back"></div>
-              <div class="reference-plate plate-middle"></div>
-              <div class="reference-plate plate-main">
-                <div class="plate-topline">
-                  <span>YOUR REFERENCE</span><span>↗</span>
+              <span class="board-coord coord-tl">SCENE / REFERENCE-01</span>
+              <span class="board-coord coord-tr">EVIDENCE ANALYSIS</span>
+              <span class="board-coord coord-bl">03 DIMENSIONS</span>
+
+              <svg class="board-lines" viewBox="0 0 560 470" fill="none" aria-hidden="true">
+                <path class="trace trace-price" d="M58 110H150L214 172" />
+                <path class="trace trace-visual" d="M502 118H392L318 206" />
+                <path class="trace trace-seller" d="M470 352H352L268 262" />
+                <path class="trace trace-base" d="M120 392H268" />
+                <circle class="trace-tick" cx="150" cy="110" r="3" />
+                <circle class="trace-tick" cy="118" cx="392" r="3" />
+                <circle class="trace-tick" cx="352" cy="352" r="3" />
+                <path class="ground-line" d="M36 424H524" />
+                <path class="ground-low" d="M56 436H508" />
+              </svg>
+
+              <div class="ref-rig signal-object" aria-hidden="true">
+                <span class="ref-tag ref-idx">A-1</span>
+                <div class="ref-plate ref-plate-deep"></div>
+                <div class="ref-plate ref-plate-mid"></div>
+                <div class="ref-plate ref-plate-main">
+                  <div class="ref-topline">
+                    <span>YOUR REFERENCE</span><span class="ref-corners"></span>
+                  </div>
+                  <div id="heroReference" class="ref-media">
+                    <svg class="reference-glyph" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+                      <path d="M34 60V34H60M140 34H166V60M166 140V166H140M60 166H34V140" />
+                      <circle cx="100" cy="100" r="48" />
+                      <circle cx="100" cy="100" r="29" />
+                      <path d="M100 39V63M100 137V161M39 100H63M137 100H161" />
+                      <circle cx="100" cy="100" r="5" fill="currentColor" stroke="none" />
+                    </svg>
+                  </div>
+                  <div class="ref-baseline">
+                    <span id="heroReferenceName">Your product, at the center.</span
+                    ><span class="ref-index">01</span>
+                  </div>
                 </div>
-                <div id="heroReference" class="hero-reference">
-                  <svg
-                    class="reference-glyph"
-                    viewBox="0 0 200 200"
-                    fill="none"
-                  >
-                    <path
-                      d="M34 60V34H60M140 34H166V60M166 140V166H140M60 166H34V140"
-                    />
-                    <circle cx="100" cy="100" r="48" />
-                    <circle cx="100" cy="100" r="29" />
-                    <path d="M100 39V63M100 137V161M39 100H63M137 100H161" />
-                    <circle
-                      cx="100"
-                      cy="100"
-                      r="5"
-                      fill="currentColor"
-                      stroke="none"
-                    />
-                  </svg>
-                </div>
-                <div class="plate-baseline">
-                  <span id="heroReferenceName"
-                    >Your product,<br />at the center.</span
-                  ><span class="plate-index">01</span>
-                </div>
+                <span class="ref-measure meas-h"></span>
+                <span class="ref-measure meas-v"></span>
+                <span class="ref-reg reg-a"></span>
+                <span class="ref-reg reg-b"></span>
+                <span class="ref-reg reg-c"></span>
+                <span class="ref-reg reg-d"></span>
               </div>
-              <div class="evidence-token token-price">
-                <span class="token-icon">₹</span
-                ><span
-                  ><strong>Price</strong
-                  ><small>Reference deviation</small></span
-                ><i></i>
+
+              <div class="signal-station station-visual">
+                <span class="station-row"
+                  ><span class="station-index">V</span
+                  ><span class="station-kicker">VISUAL SIGNAL</span></span
+                >
+                <span class="station-value">SIMILARITY</span>
+                <span class="station-note">Related image evidence</span>
               </div>
-              <div class="evidence-token token-source">
-                <span class="token-icon"
-                  ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path
-                      d="M4 10h16l-2-6H6l-2 6Zm1 0v10h14V10M9 20v-6h6v6"
-                    /></svg></span
-                ><span
-                  ><strong>Source</strong><small>Seller context</small></span
-                ><i></i>
+              <div class="signal-station station-price">
+                <span class="station-row"
+                  ><span class="station-index">P</span
+                  ><span class="station-kicker">PRICE SIGNAL</span></span
+                >
+                <span class="station-value">DEVIATION</span>
+                <span class="station-note">Reference comparison</span>
               </div>
-              <div class="evidence-token token-visual">
-                <span class="token-icon"
-                  ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <rect x="4" y="4" width="16" height="16" rx="4" />
-                    <circle cx="12" cy="12" r="4" /></svg></span
-                ><span
-                  ><strong>Visual</strong
-                  ><small>Related image evidence</small></span
-                ><i></i>
+              <div class="signal-station station-seller">
+                <span class="station-row"
+                  ><span class="station-index">S</span
+                  ><span class="station-kicker">SELLER SIGNAL</span></span
+                >
+                <span class="station-value">CONTEXT</span>
+                <span class="station-note">Marketplace source</span>
               </div>
-              <div class="scene-output">
-                <span class="output-mark">≋</span><span>REVIEW PRIORITY</span
-                ><span>→</span>
-              </div>
-            </div>
-            <figcaption>
-              <span>Three signals. One focused review.</span
-              ><span>Workflow illustration</span>
-            </figcaption>
-          </figure>
-          <div class="hero-bottom">
-            <span>CLARITY, NOT CERTAINTY.</span>
-            <p>Evidence to help you decide where to look next.</p>
-            <span aria-hidden="true">↓</span>
+
+              <figcaption class="board-caption">
+                <span>Three signals. One focused review.</span
+                ><span>Reference: your product photo</span>
+              </figcaption>
+            </figure>
+          </div>
+
+          <div class="wrap">
+            <ol class="process-strip" aria-label="The scan workflow">
+              <li>
+                <span class="ps-idx">01</span>
+                <span class="ps-body"
+                  ><strong>Scan</strong
+                  ><small>Monitor listings at scale</small></span
+                >
+              </li>
+              <li>
+                <span class="ps-idx">02</span>
+                <span class="ps-body"
+                  ><strong>Analyze</strong
+                  ><small>Price, seller and visual signals</small></span
+                >
+              </li>
+              <li>
+                <span class="ps-idx">03</span>
+                <span class="ps-body"
+                  ><strong>Prioritize</strong
+                  ><small>Focus on what needs review</small></span
+                >
+              </li>
+              <li>
+                <span class="ps-idx">04</span>
+                <span class="ps-body"
+                  ><strong>Decide</strong
+                  ><small>Compare the evidence, follow sources</small></span
+                >
+              </li>
+            </ol>
           </div>
         </section>
-        <div class="intro">
-          <p class="eyebrow">
-            <span class="tiny-mark" aria-hidden="true"></span> A clearer view of
-            your marketplace
-          </p>
-          <h2 class="setup-title">Start with what<br /><em>you know.</em></h2>
-          <p class="lede">
-            Your product photo. Marketplace listings.<br />
-            Price, source and visual evidence — together in one prioritized
-            review queue.
-          </p>
-          <div class="workflow" aria-label="How Beacontra works">
-            <div>
-              <span class="step">01</span>
-              <p>
-                <strong>Reference</strong
-                ><span>Add your product and genuine photo.</span>
+
+        <!-- ════════════════════ SECTION 01 — SIGNAL PROBLEM ════════════════════ -->
+        <section class="section" id="signals" aria-labelledby="signalsTitle">
+          <div class="wrap">
+            <header class="section-head">
+              <p class="tech">01 / SIGNAL PROBLEM</p>
+              <h2 id="signalsTitle" class="section-title">
+                Marketplace data is abundant.<br /><em>Useful evidence is not.</em>
+              </h2>
+              <p class="section-lede">
+                A listing carries three independent signals. Read together, they
+                turn thousands of offers into a short list worth your time.
               </p>
-            </div>
-            <div>
-              <span class="step">02</span>
-              <p>
-                <strong>Search</strong
-                ><span>Discover listings and related image evidence.</span>
-              </p>
-            </div>
-            <div>
-              <span class="step">03</span>
-              <p>
-                <strong>Review</strong
-                ><span>Compare the signals. Follow the sources.</span>
-              </p>
-            </div>
-          </div>
-          <p class="trust-note">
-            Evidence for your judgment. Never an authenticity verdict.
-          </p>
-        </div>
-        <section class="scan-card" aria-labelledby="scanTitle">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">New investigation</p>
-              <h2 id="scanTitle" tabindex="-1">Start with your product</h2>
-            </div>
-            <span class="index-mark" aria-hidden="true">01 / 03</span>
-          </div>
-          <form id="scanForm" novalidate>
-            <fieldset id="fields">
-              <label for="productName"
-                >Product name <span class="required">Required</span></label
-              >
-              <input
-                id="productName"
-                name="productName"
-                required
-                maxlength="200"
-                placeholder="e.g. boAt Airdopes 141"
-                autocomplete="off"
-              />
-              <div class="photo-input">
-                <div id="imagePreview" class="photo-preview">
-                  <svg
-                    aria-hidden="true"
-                    width="32"
-                    height="32"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.4"
-                  >
-                    <rect x="3" y="3" width="18" height="18" rx="3" />
-                    <circle cx="8" cy="8" r="1.5" />
-                    <path d="m3 17 6-6 4 4 3-3 5 5" /></svg
-                  ><span>Your genuine<br />product photo</span>
-                </div>
-                <div class="photo-fields">
-                  <label for="officialImageUrl">Genuine product photo (URL or File)</label>
-                  <div class="flex gap-2">
-                    <input
-                      type="url"
-                      id="officialImageUrl"
-                      name="officialImageUrl"
-                      required
-                      placeholder="https://yourbrand.com/photo.jpg"
-                      aria-describedby="imageHint imageStatus"
-                      class="flex-1"
-                    />
-                    <input
-                      type="file"
-                      id="imageFile"
-                      name="imageFile"
-                      accept="image/png, image/jpeg, image/webp"
-                      class="text-sm self-center w-full max-w-[200px]"
-                    />
+            </header>
+
+            <div class="channel-grid">
+              <article class="channel">
+                <div class="channel-head">
+                  <span class="channel-glyph" aria-hidden="true">₹</span>
+                  <div>
+                    <p class="tech">PRICE</p>
+                    <h3>Reference deviation</h3>
                   </div>
-                  <p id="imageHint" class="hint">
-                    Paste a public image link from your brand’s website.
-                  </p>
-                  <p id="imageStatus" class="hint" role="status"></p>
-                  <button
-                    id="removeImage"
-                    class="text-button"
-                    type="button"
-                    hidden
-                  >
-                    Remove photo
-                  </button>
                 </div>
+                <dl class="channel-data">
+                  <div><dt>Signal value</dt><dd>Listed price vs your MRP</dd></div>
+                  <div><dt>Source</dt><dd>Google Shopping offer</dd></div>
+                  <div><dt>Demo reference</dt><dd>₹1,399 vs ₹4,490 · −69%</dd></div>
+                </dl>
+                <div class="channel-scale" aria-hidden="true">
+                  <span class="scale-mark scale-ref" title="Reference"></span>
+                  <span class="scale-mark scale-offer" title="Offer"></span>
+                  <span class="scale-label">REF</span>
+                  <span class="scale-label">OFFER</span>
+                </div>
+                <p class="channel-note">
+                  Deep price gaps are worth a look. So are prices that look too
+                  good against your own reference.
+                </p>
+              </article>
+
+              <article class="channel">
+                <div class="channel-head">
+                  <span class="channel-glyph" aria-hidden="true">⬡</span>
+                  <div>
+                    <p class="tech">VISUAL</p>
+                    <h3>Photo evidence trail</h3>
+                  </div>
+                </div>
+                <dl class="channel-data">
+                  <div><dt>Signal value</dt><dd>Related image records</dd></div>
+                  <div><dt>Source</dt><dd>Google Lens on the listing photo</dd></div>
+                  <div><dt>Demo reference</dt><dd>Source records returned per listing</dd></div>
+                </dl>
+                <div class="channel-strip" aria-hidden="true">
+                  <span class="strip-cell on"></span><span class="strip-cell on"></span
+                  ><span class="strip-cell on"></span><span class="strip-cell dim"></span
+                  ><span class="strip-cell dim"></span>
+                  <span class="strip-label">RELATED SOURCES</span>
+                </div>
+                <p class="channel-note">
+                  Which other pages carry the same photo? Lens points you to the
+                  trail without declaring the verdict.
+                </p>
+              </article>
+
+              <article class="channel">
+                <div class="channel-head">
+                  <span class="channel-glyph" aria-hidden="true">▢</span>
+                  <div>
+                    <p class="tech">SELLER</p>
+                    <h3>Marketplace context</h3>
+                  </div>
+                </div>
+                <dl class="channel-data">
+                  <div><dt>Signal value</dt><dd>Who is offering it</dd></div>
+                  <div><dt>Source</dt><dd>Seller attribution in Shopping</dd></div>
+                  <div><dt>Demo reference</dt><dd>11 distinct sources in one scan</dd></div>
+                </dl>
+                <div class="channel-seller" aria-hidden="true">
+                  <span class="seller-cell cell-a">MN</span>
+                  <span class="seller-cell cell-b">AZ</span>
+                  <span class="seller-cell cell-c">ZP</span>
+                  <span class="seller-cell cell-d">OF</span>
+                  <span class="seller-count">+7</span>
+                  <span class="strip-label">SOURCES REPRESENTED</span>
+                </div>
+                <p class="channel-note">
+                  A recognizable seller is context, not a verdict. Unknown names
+                  simply earn a closer look.
+                </p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- ════════════════════ SECTION 02 — REFERENCE OBJECT ════════════════════ -->
+        <section class="section reference-section" id="product" aria-labelledby="referenceTitle">
+          <div class="wrap reference-grid">
+            <figure class="reference-object" aria-label="Reference product object with measurement frame">
+              <svg class="ro-frame" viewBox="0 0 460 560" fill="none" aria-hidden="true">
+                <path d="M30 46V30H46M414 30H430V46M430 514V530H414M46 530H30V514" />
+                <path d="M88 210H46M88 238H46M88 350H46M88 322H46" />
+                <path d="M372 210H414M372 238H414M372 322H414M372 350H414" />
+                <path d="M88 128H46M372 128H414" />
+              </svg>
+              <span class="ro-coord coord-a">REF / PRODUCT</span>
+              <span class="ro-coord coord-b">VENDOR PHOTO</span>
+              <div class="ro-plate">
+                <img
+                  src="https://www.boat-lifestyle.com/cdn/shop/files/AD141-FI_Black06_600x.jpg"
+                  alt="boAt Airdopes 141 earbuds, the demo reference product"
+                  loading="lazy"
+                  decoding="async"
+                  referrerpolicy="no-referrer"
+                  onerror="this.closest('.ro-plate').classList.add('is-fallback')"
+                />
+                <span class="ro-fallback" aria-hidden="true"></span>
+                <span class="ro-bracket bl"></span><span class="ro-bracket br"></span>
+                <span class="ro-bracket tl"></span><span class="ro-bracket tr"></span>
               </div>
-              <div class="field">
-                <label for="mrp"
-                  >Reference MRP <span class="optional">Optional</span></label
-                >
-                <div class="currency-input">
-                  <span aria-hidden="true">₹</span
-                  ><input
-                    id="mrp"
-                    name="mrp"
-                    type="number"
-                    min="0.01"
-                    step="0.01"
-                    placeholder="Enter the product’s MRP"
-                    aria-describedby="mrpHint"
-                  />
+              <figcaption class="ro-caption">
+                <span>DEMO REFERENCE · boAt Airdopes 141</span
+                ><span>Verified working image</span>
+              </figcaption>
+            </figure>
+
+            <div class="reference-spec">
+              <p class="tech">02 / REFERENCE OBJECT</p>
+              <h2 id="referenceTitle" class="section-title">Start with what<br /><em>you know.</em></h2>
+              <p class="section-lede">
+                One genuine product photo is the anchor of every scan. Everything
+                else is measured against it — the price you set, the sellers you
+                trust, and the visual trail Lens finds.
+              </p>
+
+              <dl class="spec-list">
+                <div class="spec-row">
+                  <dt>REFERENCE</dt>
+                  <dd class="spec-key">Product</dd>
+                  <dd class="spec-val">boAt Airdopes 141</dd>
                 </div>
-                <p id="mrpHint" class="hint">
-                  Used to show price deviations, not to establish authenticity.
+                <div class="spec-row">
+                  <dt>SOURCE</dt>
+                  <dd class="spec-key">Marketplace search</dd>
+                  <dd class="spec-val">Google Shopping</dd>
+                </div>
+                <div class="spec-row">
+                  <dt>OBSERVATIONS</dt>
+                  <dd class="spec-key">Price</dd>
+                  <dd class="spec-val">Deviation vs reference MRP</dd>
+                </div>
+                <div class="spec-row">
+                  <dt></dt>
+                  <dd class="spec-key">Visual match</dd>
+                  <dd class="spec-val">Evidence trail, not a verdict</dd>
+                </div>
+                <div class="spec-row">
+                  <dt></dt>
+                  <dd class="spec-key">Seller</dd>
+                  <dd class="spec-val">Marketplace contextual name</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </section>
+
+        <!-- ════════════════════ SECTION 03 — HOW BEACONTRA THINKS ════════════════════ -->
+        <section class="section pipeline-wrap" id="how" aria-labelledby="howTitle">
+          <div class="wrap">
+            <header class="section-head">
+              <p class="tech">03 / HOW BEACONTRA THINKS</p>
+              <h2 id="howTitle" class="section-title">One chain<br /><em>of evidence.</em></h2>
+            </header>
+          </div>
+          <div class="pipeline-holder" data-pipeline>
+            <div class="pipeline" id="pipeline">
+              <div class="pipeline-track" aria-hidden="true"
+                ><span class="pipeline-fill" aria-hidden="true"></span
+              ></div>
+              <ol class="pipeline-stages">
+                <li class="ps-stage" data-step="1">
+                  <span class="ps-marker">01</span>
+                  <h3>INPUT</h3>
+                  <p>Your product name and official photo</p>
+                </li>
+                <li class="ps-stage" data-step="2">
+                  <span class="ps-marker">02</span>
+                  <h3>SEARCH</h3>
+                  <p>Google Shopping finds live marketplace offers</p>
+                </li>
+                <li class="ps-stage" data-step="3">
+                  <span class="ps-marker">03</span>
+                  <h3>VISUAL MATCH</h3>
+                  <p>Google Lens traces each listing photo</p>
+                </li>
+                <li class="ps-stage" data-step="4">
+                  <span class="ps-marker">04</span>
+                  <h3>PRICE COMPARISON</h3>
+                  <p>Offer price measured against your reference</p>
+                </li>
+                <li class="ps-stage" data-step="5">
+                  <span class="ps-marker">05</span>
+                  <h3>SELLER CONTEXT</h3>
+                  <p>Source attribution for every offer</p>
+                </li>
+                <li class="ps-stage" data-step="6">
+                  <span class="ps-marker">06</span>
+                  <h3>PRIORITIZED REVIEW</h3>
+                  <p>One queue, ranked for your judgment</p>
+                </li>
+              </ol>
+            </div>
+            <p class="pipeline-hint" aria-hidden="true">Scroll to follow the signal &nbsp;→</p>
+          </div>
+        </section>
+
+        <!-- ════════════════════ SECTION 04 — SCANNER / INVESTIGATION ════════════════════ -->
+        <section class="section scanner-section" id="investigate" aria-labelledby="scanTitle">
+          <div class="wrap">
+            <header class="section-head scanner-head">
+              <div>
+                <p class="tech">04 / INVESTIGATION</p>
+                <h2 id="scanTitle" class="section-title" tabindex="-1"
+                  >Investigate<br /><em>a product.</em></h2>
+                <p class="section-lede">
+                  Paste a product URL or name, add your official photo and an
+                  optional reference price. Beacontra builds the review queue.
                 </p>
               </div>
-              <details class="context">
-                <summary>
-                  Add price range &amp; seller context <span>Optional</span>
-                </summary>
-                <div class="context-fields">
-                  <div class="two-fields">
-                    <div>
-                      <label for="minPrice">Expected minimum (₹)</label
-                      ><input
-                        id="minPrice"
-                        type="number"
-                        min="0.01"
-                        step="0.01"
-                        placeholder="Minimum"
-                      />
+              <span class="index-mark" aria-hidden="true">ANALYSIS / 04</span>
+            </header>
+
+            <div class="scanner-layout">
+              <form id="scanForm" class="scan-card" novalidate>
+                <fieldset id="fields">
+                  <div class="scan-sec scan-sec-name">
+                    <label for="productName"
+                      >Product name <span class="required">Required</span></label
+                    >
+                    <input
+                      id="productName"
+                      name="productName"
+                      required
+                      maxlength="200"
+                      placeholder="e.g. boAt Airdopes 141"
+                      autocomplete="off"
+                    />
+                  </div>
+
+                  <div class="scan-sec photo-input">
+                    <div id="imagePreview" class="photo-preview">
+                      <svg
+                        aria-hidden="true"
+                        width="26" height="26" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.3"
+                      >
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8" cy="8" r="1.5" />
+                        <path d="m3 17 6-6 4 4 3-3 5 5" />
+                      </svg>
+                      <span>Your genuine<br />product photo</span>
                     </div>
-                    <div>
-                      <label for="maxPrice">Expected maximum (₹)</label
-                      ><input
-                        id="maxPrice"
-                        type="number"
-                        min="0.01"
-                        step="0.01"
-                        placeholder="Maximum"
-                      />
+                    <div class="photo-fields">
+                      <label for="officialImageUrl"
+                        >Genuine product photo <span class="optional">URL or file</span></label
+                      >
+                      <div class="flex gap-2">
+                        <input
+                          type="url"
+                          id="officialImageUrl"
+                          name="officialImageUrl"
+                          required
+                          placeholder="https://yourbrand.com/photo.jpg"
+                          aria-describedby="imageHint imageStatus"
+                          class="flex-1"
+                        />
+                        <span class="file-chip">
+                          <input
+                            type="file"
+                            id="imageFile"
+                            name="imageFile"
+                            accept="image/png, image/jpeg, image/webp"
+                            aria-label="Choose a genuine product photo file"
+                            class="text-sm self-center w-full"
+                          />
+                          <span aria-hidden="true">FILE</span>
+                        </span>
+                      </div>
+                      <p id="imageHint" class="hint">
+                        Paste a public image link from your brand’s website.
+                      </p>
+                      <p id="imageStatus" class="hint" role="status"></p>
+                      <button
+                        id="removeImage"
+                        class="text-button"
+                        type="button"
+                        hidden
+                      >
+                        Remove photo
+                      </button>
                     </div>
                   </div>
-                  <label for="authorizedSellers">Your authorized sellers</label
-                  ><input
-                    id="authorizedSellers"
-                    placeholder="Seller names, separated by commas"
-                  />
-                  <p class="hint">
-                    Only add sellers you know are authorized. Marketplace names
-                    may not identify the actual seller.
-                  </p>
-                </div>
-              </details>
-              <button
-                id="scanBtn"
-                class="button primary scan-button"
-                type="submit"
-              >
-                Scan marketplaces <span aria-hidden="true">→</span>
-              </button>
-              <button id="loadDemoBtn" class="sample-button" type="button">
-                Try a product example <span aria-hidden="true">↗</span>
-              </button>
-            </fieldset>
-          </form>
-          <p class="scan-footnote">
-            Google Shopping + Google Lens <span>via SerpApi</span>
-          </p>
-        </section>
-      </section>
 
+                  <div class="scan-sec scan-sec-mrp">
+                    <label for="mrp"
+                      >Reference MRP <span class="optional">Optional</span></label
+                    >
+                    <div class="currency-input">
+                      <span aria-hidden="true">₹</span
+                      ><input
+                        id="mrp"
+                        name="mrp"
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        placeholder="Enter the product’s MRP"
+                        aria-describedby="mrpHint"
+                      />
+                    </div>
+                    <p id="mrpHint" class="hint">
+                      Used to show price deviations, not to establish authenticity.
+                    </p>
+                  </div>
+
+                  <details class="context">
+                    <summary>
+                      Add price range &amp; seller context <span>Optional</span>
+                    </summary>
+                    <div class="context-fields">
+                      <div class="two-fields">
+                        <div>
+                          <label for="minPrice">Expected minimum (₹)</label
+                          ><input
+                            id="minPrice"
+                            type="number"
+                            min="0.01"
+                            step="0.01"
+                            placeholder="Minimum"
+                          />
+                        </div>
+                        <div>
+                          <label for="maxPrice">Expected maximum (₹)</label
+                          ><input
+                            id="maxPrice"
+                            type="number"
+                            min="0.01"
+                            step="0.01"
+                            placeholder="Maximum"
+                          />
+                        </div>
+                      </div>
+                      <div class="scan-sec">
+                        <label for="authorizedSellers">Your authorized sellers</label
+                        ><input
+                          id="authorizedSellers"
+                          placeholder="Seller names, separated by commas"
+                        />
+                        <p class="hint">
+                          Only add sellers you know are authorized. Marketplace
+                          names may not identify the actual seller.
+                        </p>
+                      </div>
+                    </div>
+                  </details>
+
+                  <button
+                    id="scanBtn"
+                    class="cta cta-solid scan-button"
+                    type="submit"
+                  >
+                    START SCAN <span aria-hidden="true">→</span>
+                  </button>
+                  <button id="loadDemoBtn" class="sample-button" type="button">
+                    Try a product example <span aria-hidden="true">↗</span>
+                  </button>
+                </fieldset>
+                <p class="scan-footnote">
+                  Google Shopping + Google Lens <span>via SerpApi</span>
+                </p>
+              </form>
+
+              <aside class="scanner-sources" aria-labelledby="sourcesTitle">
+                <h3 id="sourcesTitle" class="tech">ACTIVE SOURCES</h3>
+                <div class="source-item">
+                  <span class="source-index">01</span>
+                  <span class="source-body"
+                    ><strong>Google Shopping</strong
+                    ><small>Listing discovery · price + seller</small></span
+                  >
+                  <span class="source-status" aria-hidden="true"></span>
+                </div>
+                <div class="source-item">
+                  <span class="source-index">02</span>
+                  <span class="source-body"
+                    ><strong>Google Lens</strong
+                    ><small>Visual evidence · capped at 10 scans</small></span
+                  >
+                  <span class="source-status" aria-hidden="true"></span>
+                </div>
+                <p class="scanner-meta">
+                  ANALYZE / 04<br />
+                  Every source is queried live through SerpApi. Results are
+                  ranked by a deterministic priority score for your review — never
+                  an authenticity verdict.
+                </p>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        <!-- ════════════════════ SECTION 05 — SIGNAL DETAIL ════════════════════ -->
+        <section class="section signals-detail-section" id="signalDetail" aria-labelledby="detailSectionTitle">
+          <div class="wrap">
+            <header class="section-head">
+              <p class="tech">05 / HOW EACH SIGNAL READS</p>
+              <h2 id="detailSectionTitle" class="section-title">Three signals.<br /><em>One workspace.</em></h2>
+            </header>
+
+            <div class="detail-signal-grid">
+              <article class="detail-signal ds-price">
+                <p class="tech">PRICE SIGNAL</p>
+                <h3>reference <i>→</i> market <i>→</i> deviation</h3>
+                <div class="ds-visual">
+                  <span class="ds-node" data-lab="REFERENCE">₹4,490</span>
+                  <span class="ds-node ds-mid" data-lab="MARKET">₹1,399</span>
+                  <span class="ds-result" data-lab="OUTCOME">−69% flagged</span>
+                </div>
+              </article>
+
+              <article class="detail-signal ds-visual-sig">
+                <p class="tech">VISUAL SIGNAL</p>
+                <h3>reference photo <i>→</i> listing photo <i>→</i> trail</h3>
+                <div class="ds-visual">
+                  <span class="ds-node" data-lab="YOUR REFERENCE">A</span>
+                  <span class="ds-node ds-mid" data-lab="LISTING">B</span>
+                  <span class="ds-result" data-lab="OUTCOME">related sources</span>
+                </div>
+              </article>
+
+              <article class="detail-signal ds-seller-sig">
+                <p class="tech">SELLER SIGNAL</p>
+                <h3>listing <i>→</i> seller <i>→</i> context</h3>
+                <div class="ds-visual">
+                  <span class="ds-node" data-lab="LISTING">offer #1</span>
+                  <span class="ds-node ds-mid" data-lab="SELLER">marketplace</span>
+                  <span class="ds-result" data-lab="OUTCOME">contextual</span>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- ════════════════════ SECTION 06 — WHY IT MATTERS ════════════════════ -->
+        <section class="section why-section" id="why" aria-labelledby="whyTitle">
+          <div class="wrap">
+            <header class="section-head">
+              <p class="tech">06 / WHY IT MATTERS</p>
+              <h2 id="whyTitle" class="section-title">Less searching.<br /><em>More signal.</em></h2>
+            </header>
+            <div class="why-ladder">
+              <div class="why-step">
+                <span class="why-count">01</span>
+                <strong class="why-big">hundreds</strong>
+                <span class="why-label">of listings</span>
+                <span class="why-arrow" aria-hidden="true">↓</span>
+              </div>
+              <div class="why-step">
+                <span class="why-count">02</span>
+                <strong class="why-big">a few</strong>
+                <span class="why-label">useful references</span>
+                <span class="why-arrow" aria-hidden="true">↓</span>
+              </div>
+              <div class="why-step">
+                <span class="why-count">03</span>
+                <strong class="why-big">one<br />queue</strong>
+                <span class="why-label">focused review</span>
+              </div>
+            </div>
+            <p class="why-note">
+              The work is not more searching. The work is deciding where to look.
+            </p>
+          </div>
+        </section>
+
+        <!-- ════════════════════ SECTION 07 — TECHNOLOGY ════════════════════ -->
+        <section class="section arch-section" id="technology" aria-labelledby="techTitle">
+          <div class="wrap">
+            <header class="section-head">
+              <p class="tech">07 / TECHNOLOGY</p>
+              <h2 id="techTitle" class="section-title">The pipeline<br /><em>in plain view.</em></h2>
+            </header>
+
+            <div class="arch" aria-label="System architecture diagram">
+              <div class="arch-row">
+                <span class="arch-node arch-user">USER</span>
+                <span class="arch-annot">Review workspace · evidence queue</span>
+              </div>
+              <div class="arch-link"><span class="arch-flow">POST /api/beacontra/scan</span></div>
+              <div class="arch-row">
+                <span class="arch-node arch-core">BEACONTRA</span>
+                <span class="arch-annot">Search · normalize · score · rank</span>
+              </div>
+              <div class="arch-link"><span class="arch-flow">GET search.json</span></div>
+              <div class="arch-row arch-fan">
+                <span class="arch-node">GOOGLE SHOPPING</span>
+                <span class="arch-plus" aria-hidden="true">+</span>
+                <span class="arch-node">GOOGLE LENS</span>
+              </div>
+              <div class="arch-link"><span class="arch-flow">SerpApi gateway</span></div>
+              <div class="arch-row">
+                <span class="arch-node arch-normal">NORMALIZED MARKETPLACE SIGNALS</span>
+                <span class="arch-annot">Price · visual · seller</span>
+              </div>
+              <div class="arch-link"><span class="arch-flow">fusion + priority score</span></div>
+              <div class="arch-row">
+                <span class="arch-node arch-out">REVIEW WORKSPACE</span>
+                <span class="arch-annot">Human judgment, finally</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ════════════════════ FINAL CTA ════════════════════ -->
+        <section class="section cta-section" id="cta" aria-labelledby="ctaTitle">
+          <div class="cta-glow" aria-hidden="true"></div>
+          <div class="wrap cta-inner">
+            <p class="tech">START INVESTIGATING</p>
+            <h2 id="ctaTitle" class="section-title">Find the signal<br /><em>inside the noise.</em></h2>
+            <div class="hero-actions cta-actions">
+              <a class="cta cta-solid" href="#investigate"
+                >START A PRODUCT SCAN <span aria-hidden="true">→</span></a
+              >
+              <button id="ctaExample" class="cta cta-ghost" type="button">
+                TRY AN EXAMPLE <span aria-hidden="true">→</span>
+              </button>
+            </div>
+            <p class="cta-foot">
+              Evidence for your judgment. Never an authenticity verdict.
+            </p>
+          </div>
+        </section>
+      </div>
+
+      <!-- ════════════════════ LOADING ════════════════════ -->
       <section
         id="loading"
         class="loading panel"
@@ -352,15 +762,15 @@
         aria-labelledby="loadingTitle"
         aria-busy="true"
       >
-        <div class="section-heading">
-          <p class="eyebrow">Investigation in progress</p>
+        <div class="section-head loading-head">
+          <p class="tech">BEACONTR / SCAN <span id="scanNo" class="mono">01</span></p>
           <span id="elapsed" class="mono">0s elapsed</span>
         </div>
-        <h1 id="loadingTitle" tabindex="-1">
-          Bringing the evidence into focus.
-        </h1>
+        <h1 id="loadingTitle" tabindex="-1">Searching marketplaces.</h1>
         <p id="loadingProduct" class="lede"></p>
+
         <div class="scan-instrument" aria-hidden="true">
+          <div class="scan-reticle"></div>
           <div class="scan-orbit scan-orbit-one"></div>
           <div class="scan-orbit scan-orbit-two"></div>
           <div class="scan-reference-object">
@@ -368,120 +778,136 @@
             <span>YOUR REFERENCE</span>
             <div class="scan-sweep"></div>
           </div>
-          <span class="scan-label scan-label-left"
-            >SHOPPING<br /><small>Listing discovery</small></span
-          ><span class="scan-label scan-label-right"
-            >LENS<br /><small>Visual evidence</small></span
-          ><span class="scan-axis"></span>
+          <span class="scan-label scan-label-left">SHOPPING<br /><small>Listing discovery</small></span>
+          <span class="scan-label scan-label-right">LENS<br /><small>Visual evidence</small></span>
+          <span class="scan-axis"></span>
         </div>
+
         <div class="scan-line" aria-hidden="true"></div>
-        <div class="loading-stages">
-          <div>
+        <ol class="loading-stages">
+          <li>
             <span class="step">01</span>
             <h2>Discover listings</h2>
             <p>Google Shopping finds marketplace offers.</p>
-          </div>
-          <div>
+          </li>
+          <li>
             <span class="step">02</span>
             <h2>Gather visual evidence</h2>
             <p>Google Lens checks selected listing photos.</p>
-          </div>
-          <div>
+          </li>
+          <li>
             <span class="step">03</span>
             <h2>Prioritize your review</h2>
             <p>Price, source and visual signals come together.</p>
-          </div>
-        </div>
+          </li>
+        </ol>
         <p id="loadingNote" class="hint" role="status">
           The scan is running. Results arrive together when processing finishes;
           these are workflow steps, not live stage indicators.
         </p>
       </section>
 
+      <!-- ════════════════════ ERROR ════════════════════ -->
       <section id="errorPanel" class="error-panel" hidden role="alert">
-        <div>
-          <p class="eyebrow">Scan interrupted</p>
-          <h2 id="errorTitle">We couldn’t finish this scan.</h2>
-          <p id="errorMessage"></p>
-        </div>
-        <div class="error-actions">
-          <button id="retryBtn" class="button primary" type="button">
-            Retry scan</button
-          ><button id="editBtn" class="button secondary" type="button">
-            Edit product</button
-          ><button id="returnBtn" class="button secondary" type="button" hidden>
-            Return to results
-          </button>
+        <div class="wrap error-inner">
+          <div class="error-copy">
+            <p class="tech error-tech">SIGNAL INTERRUPTED</p>
+            <h2 id="errorTitle">Unable to retrieve marketplace evidence.</h2>
+            <p id="errorMessage"></p>
+          </div>
+          <div class="error-actions">
+            <button id="retryBtn" class="cta cta-solid" type="button">
+              RETRY SCAN <span aria-hidden="true">↻</span>
+            </button>
+            <button id="editBtn" class="cta cta-ghost" type="button">
+              Edit product
+            </button>
+            <button id="returnBtn" class="cta cta-ghost" type="button" hidden>
+              Return to results
+            </button>
+          </div>
         </div>
       </section>
 
-      <section id="resultsSection" hidden aria-labelledby="resultsTitle">
-        <div class="results-heading">
-          <div>
-            <p class="eyebrow">Your evidence workspace</p>
-            <h1 id="resultsTitle" tabindex="-1">Marketplace review</h1>
-            <p id="resultsProduct" class="muted"></p>
-          </div>
-          <button id="newScanBtn" type="button" class="button secondary">
-            ← Edit product
-          </button>
-        </div>
-        <div class="provenance">
-          <span id="dataBadge" class="badge"></span
-          ><span id="resultsMeta"></span>
-        </div>
-        <div id="metrics" class="metrics"></div>
-        <p id="coverage" class="coverage"></p>
-        <div class="workspace">
-          <aside class="queue panel" aria-labelledby="queueTitle">
-            <div class="queue-heading">
-              <h2 id="queueTitle">Review queue</h2>
-              <span id="queueCount" class="count"></span>
+      <!-- ════════════════════ RESULTS ════════════════════ -->
+      <section id="resultsSection" class="results" hidden aria-labelledby="resultsTitle">
+        <div class="wrap">
+          <header class="results-heading">
+            <div>
+              <p class="tech">EVIDENCE WORKSPACE</p>
+              <h1 id="resultsTitle" tabindex="-1">Marketplace review</h1>
+              <p id="resultsProduct" class="muted"></p>
             </div>
-            <label class="sr-only" for="queueFilter">Filter review queue</label
-            ><select id="queueFilter">
-              <option value="all">All listings · highest priority first</option>
-              <option value="priority">Prioritized for review</option>
-              <option value="visual">With Lens evidence</option>
-            </select>
-            <div id="resultsList" class="queue-list"></div>
-          </aside>
-          <section
-            id="evidencePanel"
-            class="evidence panel"
-            aria-labelledby="detailTitle"
-          ></section>
+            <button id="newScanBtn" type="button" class="cta cta-ghost">
+              <span aria-hidden="true">←</span> Edit product
+            </button>
+          </header>
+
+          <div class="provenance">
+            <span id="dataBadge" class="badge"></span>
+            <span id="resultsMeta"></span>
+          </div>
+
+          <div id="metrics" class="metrics"></div>
+          <p id="coverage" class="coverage"></p>
+
+          <div class="workspace">
+            <aside class="reference-rail" id="referenceRail" aria-labelledby="railTitle">
+              <p id="railTitle" class="tech">REFERENCE</p>
+              <div class="rail-media" id="railMedia"></div>
+              <dl class="rail-spec">
+                <div><dt>PRODUCT</dt><dd id="railProduct"></dd></div>
+                <div><dt>REFERENCE PRICE</dt><dd id="railMrp"></dd></div>
+                <div><dt>SELECTED LISTING</dt><dd id="railPrice"></dd></div>
+                <div><dt>SOURCE</dt><dd id="railSource">Google Shopping</dd></div>
+              </dl>
+              <p class="rail-meta mono" id="railMeta"></p>
+            </aside>
+
+            <article class="evidence-stream" aria-label="Marketplace evidence stream">
+              <div class="stream-toolbar">
+                <h2 id="queueTitle">Marketplace evidence</h2>
+                <span id="queueCount" class="count"></span>
+                <label class="sr-only" for="queueFilter">Filter review queue</label>
+                <select id="queueFilter">
+                  <option value="all">All listings · highest priority first</option>
+                  <option value="priority">Prioritized for review</option>
+                  <option value="visual">With Lens evidence</option>
+                </select>
+              </div>
+              <div id="resultsList" class="queue-list"></div>
+              <section id="evidencePanel" class="evidence" aria-labelledby="detailTitle"></section>
+            </article>
+          </div>
         </div>
       </section>
-      <footer>
-        <span
-          >Beacontra <span class="footer-dot">/</span> Where price, seller, and
-          photo evidence meet.</span
-        ><span>Built for human judgment.</span>
+
+      <footer class="site-footer">
+        <div class="wrap footer-inner">
+          <span>Beacontra <span class="footer-dot">/</span> Where price, seller, and photo evidence meet.</span>
+          <span class="footer-mid">Built for human judgment.</span>
+          <span class="footer-credit">Search data via <a href="https://serpapi.com" target="_blank" rel="noopener noreferrer">SerpApi ↗</a></span>
+        </div>
       </footer>
       <p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
     </main>
+
     <dialog id="comparisonDialog" aria-labelledby="dialogTitle">
       <div class="dialog-header">
         <div>
-          <p class="eyebrow">Evidence close-up</p>
+          <p class="tech dialog-tech">EVIDENCE CLOSE-UP</p>
           <h2 id="dialogTitle">Compare the product photos</h2>
         </div>
-        <button
-          id="closeDialog"
-          class="button secondary"
-          type="button"
-          autofocus
-        >
+        <button id="closeDialog" class="cta cta-ghost" type="button" autofocus>
           Close <span aria-hidden="true">×</span>
         </button>
       </div>
       <div id="dialogContent"></div>
     </dialog>
-    <noscript
-      ><p class="panel">
-        Enable JavaScript to scan marketplaces and explore the evidence.
-      </p></noscript
-    >
+    <noscript>
+      <div class="wrap panel noscript">
+        <p>Enable JavaScript to scan marketplaces and explore the evidence.</p>
+      </div>
+    </noscript>
   </body>
 </html>

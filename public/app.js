@@ -129,6 +129,43 @@
     const change = ((p - reference) / reference) * 100;
     return `${Math.abs(change).toFixed(1).replace(/\.0$/, "")}% ${change < 0 ? "below" : change > 0 ? "above" : "from"} ${money(reference)} reference`;
   }
+  function deltaShort(r) {
+    const reference = state.input?.mrp;
+    const p = r.listing.extractedPrice;
+    if (!(reference > 0 && p > 0)) return "";
+    const change = ((p - reference) / reference) * 100;
+    const rounded = Math.abs(change).toFixed(0);
+    return {
+      change,
+      text: `${change < 0 ? "−" : change > 0 ? "+" : "="}${rounded}% vs MRP`,
+    };
+  }
+  function renderReference() {
+    const product = state.input?.productName || "your product";
+    const media = $("railMedia");
+    media.innerHTML = image(state.input?.officialImageUrl || "", `Reference photo for ${product}`, false);
+    wireImages(media);
+    $("railProduct").textContent = state.input?.productName || "—";
+    const ref = state.input?.mrp;
+    $("railMrp").textContent = ref > 0 ? money(ref) : "Not supplied";
+    const results = state.data?.results || [];
+    const prioritized = results.filter((r) =>
+      ["review", "review_urgently"].includes(r.recommendation),
+    ).length;
+    const withEvidence = results.filter((r) => records(r).length).length;
+    $("railMeta").textContent =
+      `${String(results.length).padStart(2, "0")} LISTINGS · ${prioritized} PRIORITIZED · ${withEvidence} WITH LENS RECORDS · VISUAL CHECKS CAPPED AT 10`;
+    updateRail();
+  }
+  function updateRail() {
+    const r = state.data?.results?.[state.selected];
+    $("railPrice").textContent = r ? price(r) : "—";
+    $("railSource").textContent = r?.listing.source
+      ? usable(r.listing.source)
+        ? r.listing.source
+        : "Source not supplied"
+      : "Google Shopping";
+  }
   function sellerInfo(r) {
     const name = usable(r.listing.seller)
       ? r.listing.seller
@@ -159,9 +196,13 @@
   }
   function renderDetail() {
     const r = state.data.results[state.selected];
+    $("evidencePanel").dataset.ref = r
+      ? `LISTING ${String(state.selected + 1).padStart(2, "0")} · EVIDENCE REVIEW`
+      : "EVIDENCE REVIEW";
     if (!r) {
       $("evidencePanel").innerHTML =
         '<div class="empty"><h2 id="detailTitle">A clearer search starts with a specific product.</h2><p>No listings with usable prices were returned. Try the exact model name, or remove extra search terms.</p><button class="button secondary" data-edit>Edit product</button></div>';
+      updateRail();
       return;
     }
     const v = visual(r),
@@ -192,6 +233,7 @@
           "",
         )}</ul>${!urls.length ? '<p class="hint">No linked visual source records available.</p>' : ""}${urls.length > 8 ? `<p class="hint">Showing the first 8 of ${urls.length} unique linked sources.</p>` : ""}<details><summary>How the service interpreted this evidence</summary><p class="hint">${escape(r.visualSignal?.anomalyType === "no_evidence" && matches.length ? "The service did not establish a reference match, despite returning related records. Review the sources above; no mismatch is established." : r.visualSignal?.anomalyType === "unavailable" ? v.text : r.visualSignal?.details || "No interpretation available.")}</p></details></details><div class="detail-action"><p>Next: check the product variant and seller details at the source.</p>${link(r.listing.productLink, "Open listing", "button primary") || '<span class="hint">Listing link unavailable</span>'}</div>`;
     wireImages($("evidencePanel"));
+    updateRail();
     $("expandComparison").addEventListener("click", () => {
       $("dialogContent").innerHTML =
         `<div class="dialog-provenance">${badge($("dataBadge").textContent, state.data.dataSource === "fixture" ? "amber" : ["live", "cache"].includes(state.data.dataSource) ? "teal" : "")}<span>Source evidence via SerpApi</span></div><p class="muted" style="margin-bottom:18px">${escape(r.listing.title)}</p>${comparison(r)}<div class="priority-strip">${badge(...p)}<p>${escape(price(r))} · ${escape(delta(r) || "No reference price")} · ${escape(v.title)}</p></div>`;
@@ -213,10 +255,32 @@
     $("queueCount").textContent = visible.length;
     $("resultsList").innerHTML = visible.length
       ? visible
-          .map(
-            ({ r, i }) =>
-              `<button class="queue-item" data-index="${i}" type="button" aria-pressed="${state.selected === i}" aria-controls="evidencePanel"><span class="queue-top"><span class="queue-thumb">${image(r.listing.thumbnail, "")}</span><span><span class="queue-source">${escape(r.listing.source || "Source not supplied")}</span><span class="queue-title">${escape(r.listing.title || "Untitled listing")}</span></span></span><span class="queue-bottom"><span class="queue-price">${escape(price(r))}</span>${badge(...priority(r))}</span><span class="queue-reason">${escape(delta(r) || reason(r))}</span></button>`,
-          )
+          .map(({ r, i }) => {
+            const dl = deltaShort(r);
+            const cnt = records(r).length;
+            const vtype = r.visualSignal?.anomalyType;
+            const chips = [badge(...priority(r))];
+            if (dl)
+              chips.push(
+                `<span class="qi-chip ${dl.change < 0 ? "warn" : ""}">${escape(dl.text)}</span>`,
+              );
+            if (cnt > 0)
+              chips.push(`<span class="qi-chip good">${cnt} lens records</span>`);
+            else if (vtype === "not_verified")
+              chips.push(`<span class="qi-chip">Not checked</span>`);
+            else if (vtype === "unavailable")
+              chips.push(`<span class="qi-chip">Unavailable</span>`);
+            else chips.push(`<span class="qi-chip">No source records</span>`);
+            if (!usable(r.listing.seller))
+              chips.push(`<span class="qi-chip">Seller not supplied</span>`);
+            const ref = state.input?.mrp;
+            const p = r.listing.extractedPrice;
+            const viz =
+              p > 0 && ref > 0
+                ? `<span class="qi-viz" aria-hidden="true"><span class="qi-viz-fill ${p > ref ? "mid" : ""}" style="width:${Math.max(2, Math.min(100, (p / ref) * 100)).toFixed(0)}%"></span></span>`
+                : "";
+            return `<button class="queue-item" data-index="${i}" type="button" aria-pressed="${state.selected === i}" aria-controls="evidencePanel"><span class="qi-rank">${String(i + 1).padStart(2, "0")}</span><span class="qi-thumb queue-thumb">${image(r.listing.thumbnail, "")}</span><span class="qi-main"><span class="qi-source">${escape(r.listing.source || "Source not supplied")} <span class="qi-meta">via Google Shopping</span></span><span class="qi-title">${escape(r.listing.title || "Untitled listing")}</span><span class="qi-signals">${chips.join("")}</span></span><span class="qi-values"><span class="qi-price">${escape(price(r))}</span>${dl ? `<span class="qi-delta ${dl.change < 0 ? "warn" : ""}">${escape(dl.text)}</span>` : ""}${viz}</span><span class="qi-view" aria-hidden="true">→</span></button>`;
+          })
           .join("")
       : `<div class="empty"><h3>${filter === "all" ? "No listings found" : "No listings in this view"}</h3><p>${filter === "priority" ? "No listings meet the service’s review threshold. Low priority does not establish authenticity." : filter === "visual" ? "No linked or structured Lens evidence was returned in this scan." : "Try a more specific product name."}</p>${filter !== "all" ? '<button class="button secondary" data-clear-filter>Show all listings</button>' : ""}</div>`;
     wireImages($("resultsList"));
@@ -282,6 +346,7 @@
     ).length;
     $("coverage").textContent =
       `${withEvidence} of ${results.length} listings have returned visual source records. ${skipped ? `${skipped} not visually checked (scan limit). ` : ""}${unavailable ? `${unavailable} without usable visual evidence. ` : ""}Missing evidence is inconclusive.`;
+    renderReference();
     renderQueue();
     $("resultsTitle").focus();
     announce(`${results.length} listings ready for review.`);

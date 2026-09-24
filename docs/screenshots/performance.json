@@ -3,95 +3,111 @@
   "assets": [
     {
       "file": "index.html",
-      "rawBytes": 19069,
-      "gzipBytes": 4854
+      "rawBytes": 43443,
+      "gzipBytes": 9254
     },
     {
       "file": "styles.css",
-      "rawBytes": 24237,
-      "gzipBytes": 5026
+      "rawBytes": 62508,
+      "gzipBytes": 11527
     },
     {
       "file": "app.js",
-      "rawBytes": 24151,
-      "gzipBytes": 7636
+      "rawBytes": 28490,
+      "gzipBytes": 8655
     },
     {
       "file": "experience.css",
-      "rawBytes": 30548,
-      "gzipBytes": 6824
+      "rawBytes": 13584,
+      "gzipBytes": 3138
     },
     {
       "file": "experience.js",
-      "rawBytes": 4834,
-      "gzipBytes": 1655
+      "rawBytes": 7541,
+      "gzipBytes": 2473
     }
   ],
   "runs": [
     {
       "name": "desktop",
       "cpuSlowdown": 1,
-      "lcp": 96,
-      "layoutShifts": 0,
+      "lcp": 316,
+      "layoutShifts": 0.0028077777777777775,
       "longTasks": [],
-      "fcp": 96,
+      "fcp": 316,
       "frameMedianMs": 16.699999999999818,
-      "frameP95Ms": 16.700000000000273,
+      "frameP95Ms": 16.799999999999727,
       "framesOver32ms": 0,
-      "sampledFrames": 121,
+      "sampledFrames": 120,
       "requests": [
         {
+          "url": "https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap",
+          "transferBytes": 1134
+        },
+        {
           "url": "http://localhost:8787/styles.css",
-          "transferBytes": 5316
-        },
-        {
-          "url": "http://localhost:8787/experience.js",
-          "transferBytes": 1940
-        },
-        {
-          "url": "http://localhost:8787/app.js",
-          "transferBytes": 7915
+          "transferBytes": 11791
         },
         {
           "url": "http://localhost:8787/experience.css",
-          "transferBytes": 7115
+          "transferBytes": 3411
+        },
+        {
+          "url": "http://localhost:8787/experience.js",
+          "transferBytes": 2757
+        },
+        {
+          "url": "http://localhost:8787/app.js",
+          "transferBytes": 8948
+        },
+        {
+          "url": "https://www.boat-lifestyle.com/cdn/shop/files/AD141-FI_Black06_600x.jpg",
+          "transferBytes": 35150
         }
       ]
     },
     {
       "name": "mobile-4x-cpu",
       "cpuSlowdown": 4,
-      "lcp": 120,
-      "layoutShifts": 0,
+      "lcp": 592,
+      "layoutShifts": 0.0077142999999999995,
       "longTasks": [
-        58
+        81
       ],
-      "fcp": 120,
+      "fcp": 592,
       "frameMedianMs": 16.699999999999818,
-      "frameP95Ms": 16.799999999999727,
+      "frameP95Ms": 16.700000000000273,
       "framesOver32ms": 0,
-      "sampledFrames": 121,
+      "sampledFrames": 120,
       "requests": [
         {
+          "url": "https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap",
+          "transferBytes": 1041
+        },
+        {
           "url": "http://localhost:8787/styles.css",
-          "transferBytes": 5316
+          "transferBytes": 11791
         },
         {
           "url": "http://localhost:8787/experience.css",
-          "transferBytes": 7115
+          "transferBytes": 3411
         },
         {
           "url": "http://localhost:8787/experience.js",
-          "transferBytes": 1940
+          "transferBytes": 2757
         },
         {
           "url": "http://localhost:8787/app.js",
-          "transferBytes": 7915
+          "transferBytes": 8948
+        },
+        {
+          "url": "https://www.boat-lifestyle.com/cdn/shop/files/AD141-FI_Black06_600x.jpg",
+          "transferBytes": 35150
         }
       ]
     }
   ],
   "enhancementFallback": "PASS: example input works with experience.js blocked",
-  "totalRawBytes": 102839,
-  "totalGzipBytes": 25995
+  "totalRawBytes": 155566,
+  "totalGzipBytes": 35047
 }

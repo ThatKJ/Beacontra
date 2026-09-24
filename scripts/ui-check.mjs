@@ -185,9 +185,12 @@ try {
     "Modal restores focus",
   );
   await page.locator(".sources > summary").click();
-  assert.ok(
-    (await page.locator(".source-list a").count()) > 0,
-    "Linked Lens sources exposed",
+  // The checked-in dump is a real live capture whose scans returned no linked
+  // Lens records; the honest UI must say so instead of inventing sources.
+  assert.match(
+    await page.locator("#evidencePanel").textContent(),
+    /No linked visual source records available/,
+    "Honest empty source list for a real recordless capture",
   );
   await page.locator("#queueFilter").selectOption("visual");
   assert.ok(
@@ -311,6 +314,46 @@ try {
     /No listings found/,
   );
   await axe("empty results");
+  // Synthetic linked-source disclosure: real anchors render, unsafe ones are
+  // discarded. Synthetic fixtures are never used for screenshots.
+  const sr = structuredClone(dump.results[0]);
+  sr.lensEvidence = {
+    details: {
+      exact_matches: [
+        {
+          position: 1,
+          title: "boAt Airdopes 141",
+          link: "https://www.amazon.in/dp/EXAMPLE000",
+          source: "Amazon.in",
+        },
+        {
+          position: 2,
+          title: "unsafe link",
+          link: "javascript:alert(1)",
+          source: "Unsafe",
+        },
+      ],
+      visual_matches: [],
+      products: [],
+    },
+    exactMatchSources: [],
+    visualMatchSources: [],
+  };
+  sr.visualSignal = { anomalyType: "no_evidence", isAnomalous: false };
+  responseData = { ...replay, dataSource: "fixture", results: [sr] };
+  await edit();
+  await submit();
+  await page.locator(".sources > summary").click();
+  assert.equal(
+    await page.locator(".source-list a").count(),
+    1,
+    "Linked Lens sources exposed as links",
+  );
+  assert.match(
+    await page.locator(".source-list a").getAttribute("href"),
+    /^https:\/\//,
+    "Unsafe source links are discarded",
+  );
   await edit();
   await page.locator("#removeImage").click();
   assert.equal(await page.locator("#officialImageUrl").inputValue(), "");
