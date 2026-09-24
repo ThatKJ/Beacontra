@@ -374,6 +374,18 @@
         ? ""
         : "Use a public http or https image link.",
     );
+    const file = $("imageFile")?.files?.[0];
+    const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+    const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
+    if ($("imageFile")) {
+      $("imageFile").setCustomValidity(
+        file && file.size > MAX_IMAGE_BYTES
+          ? `Image is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Maximum is 8MB.`
+          : file && file.type && !ALLOWED_IMAGE_TYPES.includes(file.type)
+            ? "Unsupported image type. Use PNG, JPEG, or WebP."
+            : "",
+      );
+    }
     if (!$("maxPrice").validity.valid || !$("minPrice").validity.valid)
       document.querySelector(".context").open = true;
     if (!$("scanForm").reportValidity()) return null;
@@ -388,8 +400,7 @@
         .map((s) => s.trim())
         .filter(Boolean),
     };
-    
-    const file = $("imageFile")?.files?.[0];
+
     if (file) {
       payload.imageFile = file;
     }

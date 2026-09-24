@@ -110,6 +110,25 @@ app.post('/api/beacontra/scan', async (c) => {
       
       if (!productName) return c.json({ error: 'productName is required' }, 400);
 
+      const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+      const ALLOWED_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
+
+      // The <input accept> attribute is a picker hint only, not an enforced constraint — the
+      // client can send any file. Validate size/type here, before spending time or SerpApi
+      // credits forwarding something that was never going to be a usable reference photo.
+      if (imageFile && imageFile.size > MAX_IMAGE_BYTES) {
+        return c.json(
+          { error: `Image is too large (${(imageFile.size / (1024 * 1024)).toFixed(1)}MB). Maximum is ${MAX_IMAGE_BYTES / (1024 * 1024)}MB.` },
+          400
+        );
+      }
+      if (imageFile && imageFile.type && !ALLOWED_IMAGE_TYPES.has(imageFile.type)) {
+        return c.json(
+          { error: `Unsupported image type "${imageFile.type}". Use PNG, JPEG, or WebP.` },
+          400
+        );
+      }
+
       // If a file was uploaded, we send it to SerpApi Image API to get an image_id.
       // Fixture mode never performs a real upload, so a placeholder reference is fine there
       // (all downstream data is canned). In live mode, a failed upload must fail loudly —
