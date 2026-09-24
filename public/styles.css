@@ -1991,12 +1991,16 @@ details summary::-webkit-details-marker {
 }
 
 .scan-reference-object > span {
+  position: relative;
+  z-index: 2;
   font-size: 7px;
   color: var(--text-tech);
   letter-spacing: 0.12em;
   display: block;
   text-align: center;
   margin-top: 9px;
+  padding: 2px 4px;
+  background: var(--bg);
   font-family: var(--font-mono);
   font-weight: 500;
 }

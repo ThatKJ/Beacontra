@@ -8,8 +8,8 @@
     },
     {
       "file": "styles.css",
-      "rawBytes": 62508,
-      "gzipBytes": 11527
+      "rawBytes": 62589,
+      "gzipBytes": 11540
     },
     {
       "file": "app.js",
@@ -31,10 +31,10 @@
     {
       "name": "desktop",
       "cpuSlowdown": 1,
-      "lcp": 316,
+      "lcp": 372,
       "layoutShifts": 0.0028077777777777775,
       "longTasks": [],
-      "fcp": 316,
+      "fcp": 372,
       "frameMedianMs": 16.699999999999818,
       "frameP95Ms": 16.799999999999727,
       "framesOver32ms": 0,
@@ -42,11 +42,11 @@
       "requests": [
         {
           "url": "https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap",
-          "transferBytes": 1134
+          "transferBytes": 1041
         },
         {
           "url": "http://localhost:8787/styles.css",
-          "transferBytes": 11791
+          "transferBytes": 11805
         },
         {
           "url": "http://localhost:8787/experience.css",
@@ -69,12 +69,12 @@
     {
       "name": "mobile-4x-cpu",
       "cpuSlowdown": 4,
-      "lcp": 592,
-      "layoutShifts": 0.0077142999999999995,
+      "lcp": 408,
+      "layoutShifts": 0,
       "longTasks": [
-        81
+        87
       ],
-      "fcp": 592,
+      "fcp": 408,
       "frameMedianMs": 16.699999999999818,
       "frameP95Ms": 16.700000000000273,
       "framesOver32ms": 0,
@@ -86,7 +86,7 @@
         },
         {
           "url": "http://localhost:8787/styles.css",
-          "transferBytes": 11791
+          "transferBytes": 11805
         },
         {
           "url": "http://localhost:8787/experience.css",
@@ -108,6 +108,6 @@
     }
   ],
   "enhancementFallback": "PASS: example input works with experience.js blocked",
-  "totalRawBytes": 155566,
-  "totalGzipBytes": 35047
+  "totalRawBytes": 155647,
+  "totalGzipBytes": 35060
 }
