@@ -110,32 +110,52 @@ app.post('/api/beacontra/scan', async (c) => {
       
       if (!productName) return c.json({ error: 'productName is required' }, 400);
 
-      // If a file was uploaded, we send it to SerpApi Image API to get an image_id
+      // If a file was uploaded, we send it to SerpApi Image API to get an image_id.
+      // Fixture mode never performs a real upload, so a placeholder reference is fine there
+      // (all downstream data is canned). In live mode, a failed upload must fail loudly —
+      // silently substituting a non-functional URL would make visual evidence quietly no-op
+      // without telling the caller anything went wrong.
       if (imageFile && !officialImageUrl) {
-        try {
+        if (client.isFixtureMode()) {
+          officialImageUrl = 'local-upload://' + imageFile.name;
+        } else {
           const apiKey = client.getApiKey?.() || '';
-          if (apiKey && !client.isFixtureMode()) {
+          if (!apiKey) {
+            return c.json(
+              { error: 'Image upload requires SerpApi to be configured. Use a public image URL instead.' },
+              503
+            );
+          }
+          try {
             const serpFormData = new FormData();
             serpFormData.append('image', imageFile, imageFile.name);
             serpFormData.append('api_key', apiKey);
-            
+
             const uploadResponse = await fetch('https://serpapi.com/image', {
               method: 'POST',
               body: serpFormData,
             });
-            if (uploadResponse.ok) {
-              const uploadResult = await uploadResponse.json() as { image_id?: string };
-              if (uploadResult.image_id) {
-                // Use the image_id pseudo-URL for the backend
-                officialImageUrl = `serpapi:image_id:${uploadResult.image_id}`;
-              }
+            if (!uploadResponse.ok) {
+              return c.json(
+                { error: 'Could not upload the image to the search provider. Try a public image URL instead.' },
+                502
+              );
             }
+            const uploadResult = await uploadResponse.json() as { image_id?: string };
+            if (!uploadResult.image_id) {
+              return c.json(
+                { error: 'The image upload did not return a usable reference. Try a public image URL instead.' },
+                502
+              );
+            }
+            officialImageUrl = `serpapi:image_id:${uploadResult.image_id}`;
+          } catch (e) {
+            console.error('Failed to upload local image to SerpApi:', e);
+            return c.json(
+              { error: 'Could not upload the image to the search provider. Try a public image URL instead.' },
+              502
+            );
           }
-        } catch (e) {
-          console.error('Failed to upload local image to SerpApi:', e);
-        }
-        if (!officialImageUrl) {
-          officialImageUrl = 'local-upload://' + imageFile.name;
         }
       }
 
