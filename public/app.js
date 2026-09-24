@@ -111,13 +111,13 @@
     if (type === "unavailable")
       return {
         title: "Unavailable",
-        text: "No usable visual evidence is available for this listing.",
-        note: "The response does not distinguish an empty search from a failed check.",
+        text: "The visual check could not be completed for this listing.",
+        note: "The request itself failed — this says nothing about whether the listing is genuine, and is different from a search that ran and found nothing.",
         tone: "",
       };
     return {
       title: "No source records",
-      text: "No visual source records were returned for review.",
+      text: "The visual check ran but returned no comparable records.",
       note: "Absence of evidence is not an image mismatch.",
       tone: "",
     };

@@ -177,6 +177,44 @@ describe('BeacontraService', () => {
     }
   });
 
+  it('should report dataSource "cache" when every request in a scan was served from cache', async () => {
+    // Non-fixture client: exercises the real live/cache branch, not the fixture short-circuit.
+    const liveClient = new SerpApiClient({
+      apiKey: 'test-key',
+      cache: mockCache,
+      fixtureMode: false,
+    });
+    const liveBeacontra = createBeacontraService(liveClient);
+
+    const originalFetch = global.fetch;
+    global.fetch = (async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ shopping_results: [] }),
+    })) as unknown as typeof fetch;
+
+    try {
+      const input: BeacontraInput = {
+        productName: 'Cache Test Product',
+        officialImageUrl: 'https://example.com/ref.jpg',
+      };
+
+      liveClient.resetCreditUsage();
+      const first = await liveBeacontra.scan(input);
+      expect(first.dataSource).toBe('live');
+      expect(liveClient.getCreditUsage()).toBeGreaterThan(0);
+
+      // Same input -> same cache key -> the second scan's shopping search is a cache hit,
+      // and (with no candidates) no Lens calls happen at all, so zero credits are spent.
+      liveClient.resetCreditUsage();
+      const second = await liveBeacontra.scan(input);
+      expect(second.dataSource).toBe('cache');
+      expect(liveClient.getCreditUsage()).toBe(0);
+    } finally {
+      global.fetch = originalFetch;
+    }
+  });
+
   it('should track credit usage', async () => {
     client.resetCreditUsage();
     await beacontra.scan(validInput);

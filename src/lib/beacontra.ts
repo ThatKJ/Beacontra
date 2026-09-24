@@ -83,7 +83,7 @@ export interface FusedResult {
 
 export interface BeacontraScanResult {
   scanId: string;
-  dataSource: 'live' | 'fixture';
+  dataSource: 'live' | 'fixture' | 'cache';
   productName: string;
   officialImageUrl: string;
   totalListingsFound: number;
@@ -145,9 +145,18 @@ export class BeacontraService {
 
     results.sort((a, b) => b.compositeScore - a.compositeScore);
 
+    // creditUsage only increments on a genuine live fetch (serpapi-client.ts never counts a
+    // cache hit as a credit spend) and this client is constructed fresh per request, so a scan
+    // that spent zero credits was answered entirely from cache — not a new live search.
+    const dataSource: BeacontraScanResult['dataSource'] = this.client.isFixtureMode()
+      ? 'fixture'
+      : this.client.getCreditUsage() === 0
+        ? 'cache'
+        : 'live';
+
     return {
       scanId,
-      dataSource: this.client.isFixtureMode() ? 'fixture' : 'live',
+      dataSource,
       productName: input.productName,
       officialImageUrl: input.officialImageUrl,
       totalListingsFound: candidates.length,
