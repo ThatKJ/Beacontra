@@ -4,6 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#080D0C" />
+    <script>
+      // Boot splash shows once per browser session, and never under reduced motion.
+      // Runs before experience.js loads so the fallback (no-JS-enhancement) path in
+      // ui-performance.mjs is unaffected — the splash's own auto-hide is pure CSS.
+      (function () {
+        try {
+          if (
+            sessionStorage.getItem("bc-boot") ||
+            matchMedia("(prefers-reduced-motion: reduce)").matches
+          ) {
+            document.documentElement.classList.add("no-boot");
+          } else {
+            sessionStorage.setItem("bc-boot", "1");
+          }
+        } catch (e) {}
+      })();
+    </script>
     <meta
       name="description"
       content="Beacontra — marketplace evidence, in focus. Bring price, seller and visual signals from marketplace listings into one prioritized review queue. Powered by SerpApi."
@@ -25,6 +42,14 @@
     <script src="/app.js" defer></script>
   </head>
   <body>
+    <div class="boot" id="boot" aria-hidden="true">
+      <svg class="boot-mark" viewBox="0 0 40 40" fill="none">
+        <circle class="boot-ring" cx="20" cy="20" r="12" stroke-width="1.5" />
+        <circle class="boot-dot" cx="20" cy="20" r="4" />
+        <path class="boot-ticks" d="M20 4v4M20 32v4M4 20h4M32 20h4" stroke-width="1.5" />
+      </svg>
+      <p class="tech boot-label">BEACONTRA <span aria-hidden="true">·</span> INITIALIZING EVIDENCE LAYER</p>
+    </div>
     <a class="skip" href="#main">Skip to content</a>
     <header class="site-header" id="siteHeader">
       <div class="wrap header-inner">
@@ -214,7 +239,7 @@
         <!-- ════════════════════ SECTION 01 — SIGNAL PROBLEM ════════════════════ -->
         <section class="section" id="signals" aria-labelledby="signalsTitle">
           <div class="wrap">
-            <header class="section-head">
+            <header class="section-head" data-reveal>
               <p class="tech">01 / SIGNAL PROBLEM</p>
               <h2 id="signalsTitle" class="section-title">
                 Marketplace data is abundant.<br /><em>Useful evidence is not.</em>
@@ -225,8 +250,32 @@
               </p>
             </header>
 
+            <figure class="evidence-net" id="evidenceNet" aria-hidden="true" data-reveal="lines">
+              <svg class="evidence-net-lines" viewBox="0 0 960 220" fill="none">
+                <path class="en-noise" d="M40 40 L120 90" />
+                <path class="en-noise" d="M860 30 L780 80" />
+                <path class="en-noise" d="M900 170 L820 130" />
+                <path class="en-noise" d="M60 180 L140 140" />
+                <path class="en-noise" d="M640 170 L560 140" />
+                <path class="en-signal en-signal-price" d="M180 60 C 300 60, 340 90, 480 110" />
+                <path class="en-signal en-signal-visual" d="M780 50 C 660 50, 600 90, 480 110" />
+                <path class="en-signal en-signal-seller" d="M480 190 C 480 160, 480 140, 480 110" />
+              </svg>
+              <span class="en-node en-node-ref" style="--nx: 480; --ny: 110">
+                <span class="en-node-dot"></span><span class="en-node-label">REFERENCE</span>
+              </span>
+              <span class="en-node en-node-signal" style="--nx: 180; --ny: 60">₹</span>
+              <span class="en-node en-node-signal" style="--nx: 780; --ny: 50">⬡</span>
+              <span class="en-node en-node-signal" style="--nx: 480; --ny: 190">▢</span>
+              <span class="en-node en-node-noise" style="--nx: 40; --ny: 40"></span>
+              <span class="en-node en-node-noise" style="--nx: 860; --ny: 30"></span>
+              <span class="en-node en-node-noise" style="--nx: 900; --ny: 170"></span>
+              <span class="en-node en-node-noise" style="--nx: 60; --ny: 180"></span>
+              <span class="en-node en-node-noise" style="--nx: 640; --ny: 170"></span>
+            </figure>
+
             <div class="channel-grid">
-              <article class="channel">
+              <article class="channel" data-reveal>
                 <div class="channel-head">
                   <span class="channel-glyph" aria-hidden="true">₹</span>
                   <div>
@@ -251,7 +300,7 @@
                 </p>
               </article>
 
-              <article class="channel">
+              <article class="channel" data-reveal>
                 <div class="channel-head">
                   <span class="channel-glyph" aria-hidden="true">⬡</span>
                   <div>
@@ -276,7 +325,7 @@
                 </p>
               </article>
 
-              <article class="channel">
+              <article class="channel" data-reveal>
                 <div class="channel-head">
                   <span class="channel-glyph" aria-hidden="true">▢</span>
                   <div>
@@ -309,7 +358,7 @@
         <!-- ════════════════════ SECTION 02 — REFERENCE OBJECT ════════════════════ -->
         <section class="section reference-section" id="product" aria-labelledby="referenceTitle">
           <div class="wrap reference-grid">
-            <figure class="reference-object" aria-label="Reference product object with measurement frame">
+            <figure class="reference-object" data-reveal aria-label="Reference product object with measurement frame">
               <svg class="ro-frame" viewBox="0 0 460 560" fill="none" aria-hidden="true">
                 <path d="M30 46V30H46M414 30H430V46M430 514V530H414M46 530H30V514" />
                 <path d="M88 210H46M88 238H46M88 350H46M88 322H46" />
@@ -337,7 +386,7 @@
               </figcaption>
             </figure>
 
-            <div class="reference-spec">
+            <div class="reference-spec" data-reveal>
               <p class="tech">02 / REFERENCE OBJECT</p>
               <h2 id="referenceTitle" class="section-title">Start with what<br /><em>you know.</em></h2>
               <p class="section-lede">
@@ -380,7 +429,7 @@
         <!-- ════════════════════ SECTION 03 — HOW BEACONTRA THINKS ════════════════════ -->
         <section class="section pipeline-wrap" id="how" aria-labelledby="howTitle">
           <div class="wrap">
-            <header class="section-head">
+            <header class="section-head" data-reveal>
               <p class="tech">03 / HOW BEACONTRA THINKS</p>
               <h2 id="howTitle" class="section-title">One chain<br /><em>of evidence.</em></h2>
             </header>
@@ -592,7 +641,7 @@
                 </p>
               </form>
 
-              <aside class="scanner-sources" aria-labelledby="sourcesTitle">
+              <aside class="scanner-sources" data-reveal aria-labelledby="sourcesTitle">
                 <h3 id="sourcesTitle" class="tech">ACTIVE SOURCES</h3>
                 <div class="source-item">
                   <span class="source-index">01</span>
@@ -624,13 +673,13 @@
         <!-- ════════════════════ SECTION 05 — SIGNAL DETAIL ════════════════════ -->
         <section class="section signals-detail-section" id="signalDetail" aria-labelledby="detailSectionTitle">
           <div class="wrap">
-            <header class="section-head">
+            <header class="section-head" data-reveal>
               <p class="tech">05 / HOW EACH SIGNAL READS</p>
               <h2 id="detailSectionTitle" class="section-title">Three signals.<br /><em>One workspace.</em></h2>
             </header>
 
             <div class="detail-signal-grid">
-              <article class="detail-signal ds-price">
+              <article class="detail-signal ds-price" data-reveal>
                 <p class="tech">PRICE SIGNAL</p>
                 <h3>reference <i>→</i> market <i>→</i> deviation</h3>
                 <div class="ds-visual">
@@ -640,7 +689,7 @@
                 </div>
               </article>
 
-              <article class="detail-signal ds-visual-sig">
+              <article class="detail-signal ds-visual-sig" data-reveal>
                 <p class="tech">VISUAL SIGNAL</p>
                 <h3>reference photo <i>→</i> listing photo <i>→</i> trail</h3>
                 <div class="ds-visual">
@@ -650,7 +699,7 @@
                 </div>
               </article>
 
-              <article class="detail-signal ds-seller-sig">
+              <article class="detail-signal ds-seller-sig" data-reveal>
                 <p class="tech">SELLER SIGNAL</p>
                 <h3>listing <i>→</i> seller <i>→</i> context</h3>
                 <div class="ds-visual">
@@ -666,24 +715,24 @@
         <!-- ════════════════════ SECTION 06 — WHY IT MATTERS ════════════════════ -->
         <section class="section why-section" id="why" aria-labelledby="whyTitle">
           <div class="wrap">
-            <header class="section-head">
+            <header class="section-head" data-reveal>
               <p class="tech">06 / WHY IT MATTERS</p>
               <h2 id="whyTitle" class="section-title">Less searching.<br /><em>More signal.</em></h2>
             </header>
             <div class="why-ladder">
-              <div class="why-step">
+              <div class="why-step" data-reveal>
                 <span class="why-count">01</span>
                 <strong class="why-big">hundreds</strong>
                 <span class="why-label">of listings</span>
                 <span class="why-arrow" aria-hidden="true">↓</span>
               </div>
-              <div class="why-step">
+              <div class="why-step" data-reveal>
                 <span class="why-count">02</span>
                 <strong class="why-big">a few</strong>
                 <span class="why-label">useful references</span>
                 <span class="why-arrow" aria-hidden="true">↓</span>
               </div>
-              <div class="why-step">
+              <div class="why-step" data-reveal>
                 <span class="why-count">03</span>
                 <strong class="why-big">one<br />queue</strong>
                 <span class="why-label">focused review</span>
@@ -698,12 +747,12 @@
         <!-- ════════════════════ SECTION 07 — TECHNOLOGY ════════════════════ -->
         <section class="section arch-section" id="technology" aria-labelledby="techTitle">
           <div class="wrap">
-            <header class="section-head">
+            <header class="section-head" data-reveal>
               <p class="tech">07 / TECHNOLOGY</p>
               <h2 id="techTitle" class="section-title">The pipeline<br /><em>in plain view.</em></h2>
             </header>
 
-            <div class="arch" aria-label="System architecture diagram">
+            <div class="arch" data-reveal aria-label="System architecture diagram">
               <div class="arch-row">
                 <span class="arch-node arch-user">USER</span>
                 <span class="arch-annot">Review workspace · evidence queue</span>
@@ -736,7 +785,7 @@
         <!-- ════════════════════ FINAL CTA ════════════════════ -->
         <section class="section cta-section" id="cta" aria-labelledby="ctaTitle">
           <div class="cta-glow" aria-hidden="true"></div>
-          <div class="wrap cta-inner">
+          <div class="wrap cta-inner" data-reveal>
             <p class="tech">START INVESTIGATING</p>
             <h2 id="ctaTitle" class="section-title">Find the signal<br /><em>inside the noise.</em></h2>
             <div class="hero-actions cta-actions">

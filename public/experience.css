@@ -4,6 +4,117 @@
    Depends on the design system in styles.css. No :root overrides here.
    ════════════════════════════════════════════════════════════════ */
 
+/* ───────────── Boot splash ─────────────
+   Pure-CSS auto-hide: works even with experience.js blocked (see
+   scripts/ui-performance.mjs's fallback check). The inline gating script in
+   index.html's <head> only decides whether .no-boot is present at all. */
+
+.boot {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: grid;
+  place-items: center;
+  gap: 14px;
+  background: var(--bg);
+}
+
+.boot-mark {
+  width: 40px;
+  height: 40px;
+}
+
+.boot-ring {
+  stroke: var(--accent);
+}
+
+.boot-dot {
+  fill: var(--accent);
+}
+
+.boot-ticks {
+  stroke: var(--accent-2);
+}
+
+.boot-label {
+  margin: 0;
+}
+
+html.no-boot .boot {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .boot-mark {
+    opacity: 0;
+    animation: bootFadeIn 0.4s ease forwards;
+  }
+
+  .boot-label {
+    opacity: 0;
+    animation: bootFadeIn 0.4s ease 0.08s forwards;
+  }
+
+  /* Total lifecycle: mark+label fade in over ~480ms, then the whole splash
+     fades out starting at 220ms, finishing at 540ms — under the 600ms budget. */
+  .boot {
+    animation: bootOut 0.32s ease 0.22s forwards;
+  }
+}
+
+@keyframes bootFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes bootOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+/* ───────────── Section-entry reveals ───────────── */
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+/* A keyboard user tabbing into a not-yet-revealed control must still see it. */
+[data-reveal]:focus-within {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    transition:
+      opacity 0.6s ease calc(var(--i, 0) * 70ms),
+      transform 0.6s ease calc(var(--i, 0) * 70ms);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* ───────────── Signal board scaffold ───────────── */
 
 .signal-board {
@@ -725,6 +836,121 @@
 
   .ref-rig {
     transform: none;
+  }
+}
+
+/* ───────────── Evidence network (Section 01) ─────────────
+   Decorative amplifier for the section's own copy — the accessible content
+   lives entirely in .channel-grid's articles, so this figure is aria-hidden,
+   same pattern as the hero's .signal-board. */
+
+.evidence-net {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto clamp(32px, 4vw, 56px);
+  aspect-ratio: 960 / 220;
+}
+
+.evidence-net-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.en-noise {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+  opacity: 0.5;
+}
+
+.en-signal {
+  stroke: var(--accent);
+  stroke-width: 1.25;
+  opacity: 0.9;
+}
+
+.en-signal-visual {
+  stroke: var(--accent-2);
+}
+
+.en-node {
+  position: absolute;
+  left: calc(var(--nx) / 960 * 100%);
+  top: calc(var(--ny) / 220 * 100%);
+  transform: translate(-50%, -50%);
+}
+
+.en-node-noise {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.en-node-signal {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--accent-2);
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--accent);
+}
+
+.en-node-ref {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.en-node-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(201, 230, 166, 0.15);
+}
+
+.en-node-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  color: var(--text-tech);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal="lines"] .en-signal {
+    stroke-dasharray: 220;
+    stroke-dashoffset: 220;
+  }
+
+  [data-reveal="lines"].is-visible .en-signal {
+    animation: boardTrace 0.9s ease forwards;
+  }
+
+  [data-reveal="lines"] .en-node {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(6px);
+    transition:
+      opacity 0.4s ease,
+      transform 0.4s ease;
+  }
+
+  [data-reveal="lines"].is-visible .en-node {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+    transition-delay: 0.3s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .en-signal {
+    stroke-dashoffset: 0;
   }
 }
 

@@ -158,6 +158,27 @@
     spySections.forEach((section) => spy.observe(section));
   }
 
+  // Section-entry reveals: a generic [data-reveal] trigger observed once each,
+  // separate from the scroll-tick below since IntersectionObserver doesn't run
+  // on every scroll frame — this costs nothing in onScrollFrame.
+  const revealObserver = "IntersectionObserver" in window
+    ? new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            entry.target.classList.add("is-visible");
+            revealObserver.unobserve(entry.target);
+          }
+        },
+        { rootMargin: "0px 0px -8% 0px", threshold: 0.15 },
+      )
+    : null;
+  document.querySelectorAll("[data-reveal]").forEach((el, i) => {
+    el.style.setProperty("--i", i % 6);
+    if (revealObserver) revealObserver.observe(el);
+    else el.classList.add("is-visible");
+  });
+
   // Only propagate an image that the existing preview has successfully loaded.
   const previewObserver = new MutationObserver(() => {
     const img = $("imagePreview").querySelector("img");

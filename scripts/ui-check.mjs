@@ -66,6 +66,12 @@ async function overflow(label) {
 }
 async function axe(label) {
   await page.evaluate(async () => {
+    // Some state transitions (e.g. the app's own reveal-section fade-in) defer
+    // adding their animating class by one requestAnimationFrame. Without this,
+    // the check below can race ahead of that frame, find no animations yet,
+    // and let axe-core sample mid-fade a moment later — a false contrast
+    // violation on text that is genuinely fine once settled.
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
     await Promise.all(
       document
         .getAnimations()
@@ -93,6 +99,23 @@ async function edit() {
   await visible("#home");
 }
 async function capture(name) {
+  const fullPage = !["hero", "evidence-detail"].includes(name);
+  if (fullPage)
+    await page.evaluate(() => {
+      // Prior interactions (e.g. Playwright auto-scrolling a button into view
+      // before clicking it) can leave real scroll position non-zero, which a
+      // sticky header renders incorrectly once combined with a fullPage
+      // capture's viewport expansion — reset it first.
+      scrollTo(0, 0);
+      // Playwright's fullPage screenshot does not perform a real scroll, so
+      // IntersectionObserver-based section reveals never fire for content
+      // below the fold. A full-page capture documents the finished page, not
+      // reveal timing (a live browser session covers that), so force every
+      // reveal target visible directly instead.
+      document
+        .querySelectorAll("[data-reveal]")
+        .forEach((el) => el.classList.add("is-visible"));
+    });
   await page.evaluate(async () => {
     await Promise.all(
       document
