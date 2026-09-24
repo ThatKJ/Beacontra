@@ -27,3 +27,14 @@ CSS perspective and layered planes, lightweight inline vector geometry, no WebGL
 
 ## Verification
 Retain and extend the existing zero-credit browser suite, visually inspect each major state, test all six viewport widths and keyboard/reduced-motion behavior. Measure local LCP/layout shift, transfer footprint and animation-frame cadence; report local measurements as local, not production guarantees.
+
+## T-038 addendum: cinematic evolution, still no runtime framework
+A later request asked for an "Awwwards-level" transformation (React + Three.js/R3F + GSAP + Lenis, full 3D scroll choreography). That was evaluated against this document's own constraint above and against the 11-day hackathon runway remaining at the time, and the user confirmed: evolve this system, don't replace it. What was added, all within the existing vanilla CSS/JS architecture (see `docs/TASK_BOARD.md` T-038 for the full list and the bugs it surfaced):
+
+- A pure-CSS, <600ms, session-gated boot splash.
+- A generic `[data-reveal]` IntersectionObserver reveal system for section entries, excluding the scan form.
+- A restrained evidence-network SVG in the "Signal Problem" section, reusing the existing trace-draw motion vocabulary rather than inventing a new one.
+- The hero's existing pointer-tilt now settles as the user scrolls past it (`--hero-lock`), combined with tilt via CSS `calc()` so the two stay independent in JS.
+- A magnetic hover effect on marketing CTAs only, and a subtle dot+ring custom cursor (desktop fine-pointer only, `pointer-events: none`, suppressed over form controls and the open dialog).
+
+Everything above degrades to fully static under `prefers-reduced-motion: reduce`, matching this document's original constraint, and none of it touches `styles.css`'s design tokens or `src/lib/*.ts`'s scoring logic.

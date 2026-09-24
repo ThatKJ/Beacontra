@@ -11,6 +11,31 @@
 
 ## Tasks
 
+### T-038: Cinematic evolution of the vanilla CSS/JS instrument system (no framework migration)
+**OWNER:** CLAUDE (third concurrent session)
+**STATUS:** DONE — committed across f14fc07 (T-037 commit), e4c3dd4, a72abf0, 343da1a, 56c7437
+**PRIORITY:** P2 (visual polish; correctness work this session tracked separately under the T-033/T-029/T-021/T-035 board updates)
+**FILES:** public/index.html, public/experience.css, public/experience.js, scripts/ui-check.mjs, src/index.ts
+**ISSUE:** User requested an "Awwwards-level" cinematic frontend transformation (React + Three.js/R3F + GSAP + Lenis, full 3D scroll choreography). This conflicts with a twice-made, QA-verified architectural decision in this repo (`docs/ASTRA_VISUAL_REBUILD.md`: "no WebGL/runtime framework") and would require introducing a build pipeline that doesn't exist today, 11 days before the hackathon deadline. User confirmed (via AskUserQuestion): evolve the existing vanilla system instead of migrating frameworks.
+**ACCEPTANCE CRITERIA:**
+- [x] No new frontend framework, bundler, or WebGL/GSAP/Lenis dependency introduced; `public/styles.css`'s design tokens untouched.
+- [x] <600ms sessionStorage-gated boot splash, pure CSS (works with experience.js blocked), skipped under reduced motion.
+- [x] Generic `[data-reveal]` section-entry system (one IntersectionObserver, not per-scroll-frame cost) applied to marketing sections, deliberately excluding the scan form.
+- [x] Restrained evidence-network SVG in the "01 / SIGNAL PROBLEM" section illustrating the section's own copy, reusing the existing `boardTrace` keyframe rather than inventing new motion vocabulary.
+- [x] Hero pointer-tilt tied to a scroll-driven lock-in state (`--hero-lock`), combined via CSS `calc()` so the two inputs stay independent in JS.
+- [x] Magnetic hover on the four marketing CTAs only (never functional buttons); CSS-only hover lifts on channel/detail-signal cards.
+- [x] Subtle dot+ring custom cursor, desktop fine-pointer only, `pointer-events: none`, suppressed over form inputs and the open comparison dialog, confirmed absent under a touch-emulated context.
+- [x] All new motion has a `prefers-reduced-motion: reduce` fallback; verified via `scripts/ui-check.mjs`'s explicit reduced-motion assertions and `scripts/ui-performance.mjs`'s tilt/reduced-motion checks.
+- [x] Zero backend/scoring changes beyond one real bug found along the way (see below).
+**BUGS FOUND AND FIXED WHILE VERIFYING (not guessed — each root-caused with a temporary diagnostic before fixing):**
+1. `src/index.ts`'s multipart upload branch silently substituted a non-functional `local-upload://<filename>` URL when a live SerpApi image upload failed, continuing the scan as if that were usable evidence. Now returns a clear error in live mode; fixture mode unaffected.
+2. `.scan-reference-object > span`'s contrast depended on the phase of an infinite sweep animation `axe()` never waits for — gave it its own opaque background chip instead of relying on stacking order.
+3. `scripts/ui-check.mjs`'s `capture()` didn't perform a real scroll, so the new IntersectionObserver reveals never fired for a fullPage screenshot — now force-reveals and resets scroll before capturing.
+4. A pre-existing race in `scripts/ui-check.mjs`'s `axe()` helper: it could sample the DOM one frame before a `requestAnimationFrame`-deferred reveal class was actually added, catching a fade at ~2% opacity and reporting a false contrast violation. Fixed by waiting two rAF ticks before collecting animations.
+5. Dimming `.signal-board`'s opacity for the hero lock-in also dimmed `.board-coord`'s own already-marginal-contrast labels as a composited group (ancestor opacity affects the whole subtree, including elements with their own opaque background). Capped the max dimming at a level that keeps ~5:1 contrast.
+**VERIFICATION:** `npm test` (69 passed, 1 skipped), typecheck/lint/build clean throughout. `node scripts/ui-check.mjs` run 15+ times across the session (axe WCAG at 6 widths, keyboard focus, reduced motion, click-interception safety for the new cursor) with the final state passing consistently; `node scripts/ui-performance.mjs` green including its `experience.js`-blocked fallback and mobile/touch-emulated run. Manual browser pass at 1440px and mobile-emulated width confirmed the reveal/evidence-network/pointer-lock behavior visually, not just via assertions. Did not spend live SerpApi credits — a real key was found configured (`test -f .env && grep -q SERPAPI .env`, per CLAUDE.md's rule, value never read), so the live "Start Scan" path was deliberately not exercised in this session; the existing `docs/FINAL_VERIFIED_RUN.md` canonical run already covers that path.
+**NOT DONE (explicitly out of scope, flagged for whoever picks this up):** the pre-existing "tiny mono technical label" / "eyebrow chip" / "small padding" design patterns flagged broadly by this session's design-lint hook are the deliberate T-034/T-036/T-037 "editorial intelligence terminal" visual language, already axe-verified — redesigning them would mean replacing the whole visual identity, which is out of scope for "evolve the existing system." Left as-is.
+
 ### T-036: Signature 3D and motion experience — 80% calm / 20% wow
 **OWNER:** ASTRA — PRODUCT EXPERIENCE / UI OWNER
 **STATUS:** DONE — committed as 6189baf

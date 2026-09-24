@@ -31,19 +31,15 @@
     {
       "name": "desktop",
       "cpuSlowdown": 1,
-      "lcp": 268,
-      "layoutShifts": 0.0028077777777777775,
+      "lcp": 244,
+      "layoutShifts": 0.0027338888888888886,
       "longTasks": [],
-      "fcp": 268,
+      "fcp": 244,
       "frameMedianMs": 16.699999999999818,
       "frameP95Ms": 16.799999999999727,
       "framesOver32ms": 0,
       "sampledFrames": 120,
       "requests": [
-        {
-          "url": "https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap",
-          "transferBytes": 1041
-        },
         {
           "url": "http://localhost:8787/styles.css",
           "transferBytes": 11805
@@ -51,6 +47,10 @@
         {
           "url": "http://localhost:8787/experience.css",
           "transferBytes": 5464
+        },
+        {
+          "url": "https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap",
+          "transferBytes": 1041
         },
         {
           "url": "http://localhost:8787/experience.js",
@@ -69,24 +69,24 @@
     {
       "name": "mobile-4x-cpu",
       "cpuSlowdown": 4,
-      "lcp": 296,
+      "lcp": 304,
       "layoutShifts": 0,
       "longTasks": [
-        92
+        95
       ],
-      "fcp": 296,
+      "fcp": 304,
       "frameMedianMs": 16.699999999999818,
-      "frameP95Ms": 16.700000000000273,
+      "frameP95Ms": 16.799999999999727,
       "framesOver32ms": 0,
       "sampledFrames": 120,
       "requests": [
         {
-          "url": "http://localhost:8787/styles.css",
-          "transferBytes": 11805
-        },
-        {
           "url": "https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap",
           "transferBytes": 1041
+        },
+        {
+          "url": "http://localhost:8787/styles.css",
+          "transferBytes": 11805
         },
         {
           "url": "http://localhost:8787/experience.css",
