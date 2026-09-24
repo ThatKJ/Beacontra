@@ -17,17 +17,32 @@
       el.style.removeProperty("--image-y");
     });
   }
+  function resetMagnetic(el) {
+    el.style.removeProperty("--mx");
+    el.style.removeProperty("--my");
+  }
   document.addEventListener(
     "pointermove",
     (event) => {
       if (reduce.matches || !fine.matches || document.hidden || frame) return;
-      const target = event.target.closest("#signalScene, .image-well");
+      const target = event.target.closest(
+        "#signalScene, .image-well, .magnetic",
+      );
       if (!target) return;
+      if (target === scene && scene.closest(".hero")?.classList.contains("is-locked"))
+        return;
       const x = event.clientX,
         y = event.clientY;
       frame = requestAnimationFrame(() => {
         frame = 0;
         const rect = target.getBoundingClientRect();
+        if (target.classList.contains("magnetic")) {
+          const mx = (x - (rect.left + rect.width / 2)) * 0.28;
+          const my = (y - (rect.top + rect.height / 2)) * 0.28;
+          target.style.setProperty("--mx", `${mx.toFixed(1)}px`);
+          target.style.setProperty("--my", `${my.toFixed(1)}px`);
+          return;
+        }
         const dx = Math.max(
           -1,
           Math.min(1, ((x - rect.left) / rect.width) * 2 - 1),
@@ -46,14 +61,27 @@
   document.addEventListener(
     "pointerout",
     (event) => {
-      const target = event.target.closest("#signalScene, .image-well");
-      if (target && !target.contains(event.relatedTarget)) resetDepth();
+      const target = event.target.closest(
+        "#signalScene, .image-well, .magnetic",
+      );
+      if (!target || target.contains(event.relatedTarget)) return;
+      if (target.classList.contains("magnetic")) resetMagnetic(target);
+      else resetDepth();
     },
     { passive: true },
   );
-  reduce.addEventListener("change", resetDepth);
+  function resetAllMagnetic() {
+    document.querySelectorAll(".magnetic").forEach(resetMagnetic);
+  }
+  reduce.addEventListener("change", () => {
+    resetDepth();
+    resetAllMagnetic();
+  });
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) resetDepth();
+    if (document.hidden) {
+      resetDepth();
+      resetAllMagnetic();
+    }
   });
 
   function goToForm() {
@@ -122,11 +150,45 @@
       stage.classList.toggle("is-active", p >= lo && p < hi);
     });
   }
+  // Continuous scroll-linked choreography for the hero only, gated behind its
+  // own IntersectionObserver so onScrollFrame doesn't run getBoundingClientRect()
+  // for a section nowhere near the viewport on every scroll frame.
+  const heroInView = new Set();
+  const heroObserver = "IntersectionObserver" in window
+    ? new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries)
+            entry.isIntersecting
+              ? heroInView.add(entry.target.id)
+              : heroInView.delete(entry.target.id);
+        },
+        { rootMargin: "20% 0px 20% 0px", threshold: 0 },
+      )
+    : null;
+  heroObserver?.observe($("top"));
+  // #home can be hidden/re-shown (edit() in app.js) at any scroll position,
+  // independent of actual scrolling — reset the lock so a stale dimmed state
+  // from before never persists into a fresh view of the hero.
+  new MutationObserver(() => {
+    if ($("home").hidden) return;
+    $("top").style.setProperty("--hero-lock", 0);
+    $("top").classList.remove("is-locked");
+  }).observe($("home"), { attributes: true, attributeFilter: ["hidden"] });
+  function paintHeroLock() {
+    if (!heroObserver || !heroInView.has("top")) return;
+    const hero = $("top");
+    const rect = hero.getBoundingClientRect();
+    const p = Math.min(1, Math.max(0, -rect.top / (rect.height * 0.6)));
+    hero.style.setProperty("--hero-lock", p.toFixed(3));
+    hero.classList.toggle("is-locked", p > 0.55);
+  }
+
   let scrollTick = false;
   function onScrollFrame() {
     scrollTick = false;
     header.classList.toggle("scrolled", scrollY > 12);
     paintPipeline();
+    paintHeroLock();
   }
   addEventListener(
     "scroll",

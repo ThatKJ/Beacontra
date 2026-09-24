@@ -3,8 +3,8 @@
   "assets": [
     {
       "file": "index.html",
-      "rawBytes": 46519,
-      "gzipBytes": 10079
+      "rawBytes": 46555,
+      "gzipBytes": 10099
     },
     {
       "file": "styles.css",
@@ -18,43 +18,43 @@
     },
     {
       "file": "experience.css",
-      "rawBytes": 17936,
-      "gzipBytes": 4177
+      "rawBytes": 19870,
+      "gzipBytes": 4947
     },
     {
       "file": "experience.js",
-      "rawBytes": 8387,
-      "gzipBytes": 2716
+      "rawBytes": 10762,
+      "gzipBytes": 3317
     }
   ],
   "runs": [
     {
       "name": "desktop",
       "cpuSlowdown": 1,
-      "lcp": 248,
+      "lcp": 244,
       "layoutShifts": 0.0028077777777777775,
       "longTasks": [],
-      "fcp": 248,
+      "fcp": 244,
       "frameMedianMs": 16.699999999999818,
       "frameP95Ms": 16.799999999999727,
       "framesOver32ms": 0,
       "sampledFrames": 120,
       "requests": [
         {
-          "url": "https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap",
-          "transferBytes": 1041
-        },
-        {
           "url": "http://localhost:8787/styles.css",
           "transferBytes": 11805
         },
         {
           "url": "http://localhost:8787/experience.css",
-          "transferBytes": 4449
+          "transferBytes": 5214
+        },
+        {
+          "url": "https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap",
+          "transferBytes": 1041
         },
         {
           "url": "http://localhost:8787/experience.js",
-          "transferBytes": 2997
+          "transferBytes": 3598
         },
         {
           "url": "http://localhost:8787/app.js",
@@ -69,10 +69,12 @@
     {
       "name": "mobile-4x-cpu",
       "cpuSlowdown": 4,
-      "lcp": 364,
+      "lcp": 328,
       "layoutShifts": 0,
-      "longTasks": [],
-      "fcp": 364,
+      "longTasks": [
+        108
+      ],
+      "fcp": 328,
       "frameMedianMs": 16.699999999999818,
       "frameP95Ms": 16.700000000000273,
       "framesOver32ms": 0,
@@ -83,16 +85,16 @@
           "transferBytes": 11805
         },
         {
+          "url": "http://localhost:8787/experience.css",
+          "transferBytes": 5214
+        },
+        {
           "url": "https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap",
           "transferBytes": 1041
         },
         {
-          "url": "http://localhost:8787/experience.css",
-          "transferBytes": 4449
-        },
-        {
           "url": "http://localhost:8787/experience.js",
-          "transferBytes": 2997
+          "transferBytes": 3598
         },
         {
           "url": "http://localhost:8787/app.js",
@@ -106,6 +108,6 @@
     }
   ],
   "enhancementFallback": "PASS: example input works with experience.js blocked",
-  "totalRawBytes": 163921,
-  "totalGzipBytes": 37167
+  "totalRawBytes": 168266,
+  "totalGzipBytes": 38558
 }

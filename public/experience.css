@@ -4,6 +4,43 @@
    Depends on the design system in styles.css. No :root overrides here.
    ════════════════════════════════════════════════════════════════ */
 
+/* ───────────── Micro-interactions ─────────────
+   Applied only to the four marketing CTAs (hero + final CTA section) — never
+   to functional buttons (#scanBtn, dialog controls, queue actions), where
+   drift on a submit action would read as janky rather than premium. */
+
+.magnetic {
+  transform: translate(var(--mx, 0), var(--my, 0));
+  transition: transform 0.18s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .magnetic {
+    transform: none !important;
+  }
+}
+
+.channel,
+.detail-signal {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.channel:hover {
+  background: rgba(201, 230, 166, 0.035);
+}
+
+/* .arch-node is a <span> (non-replaced inline) — transform has no effect on
+   it per spec, so this stays a color-only transition. */
+.arch-node {
+  transition: border-color 0.2s ease;
+}
+
+.arch-node:hover {
+  border-color: var(--accent-2);
+}
+
 /* ───────────── Boot splash ─────────────
    Pure-CSS auto-hide: works even with experience.js blocked (see
    scripts/ui-performance.mjs's fallback check). The inline gating script in
@@ -126,9 +163,20 @@ html.no-boot .boot {
   container-type: inline-size;
   overflow: hidden;
   isolation: isolate;
-  transform: perspective(1200px) rotateX(var(--tilt-x, 0deg))
-    rotateY(var(--tilt-y, 0deg));
-  transition: transform 0.25s ease-out;
+  /* Pointer tilt fades out and the board settles/dims as --hero-lock rises
+     from scrolling past the hero (see paintHeroLock() in experience.js) —
+     the two inputs stay independent in JS and combine only here in CSS. */
+  transform: perspective(1200px)
+    rotateX(calc(var(--tilt-x, 0deg) * (1 - var(--hero-lock, 0))))
+    rotateY(calc(var(--tilt-y, 0deg) * (1 - var(--hero-lock, 0))))
+    scale(calc(1 - 0.04 * var(--hero-lock, 0)));
+  /* Capped at 0.85 floor (not lower): opacity on this ancestor dims its whole
+     subtree as a composited group, including .board-coord's own already-
+     marginal-contrast 6px labels (which have their own opaque background —
+     ancestor opacity still blends them toward the page backdrop as a unit).
+     0.85 keeps ~5:1 contrast; anything past ~0.75 drops below 4.5:1. */
+  opacity: calc(1 - 0.15 * var(--hero-lock, 0));
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
   will-change: transform;
 }
 
@@ -646,6 +694,12 @@ html.no-boot .boot {
     animation: cornerPulse 3.4s ease-in-out infinite;
   }
 
+  /* Settle the pulsing corner glow once the user has scrolled past the hero. */
+  .hero.is-locked .ref-corners {
+    animation-play-state: paused;
+    opacity: 0.9;
+  }
+
   .coord-tl,
   .coord-tr,
   .coord-bl {
@@ -809,6 +863,7 @@ html.no-boot .boot {
 @media (prefers-reduced-motion: reduce) {
   .signal-board {
     transform: none;
+    opacity: 1;
   }
 
   .image-well {
