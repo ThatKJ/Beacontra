@@ -125,6 +125,42 @@ describe('BeacontraService', () => {
     expect(visualSignal.confidence).toBe('high');
   });
 
+  it('should distinguish a failed Lens request from a successful-but-empty one', async () => {
+    const testClient = new SerpApiClient({
+      apiKey: 'test-key',
+      cache: mockCache,
+      fixtureMode: true,
+    });
+    const testBeacontra = createBeacontraService(testClient);
+
+    const failedRequest = {
+      hasExactMatch: false,
+      hasVisualMatch: false,
+      hasLensData: false,
+      callFailed: true,
+      exactMatchSources: [],
+      visualMatchSources: [],
+      matchConfidence: 'none' as const,
+      details: {},
+    };
+    const emptyButSuccessful = { ...failedRequest, callFailed: false };
+
+    const failedSignal = (testBeacontra as any).analyzeVisual(failedRequest);
+    const emptySignal = (testBeacontra as any).analyzeVisual(emptyButSuccessful);
+
+    // Both are neutral (neither is treated as evidence of a problem)...
+    expect(failedSignal.isAnomalous).toBe(false);
+    expect(emptySignal.isAnomalous).toBe(false);
+
+    // ...but they must not collapse into the same observation. "The check never ran" and
+    // "the check ran and found nothing" are different facts and must stay visibly different.
+    expect(failedSignal.anomalyType).toBe('unavailable');
+    expect(failedSignal.status).toBe('unavailable');
+    expect(emptySignal.anomalyType).toBe('no_evidence');
+    expect(emptySignal.status).toBe('no_evidence');
+    expect(failedSignal.details).not.toBe(emptySignal.details);
+  });
+
   it('should assign recommendation based on composite score', async () => {
     const result = await beacontra.scan(validInput);
 

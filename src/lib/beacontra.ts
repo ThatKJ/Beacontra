@@ -34,6 +34,9 @@ export interface LensEvidence {
   hasExactMatch: boolean;
   hasVisualMatch: boolean;
   hasLensData: boolean;
+  /** True only when the Lens request itself failed (network error, timeout, thrown exception) —
+   * distinct from a request that succeeded but simply found nothing. See analyzeVisual(). */
+  callFailed: boolean;
   exactMatchSources: string[];
   visualMatchSources: string[];
   matchConfidence: 'high' | 'medium' | 'low' | 'none';
@@ -262,6 +265,9 @@ export class BeacontraService {
       const allMatches = [...visualMatches, ...exactMatches, ...products];
 
       if (allMatches.length === 0 && !lensResponse.ai_overview) {
+        // The request succeeded (HTTP 200) but genuinely found nothing — an observation,
+        // not a failure. callFailed stays false so analyzeVisual reports this as absence
+        // of evidence, not as "verification unavailable".
         return {
           ...this.emptyLensEvidence(),
           hasLensData: false,
@@ -298,6 +304,7 @@ export class BeacontraService {
         hasExactMatch,
         hasVisualMatch: hasVisualMatch || hasProductMatch,
         hasLensData: true,
+        callFailed: false,
         exactMatchSources,
         visualMatchSources: [...visualMatchSources, ...productSources],
         matchConfidence,
@@ -309,9 +316,12 @@ export class BeacontraService {
         },
       };
     } catch {
+      // The request itself failed (network error, timeout, malformed image) — we made no
+      // observation at all. This must stay distinguishable from "observed zero matches" below.
       return {
         ...this.emptyLensEvidence(),
         hasLensData: false,
+        callFailed: true,
       };
     }
   }
@@ -352,6 +362,7 @@ export class BeacontraService {
       hasExactMatch: false,
       hasVisualMatch: false,
       hasLensData: false,
+      callFailed: false,
       exactMatchSources: [],
       visualMatchSources: [],
       matchConfidence: 'none',
@@ -463,14 +474,16 @@ export class BeacontraService {
   }
 
   private analyzeVisual(evidence: LensEvidence): VisualSignal {
-    // Lens unavailable or returned no structured data (ai_overview only)
-    if (!evidence.hasLensData) {
+    // The Lens request itself failed (network error, timeout, malformed image) — no
+    // observation was made. This must not read as "we checked and it's fine"; it contributes
+    // nothing to the score either way and says plainly that verification did not happen.
+    if (evidence.callFailed) {
       return {
         isAnomalous: false,
         anomalyType: 'unavailable',
         confidence: 'low',
         matchSources: [],
-        details: 'Visual verification unavailable (Lens returned AI overview only, no structured match data)',
+        details: 'Visual verification could not be completed — the Lens request failed. This is not evidence of anything; the check simply did not run.',
         status: 'unavailable',
       };
     }

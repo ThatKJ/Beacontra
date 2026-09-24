@@ -44,6 +44,8 @@ This document reflects the canonical, final, frozen production state of Beacontr
 
 **Conclusion**: The Airdopes 141 officially lists an MRP of ₹4,490 but legitimately retails around ₹1,299-₹1,499 across Indian marketplaces. This mathematically represents an extreme deviation (< 50%). Beacontra accurately identifies this mathematical delta, confirming the algorithm is firing correctly based on the input MRP.
 
+**Read this number carefully — it is not a discrimination result.** Because 100% of results landed in the *same* bucket, the price signal contributed nothing to distinguishing any one of these 11 listings from the others; MRP-based percentage deviation is not a useful anomaly signal for this product, precisely because Indian consumer-electronics MRP is conventionally inflated ~3x genuine street price. This isn't a false claim (the math is correct) but it should not be presented as "the price signal caught something" — see `docs/FINAL_LIMITATIONS.md` for the full explanation and the unfixed precedence issue (`expectedPriceRange` is ignored whenever `mrp` is present, even though it would be the more realistic baseline here).
+
 ## Seller signal — exact distribution
 
 | `anomalyType` | Count |
