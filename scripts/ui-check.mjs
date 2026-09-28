@@ -37,10 +37,12 @@ page.on("pageerror", (e) => errors.push(e.message));
 let responseData = replay,
   status = 200,
   delay = 0,
-  posts = 0;
+  posts = 0,
+  lastContentType = "";
 await page.route("**/api/**", async (route) => {
   assert.match(route.request().url(), /\/api\/beacontra\/scan$/);
   posts++;
+  lastContentType = route.request().headers()["content-type"] || "";
   if (delay) await new Promise((r) => setTimeout(r, delay));
   await route.fulfill({
     status,
@@ -90,6 +92,14 @@ async function axe(label) {
     `${label}: accessibility violations`,
   );
 }
+async function targetAtLeast(selector, size = 44) {
+  const box = await page.locator(selector).boundingBox();
+  assert.ok(box, `${selector}: target must be measurable`);
+  assert.ok(
+    box.height >= size && box.width >= size,
+    `${selector}: target must be at least ${size}px in each dimension`,
+  );
+}
 async function submit() {
   await page.locator("#scanBtn").click();
   await visible("#resultsSection");
@@ -100,6 +110,11 @@ async function edit() {
 }
 async function capture(name) {
   const fullPage = !["hero", "evidence-detail"].includes(name);
+  // Screenshot the resting interface, not the test runner's transient keyboard
+  // focus. Focus behavior is asserted separately above and in the dialog test.
+  // Without this, Playwright's full-page compositor can repeat the fixed skip
+  // link halfway down a capture even though it only appears during Tab focus.
+  await page.evaluate(() => document.activeElement?.blur());
   if (fullPage)
     await page.evaluate(() => {
       // Prior interactions (e.g. Playwright auto-scrolling a button into view
@@ -136,9 +151,18 @@ async function capture(name) {
         new Promise((r) => setTimeout(r, 15000)),
       ]);
     });
+  // Chromium's full-page compositor can paint fixed, off-canvas skip links in
+  // the stitched image even after focus has moved. Hide only for the capture;
+  // keyboard behavior is asserted in the live page above.
+  await page.evaluate(() => {
+    document.querySelector(".skip").hidden = true;
+  });
   await page.screenshot({
     path: `${output}/${name}.png`,
     fullPage: !["hero", "evidence-detail"].includes(name),
+  });
+  await page.evaluate(() => {
+    document.querySelector(".skip").hidden = false;
   });
 }
 
@@ -153,6 +177,7 @@ try {
     true,
     "Keyboard skip link",
   );
+  await targetAtLeast("#loadDemoBtn");
   await page.locator("#loadDemoBtn").click();
   await page.waitForFunction(
     () =>
@@ -185,6 +210,24 @@ try {
     0,
   );
   await axe("review queue");
+  await targetAtLeast("#newScanBtn");
+  await targetAtLeast("#expandComparison");
+  await page.locator(".brand").focus();
+  for (let i = 0; i < 8; i++) {
+    if ((await page.evaluate(() => document.activeElement?.id)) === "newScanBtn")
+      break;
+    await page.keyboard.press("Tab");
+  }
+  assert.equal(
+    await page.evaluate(() => document.activeElement?.id),
+    "newScanBtn",
+    "Keyboard reaches the edit-product action",
+  );
+  assert.equal(
+    await page.locator("#newScanBtn").evaluate((el) => getComputedStyle(el).outlineColor),
+    "rgb(49, 85, 43)",
+    "Paper surfaces use the high-contrast focus ring",
+  );
   await page.waitForTimeout(1200);
   await capture("review-queue");
   await page.locator("#expandComparison").click();
@@ -393,6 +436,43 @@ try {
   await page.locator("#maxPrice").fill("100");
   await page.locator("#scanBtn").click();
   assert.equal(posts, previous, "Reversed range prevents request");
+  // A local file is a first-class alternative to a public URL. Verify the
+  // actual multipart request and reference-image continuity; no live request
+  // escapes because the route remains intercepted above.
+  await page.locator("#minPrice").fill("");
+  await page.locator("#maxPrice").fill("");
+  await page.locator("#imageFile").setInputFiles({
+    name: "official-reference.png",
+    mimeType: "image/png",
+    buffer: Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+      "base64",
+    ),
+  });
+  await page.waitForFunction(() =>
+    document.getElementById("imageStatus").textContent.includes("ready"),
+  );
+  assert.equal(
+    await page.locator("#officialImageUrl").inputValue(),
+    "",
+    "File choice replaces the URL path",
+  );
+  delay = 800;
+  await page.locator("#scanBtn").click();
+  await visible("#loading");
+  assert.equal(
+    await page.locator("#scanReference img").count(),
+    1,
+    "Uploaded reference continues into the scan chamber",
+  );
+  await visible("#resultsSection");
+  delay = 0;
+  assert.match(lastContentType, /multipart\/form-data/);
+  assert.equal(
+    await page.locator("#railMedia img").count(),
+    1,
+    "Uploaded reference continues into results",
+  );
   await page.emulateMedia({ reducedMotion: "reduce" });
   assert.equal(
     await page

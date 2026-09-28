@@ -1,5 +1,7 @@
 # Beacontra premium experience — visual QA
 
+> **2026-09-28 T-039 update:** The V2 reference-dossier redesign supersedes the visual layer documented below while retaining the same vanilla architecture and truth constraints. The final journey is dark evidence field → cool-paper editorial explanation → bright photo-led investigation desk → dark indeterminate scan chamber → paper-toned analyst workspace. Current tokens/states are documented in `BEACONTRA_DESIGN_SYSTEM_V2.md`. The zero-credit browser suite now passes at 375/390/430/768/1024/1440px, including axe, overflow, provenance, URL and file-only reference continuity, missing evidence, error/empty, dialog keyboard behavior, focus contrast, 44px secondary targets, and reduced motion. Current local performance output is in `screenshots/performance.json` (35,777 bytes gzip for the five local frontend assets; 392ms desktop LCP, 488ms mobile 4× CPU LCP; 0 frames over 32ms in both samples). The historical T-036 record remains below for traceability.
+
 ASTRA · T-036 · 2026-09-18
 
 ## Design direction and signature components

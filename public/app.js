@@ -8,6 +8,7 @@
     selected: 0,
     busy: false,
     previewVersion: 0,
+    previewObjectUrl: "",
   };
   const money = (value) =>
     new Intl.NumberFormat("en-IN", {
@@ -68,10 +69,19 @@
     })[r.recommendation] || ["Unspecified", ""];
   const badge = (text, tone = "") =>
     `<span class="badge ${tone}">${escape(text)}</span>`;
-  const image = (url, alt, lazy = true) =>
-    safeUrl(url)
-      ? `<img src="${escape(safeUrl(url))}" alt="${escape(alt)}" ${lazy ? 'loading="lazy"' : ""} decoding="async" referrerpolicy="no-referrer">`
+  const image = (url, alt, lazy = true) => {
+    // Only the object URL created from the user's current local file is trusted.
+    // Marketplace/API URLs still pass through the strict http(s)-only sanitizer.
+    const source =
+      typeof url === "string" &&
+      url.startsWith("blob:") &&
+      url === state.previewObjectUrl
+        ? url
+        : safeUrl(url);
+    return source
+      ? `<img src="${escape(source)}" alt="${escape(alt)}" ${lazy ? 'loading="lazy"' : ""} decoding="async" referrerpolicy="no-referrer">`
       : '<span class="image-fallback">Photo not available</span>';
+  };
   const link = (url, text, cls = "") =>
     safeUrl(url)
       ? `<a class="${cls}" href="${escape(safeUrl(url))}" target="_blank" rel="noopener noreferrer">${escape(text)} <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>`
@@ -303,6 +313,7 @@
     state.selected = 0;
     $("queueFilter").value = "all";
     $("home").hidden = true;
+    document.body.dataset.view = "results";
     $("resultsSection").hidden = false;
     $("errorPanel").hidden = true;
     $("resultsProduct").textContent = input.productName;
@@ -355,6 +366,7 @@
     $("resultsSection").hidden = true;
     $("errorPanel").hidden = true;
     $("home").hidden = false;
+    document.body.dataset.view = "home";
     $("productName").focus();
   }
   function readInput() {
@@ -369,11 +381,6 @@
     $("productName").setCustomValidity(
       $("productName").value.trim() ? "" : "Enter a product name.",
     );
-    $("officialImageUrl").setCustomValidity(
-      safeUrl($("officialImageUrl").value.trim())
-        ? ""
-        : "Use a public http or https image link.",
-    );
     const file = $("imageFile")?.files?.[0];
     const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
     const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
@@ -386,6 +393,14 @@
             : "",
       );
     }
+    const imageUrl = $("officialImageUrl").value.trim();
+    $("officialImageUrl").setCustomValidity(
+      imageUrl && !safeUrl(imageUrl)
+        ? "Use a public http or https image link."
+        : !imageUrl && !file
+          ? "Paste a public image link or choose an image file."
+          : "",
+    );
     if (!$("maxPrice").validity.valid || !$("minPrice").validity.valid)
       document.querySelector(".context").open = true;
     if (!$("scanForm").reportValidity()) return null;
@@ -415,6 +430,7 @@
     $("resultsSection").hidden = true;
     $("errorPanel").hidden = true;
     $("loading").hidden = false;
+    document.body.dataset.view = "loading";
     $("loadingProduct").textContent = input.productName;
     $("loadingTitle").focus();
     $("elapsed").textContent = "0s elapsed";
@@ -444,7 +460,8 @@
         formData.append("imageFile", input.imageFile);
         
         // Preview local image
-        input.officialImageUrl = URL.createObjectURL(input.imageFile);
+        input.officialImageUrl =
+          state.previewObjectUrl || URL.createObjectURL(input.imageFile);
         fetchOptions.body = formData;
       } else {
         fetchOptions.headers = { "Content-Type": "application/json" };
@@ -469,6 +486,7 @@
       renderResults(payload.data, input);
     } catch (error) {
       $("errorPanel").hidden = false;
+      document.body.dataset.view = "error";
       $("returnBtn").hidden = !state.data;
       $("errorMessage").textContent =
         error.name === "AbortError"
@@ -521,10 +539,56 @@
   }
   let previewTimer;
   $("officialImageUrl").addEventListener("input", () => {
+    if ($("officialImageUrl").value && $("imageFile")?.value) {
+      $("imageFile").value = "";
+      $("imageFile").setCustomValidity("");
+    }
+    if (state.previewObjectUrl) {
+      URL.revokeObjectURL(state.previewObjectUrl);
+      state.previewObjectUrl = "";
+    }
     $("officialImageUrl").setCustomValidity("");
     ++state.previewVersion;
     clearTimeout(previewTimer);
     previewTimer = setTimeout(preview, 450);
+  });
+  $("imageFile").addEventListener("change", () => {
+    const file = $("imageFile").files?.[0];
+    ++state.previewVersion;
+    clearTimeout(previewTimer);
+    $("imageFile").setCustomValidity("");
+    if (state.previewObjectUrl) URL.revokeObjectURL(state.previewObjectUrl);
+    state.previewObjectUrl = "";
+    if (!file) {
+      preview();
+      return;
+    }
+    const allowed = ["image/png", "image/jpeg", "image/webp"];
+    if (file.size > 8 * 1024 * 1024 || !allowed.includes(file.type)) {
+      $("imageStatus").className = "hint error";
+      $("imageStatus").textContent =
+        file.size > 8 * 1024 * 1024
+          ? "Image is too large. Choose a file under 8MB."
+          : "Unsupported image type. Use PNG, JPEG, or WebP.";
+      return;
+    }
+    $("officialImageUrl").value = "";
+    $("officialImageUrl").setCustomValidity("");
+    $("removeImage").hidden = false;
+    state.previewObjectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    img.alt = "Preview of your genuine product photo";
+    img.onload = () => {
+      $("imagePreview").replaceChildren(img);
+      $("imageStatus").className = "hint";
+      $("imageStatus").textContent = `${file.name} ready. Choose another file to replace it.`;
+    };
+    img.onerror = () => {
+      $("imageStatus").className = "hint error";
+      $("imageStatus").textContent =
+        "This file could not be previewed. Choose another image.";
+    };
+    img.src = state.previewObjectUrl;
   });
   $("productName").addEventListener("input", () =>
     $("productName").setCustomValidity(""),
@@ -532,11 +596,18 @@
   for (const id of ["minPrice", "maxPrice"])
     $(id).addEventListener("input", () => $("maxPrice").setCustomValidity(""));
   $("removeImage").addEventListener("click", () => {
+    if (state.previewObjectUrl) URL.revokeObjectURL(state.previewObjectUrl);
+    state.previewObjectUrl = "";
+    $("imageFile").value = "";
+    $("imageFile").setCustomValidity("");
     $("officialImageUrl").value = "";
     preview();
     $("officialImageUrl").focus();
   });
   $("loadDemoBtn").addEventListener("click", () => {
+    if (state.previewObjectUrl) URL.revokeObjectURL(state.previewObjectUrl);
+    state.previewObjectUrl = "";
+    $("imageFile").value = "";
     $("productName").value = "boAt Airdopes 141";
     $("officialImageUrl").value =
       "https://www.boat-lifestyle.com/cdn/shop/files/AD141-FI_Black06_600x.jpg";

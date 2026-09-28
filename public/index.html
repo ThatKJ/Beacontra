@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#080D0C" />
+    <meta name="theme-color" content="#10150f" />
     <script>
       // Boot splash shows once per browser session, and never under reduced motion.
       // Runs before experience.js loads so the fallback (no-JS-enhancement) path in
@@ -41,7 +41,7 @@
     <script src="/experience.js" defer></script>
     <script src="/app.js" defer></script>
   </head>
-  <body>
+  <body data-view="home">
     <div class="boot" id="boot" aria-hidden="true">
       <svg class="boot-mark" viewBox="0 0 40 40" fill="none">
         <circle class="boot-ring" cx="20" cy="20" r="12" stroke-width="1.5" />
@@ -90,16 +90,13 @@
           <div class="hero-grain" aria-hidden="true"></div>
           <div class="wrap hero-grid">
             <div class="hero-copy">
-              <p class="tech hero-eyebrow">
-                MARKETPLACE EVIDENCE <span aria-hidden="true">·</span> HUMAN JUDGMENT
-              </p>
+              <p class="tech hero-eyebrow">Evidence for human review</p>
               <h1 id="heroTitle" class="hero-title">
                 Every listing.<br /><em>A clearer signal.</em>
               </h1>
               <p class="hero-lede">
-                Find marketplace listings worth a closer look.<br />
-                Bring price, seller and visual evidence into one prioritized
-                review queue.
+                Bring price, source, product identity and visual evidence into
+                one prioritized review queue—so your team knows where to look first.
               </p>
               <div class="hero-actions">
                 <a class="cta cta-solid magnetic" href="#investigate" data-start
@@ -203,33 +200,47 @@
           </div>
 
           <div class="wrap">
-            <ol class="process-strip" aria-label="The scan workflow">
+            <ol class="process-strip" aria-label="The Beacontra evidence workflow">
               <li>
                 <span class="ps-idx">01</span>
                 <span class="ps-body"
-                  ><strong>Scan</strong
-                  ><small>Monitor listings at scale</small></span
+                  ><strong>Reference</strong
+                  ><small>Start with the product you know</small></span
                 >
               </li>
               <li>
                 <span class="ps-idx">02</span>
                 <span class="ps-body"
-                  ><strong>Analyze</strong
-                  ><small>Price, seller and visual signals</small></span
+                  ><strong>Search</strong
+                  ><small>Discover marketplace listings</small></span
                 >
               </li>
               <li>
                 <span class="ps-idx">03</span>
                 <span class="ps-body"
-                  ><strong>Prioritize</strong
-                  ><small>Focus on what needs review</small></span
+                  ><strong>Verify</strong
+                  ><small>Gather bounded visual evidence</small></span
                 >
               </li>
               <li>
                 <span class="ps-idx">04</span>
                 <span class="ps-body"
-                  ><strong>Decide</strong
-                  ><small>Compare the evidence, follow sources</small></span
+                  ><strong>Fuse</strong
+                  ><small>Combine independent signals</small></span
+                >
+              </li>
+              <li>
+                <span class="ps-idx">05</span>
+                <span class="ps-body"
+                  ><strong>Prioritize</strong
+                  ><small>Rank what deserves review</small></span
+                >
+              </li>
+              <li>
+                <span class="ps-idx">06</span>
+                <span class="ps-body"
+                  ><strong>Review</strong
+                  ><small>Inspect the evidence yourself</small></span
                 >
               </li>
             </ol>
@@ -240,7 +251,7 @@
         <section class="section" id="signals" aria-labelledby="signalsTitle">
           <div class="wrap">
             <header class="section-head" data-reveal>
-              <p class="tech">01 / SIGNAL PROBLEM</p>
+              <p class="tech">The evidence problem</p>
               <h2 id="signalsTitle" class="section-title">
                 Marketplace data is abundant.<br /><em>Useful evidence is not.</em>
               </h2>
@@ -387,7 +398,7 @@
             </figure>
 
             <div class="reference-spec" data-reveal>
-              <p class="tech">02 / REFERENCE OBJECT</p>
+              <p class="tech">Reference</p>
               <h2 id="referenceTitle" class="section-title">Start with what<br /><em>you know.</em></h2>
               <p class="section-lede">
                 One genuine product photo is the anchor of every scan. Everything
@@ -430,7 +441,7 @@
         <section class="section pipeline-wrap" id="how" aria-labelledby="howTitle">
           <div class="wrap">
             <header class="section-head" data-reveal>
-              <p class="tech">03 / HOW BEACONTRA THINKS</p>
+              <p class="tech">Search → verify → fuse → prioritize → review</p>
               <h2 id="howTitle" class="section-title">One chain<br /><em>of evidence.</em></h2>
             </header>
           </div>
@@ -481,12 +492,12 @@
           <div class="wrap">
             <header class="section-head scanner-head">
               <div>
-                <p class="tech">04 / INVESTIGATION</p>
+                <p class="tech">Begin an investigation</p>
                 <h2 id="scanTitle" class="section-title" tabindex="-1"
                   >Investigate<br /><em>a product.</em></h2>
                 <p class="section-lede">
-                  Paste a product URL or name, add your official photo and an
-                  optional reference price. Beacontra builds the review queue.
+                  Add the exact product name, your official photo and any
+                  reference context you trust. Beacontra builds the review queue.
                 </p>
               </div>
               <span class="index-mark" aria-hidden="true">ANALYSIS / 04</span>
@@ -531,7 +542,6 @@
                           type="url"
                           id="officialImageUrl"
                           name="officialImageUrl"
-                          required
                           placeholder="https://yourbrand.com/photo.jpg"
                           aria-describedby="imageHint imageStatus"
                           class="flex-1"
@@ -642,7 +652,7 @@
               </form>
 
               <aside class="scanner-sources" data-reveal aria-labelledby="sourcesTitle">
-                <h3 id="sourcesTitle" class="tech">ACTIVE SOURCES</h3>
+                <h3 id="sourcesTitle" class="tech">Evidence sources</h3>
                 <div class="source-item">
                   <span class="source-index">01</span>
                   <span class="source-body"
@@ -661,7 +671,7 @@
                 </div>
                 <p class="scanner-meta">
                   ANALYZE / 04<br />
-                  Every source is queried live through SerpApi. Results are
+                  Sources are queried through SerpApi. Results are
                   ranked by a deterministic priority score for your review — never
                   an authenticity verdict.
                 </p>
@@ -674,7 +684,7 @@
         <section class="section signals-detail-section" id="signalDetail" aria-labelledby="detailSectionTitle">
           <div class="wrap">
             <header class="section-head" data-reveal>
-              <p class="tech">05 / HOW EACH SIGNAL READS</p>
+              <p class="tech">Independent evidence</p>
               <h2 id="detailSectionTitle" class="section-title">Three signals.<br /><em>One workspace.</em></h2>
             </header>
 
@@ -716,7 +726,7 @@
         <section class="section why-section" id="why" aria-labelledby="whyTitle">
           <div class="wrap">
             <header class="section-head" data-reveal>
-              <p class="tech">06 / WHY IT MATTERS</p>
+              <p class="tech">The review workload</p>
               <h2 id="whyTitle" class="section-title">Less searching.<br /><em>More signal.</em></h2>
             </header>
             <div class="why-ladder">
@@ -748,7 +758,7 @@
         <section class="section arch-section" id="technology" aria-labelledby="techTitle">
           <div class="wrap">
             <header class="section-head" data-reveal>
-              <p class="tech">07 / TECHNOLOGY</p>
+              <p class="tech">Transparent infrastructure</p>
               <h2 id="techTitle" class="section-title">The pipeline<br /><em>in plain view.</em></h2>
             </header>
 

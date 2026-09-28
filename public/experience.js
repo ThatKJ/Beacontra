@@ -366,11 +366,16 @@
         let img = $("imagePreview").querySelector("img");
         // A URL may have changed just before submit, before the preview debounce.
         // Never animate an old reference as though it belongs to the new scan.
-        try {
-          if (img?.src !== new URL($("officialImageUrl").value.trim()).href)
+        // A selected local file has already produced the current object-URL
+        // preview, so it is the authoritative reference even though the URL
+        // field is intentionally empty.
+        if (!$("imageFile").files?.[0]) {
+          try {
+            if (img?.src !== new URL($("officialImageUrl").value.trim()).href)
+              img = null;
+          } catch {
             img = null;
-        } catch {
-          img = null;
+          }
         }
         if (img) {
           const clone = img.cloneNode();
