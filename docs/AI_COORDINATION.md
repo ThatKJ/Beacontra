@@ -47,6 +47,12 @@
 
 ## Agent Heartbeats
 
+CODEX — PREMIUM JOURNEY REDESIGN (T-039):
+Current: T-039 is complete on `redesign/premium-experience`. The reference-dossier journey now moves from a dark evidence field through editorial explanation and a bright investigation desk into an honest scan chamber and paper-toned analyst workspace. Existing scan/scoring contracts and provenance truth were preserved; file-only upload continuity was repaired and regression-tested without live credits.
+Last Completed: Implementation commit f2650fb; refreshed desktop/mobile screenshots and local performance evidence; 70 tests passed with 1 skipped; typecheck/lint/build/UI/performance gates passed. Browser QA covers six widths, axe, keyboard/focus, 44px secondary targets, dialog behavior, error/empty/missing evidence, multipart file-only continuity, reduced motion, and zero overflow. Independent Impeccable verdict: SHIP, no release blocker.
+Next: Human review or merge when desired; no further T-039 work is required.
+Blocked: None. User-provided untracked `AGENTS.md` is preserved and will not be committed.
+
 ASTRA — PRODUCT EXPERIENCE / UI OWNER:
 Current: T-034 committed as efbed21; T-036 committed as 6189baf. Editorial/CSS-3D rebuild complete (80% calm / 20% wow): hero evidence instrument, actual-reference scan scene, tactile photo card, comparison depth and provenance inside dialog. No scoring or request changes.
 Last Completed: Seven visual passes; Chromium checks at 375/390/430/768/1024/1440; axe home/mobile/loading/queue/dialog/error/empty passed; 68 tests + 1 skipped, typecheck/lint/build passed. Local initial asset gzip 25.4 KiB; zero observed initial layout shift; no 3D runtime dependency. Screenshots/measurements in ASTRA_VISUAL_QA.md.

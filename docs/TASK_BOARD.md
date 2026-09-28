@@ -11,6 +11,23 @@
 
 ## Tasks
 
+### T-039: Complete premium journey redesign — reference dossier to analyst workspace
+**OWNER:** CODEX
+**STATUS:** DONE — implementation committed as f2650fb
+**PRIORITY:** P1
+**FILES:** public/index.html, public/styles.css, public/experience.css, public/app.js, public/experience.js, scripts/ui-check.mjs, docs/BEACONTRA_DESIGN_SYSTEM_V2.md, docs/ASTRA_VISUAL_QA.md, docs/screenshots/*
+**ISSUE:** The current frontend is polished but reads as one continuous dark intelligence terminal. The requested experience needs a clearer journey—cinematic landing, editorial explanation, bright investigation input, dark honest scan state, and evidence-dense analyst workspace—while retaining the vanilla architecture, every stable DOM/API hook, provenance truth, neutral uncertainty states, and the existing backend/scoring contract.
+**ACCEPTANCE CRITERIA:**
+- [x] Preserve the existing scan API, ranking/scoring logic, data-source states, file upload contract, dialog behavior, and zero-credit browser-test fixtures.
+- [x] Make REFERENCE → SEARCH → VERIFY → FUSE → PRIORITIZE → REVIEW understandable within the first viewport and supporting narrative.
+- [x] Rebuild the input as a bright, photo-led investigation desk with complete focus/valid/invalid/uploaded/disabled/error states.
+- [x] Keep loading indeterminate and explicitly non-telemetric; show the real reference image and conceptual evidence convergence.
+- [x] Reframe results as a responsive queue/detail workspace with prominent LIVE/CACHED/FIXTURE provenance and an editorial, non-probabilistic Review Priority explanation.
+- [x] Verify 390/430/768/1024/1440 layouts, keyboard/focus/dialog behavior, reduced motion, zero horizontal overflow, error/empty/missing-evidence states, and actual desktop/mobile screenshots.
+- [x] Pass npm test, typecheck, lint, build, test:ui, and test:ui:performance without spending live SerpApi credits.
+- [x] Document the final tokens, typography, spacing, motion, responsive behavior, accessibility, provenance, priority, and visual-evidence states.
+**VERIFICATION:** `npm test` passed 70 tests with 1 explicitly skipped; typecheck, lint, and the Wrangler dry-run build passed (the build still emits its existing deprecation/out-of-date warnings). `npm run test:ui` passed home/loading/results/dialog/error/empty, axe, keyboard/focus, file-only multipart continuity, reduced motion, provenance, and overflow at 375/390/430/768/1024/1440px. `npm run test:ui:performance` passed with 35,777 bytes gzip across the five local frontend assets, 392ms desktop and 488ms mobile-4×-CPU local LCP, and zero sampled frames over 32ms. All browser API requests were intercepted; no live SerpApi credits were spent. Independent Impeccable finish review returned SHIP with no release blocker; its only notes were intentional cinematic motion breadth and remaining useful pre-heading labels.
+
 ### T-038: Cinematic evolution of the vanilla CSS/JS instrument system (no framework migration)
 **OWNER:** CLAUDE (third concurrent session)
 **STATUS:** DONE — committed across f14fc07 (T-037 commit), e4c3dd4, a72abf0, 343da1a, 56c7437
