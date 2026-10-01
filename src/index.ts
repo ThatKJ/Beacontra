@@ -5,6 +5,13 @@ import { getSharedCache } from './lib/cache';
 import { createBeacontraService, type BeacontraInput, type BeacontraScanResult } from './lib/beacontra';
 import { getSerpApiKey, isSerpApiConfigured, getSerpApiHealthStatus } from './lib/config';
 import { isSafePublicUrl } from './lib/security';
+import {
+  EvidenceDeskService,
+  generateInvestigationHtmlReport,
+  type CreateCaseInput,
+  type UpdateCaseInput,
+  type CaseStatus,
+} from './lib/evidence-desk';
 import type { BaseSearchParams, SerpApiEngine, SerpApiResponse } from './lib/types';
 
 
@@ -306,6 +313,145 @@ app.get('/api/engines', (c) => {
 
 app.get('/api/usage', (c) => {
   return c.json({ message: 'Credit tracking available via client.getCreditUsage()' });
+});
+
+// ==========================================
+// EVIDENCE DESK CASE MANAGEMENT API
+// ==========================================
+
+function getEvidenceDeskService(env?: Env) {
+  const safeEnv = env || ({} as Env);
+  const cache = getSharedCache(safeEnv.CACHE_KV);
+  return new EvidenceDeskService(cache);
+}
+
+app.post('/api/cases', async (c) => {
+  try {
+    const body = await c.req.json<CreateCaseInput>();
+    if (!body.productName) {
+      return c.json({ error: 'productName is required' }, 400);
+    }
+    if (!body.officialImageUrl) {
+      return c.json({ error: 'officialImageUrl is required' }, 400);
+    }
+
+    const env = c.env || ({} as Env);
+    const deskService = getEvidenceDeskService(env);
+
+    let scanSnapshot: BeacontraScanResult | undefined;
+    if (body.scanId) {
+      const cache = getSharedCache(env.CACHE_KV);
+      const cachedScan = await cache.get<BeacontraScanResult>(`scan:${body.scanId}`);
+      if (cachedScan?.data) {
+        scanSnapshot = cachedScan.data;
+      }
+    }
+
+    const newCase = await deskService.createCase(body, scanSnapshot);
+    return c.json({ data: newCase }, 201);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.get('/api/cases', async (c) => {
+  try {
+    const status = c.req.query('status') as CaseStatus | undefined;
+    const search = c.req.query('search') || c.req.query('q');
+
+    const env = c.env || ({} as Env);
+    const deskService = getEvidenceDeskService(env);
+
+    const cases = await deskService.listCases({ status, search });
+    return c.json({ data: cases, count: cases.length });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.get('/api/cases/:caseId', async (c) => {
+  try {
+    const caseId = c.req.param('caseId');
+    const env = c.env || ({} as Env);
+    const deskService = getEvidenceDeskService(env);
+
+    const found = await deskService.getCase(caseId);
+    if (!found) {
+      return c.json({ error: 'Case not found', caseId }, 404);
+    }
+
+    return c.json({ data: found });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.patch('/api/cases/:caseId', async (c) => {
+  try {
+    const caseId = c.req.param('caseId');
+    const body = await c.req.json<UpdateCaseInput>();
+
+    const env = c.env || ({} as Env);
+    const deskService = getEvidenceDeskService(env);
+
+    const updated = await deskService.updateCase(caseId, body);
+    if (!updated) {
+      return c.json({ error: 'Case not found', caseId }, 404);
+    }
+
+    return c.json({ data: updated });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.post('/api/cases/:caseId/notes', async (c) => {
+  try {
+    const caseId = c.req.param('caseId');
+    const body = await c.req.json<{ author?: string; content: string }>();
+    if (!body.content || typeof body.content !== 'string') {
+      return c.json({ error: 'content is required' }, 400);
+    }
+
+    const env = c.env || ({} as Env);
+    const deskService = getEvidenceDeskService(env);
+
+    const note = await deskService.addNote(caseId, body.author || 'Analyst', body.content);
+    if (!note) {
+      return c.json({ error: 'Case not found', caseId }, 404);
+    }
+
+    return c.json({ data: note }, 201);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.get('/api/cases/:caseId/report', async (c) => {
+  try {
+    const caseId = c.req.param('caseId');
+    const env = c.env || ({} as Env);
+    const deskService = getEvidenceDeskService(env);
+
+    const investigationCase = await deskService.getCase(caseId);
+    if (!investigationCase) {
+      return c.text('Case not found', 404);
+    }
+
+    const html = generateInvestigationHtmlReport(investigationCase);
+    c.header('Content-Type', 'text/html; charset=utf-8');
+    c.header('Content-Disposition', `inline; filename="beacontra-case-${caseId}.html"`);
+    c.header('X-Evidence-Case-Id', caseId);
+    return c.html(html);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.text(`Report generation error: ${msg}`, 500);
+  }
 });
 
 export default app;
