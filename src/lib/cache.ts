@@ -141,6 +141,19 @@ function simpleHash(str: string): string {
   return Math.abs(hash).toString(36);
 }
 
+const globalMemoryCache = new MemoryCache();
+
+export function getSharedCache(kv?: KVNamespace): CacheAdapter {
+  if (kv) {
+    return new TieredCache(globalMemoryCache, new KVCache(kv));
+  }
+  return globalMemoryCache;
+}
+
+export function clearSharedCache(): void {
+  globalMemoryCache.clear();
+}
+
 export function createTieredCache(kv?: KVNamespace): CacheAdapter {
   const memory = new MemoryCache();
   if (kv) {

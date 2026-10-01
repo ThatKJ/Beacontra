@@ -71,13 +71,24 @@ describe('BeacontraService', () => {
   });
 
   it('should detect price anomaly for below-MRP listings', async () => {
-    // Override MRP to force a large_deviation anomaly (e.g. price 72999 < 120000 * 0.7)
-    const testInput = { ...validInput, mrp: 120000 };
+    // Override MRP to force a large_deviation anomaly (e.g. price 72999 < 120000 * 0.7) when no expected range is given
+    const testInput: BeacontraInput = { ...validInput, mrp: 120000, expectedPriceRange: undefined };
     const result = await beacontra.scan(testInput);
     const results = result.results ?? [];
 
     const hasPriceAnomaly = results.some(r => r.priceSignal.isAnomalous);
     expect(hasPriceAnomaly).toBe(true);
+  });
+
+  it('should prioritize expectedPriceRange over inflated MRP to prevent false alarms on legitimate retail discounts', async () => {
+    // Typical Indian D2C case: MRP 120000, but legitimate retail street price is 70000-80000.
+    // Listings at 72999-74999 must NOT be flagged as price anomalies.
+    const testInput: BeacontraInput = { ...validInput, mrp: 120000, expectedPriceRange: { min: 70000, max: 80000 } };
+    const result = await beacontra.scan(testInput);
+    const results = result.results ?? [];
+
+    const hasPriceAnomaly = results.some(r => r.priceSignal.isAnomalous);
+    expect(hasPriceAnomaly).toBe(false);
   });
 
   it('should handle authorized sellers correctly', async () => {

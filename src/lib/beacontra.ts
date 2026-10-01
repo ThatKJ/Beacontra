@@ -1,4 +1,6 @@
 import { SerpApiClient } from './serpapi-client';
+import { isVariantMismatch, classifyMatchSource } from './normalization';
+import { safeFetchImage } from './security';
 import type {
   BaseSearchParams,
   LensSearchParams,
@@ -41,6 +43,8 @@ export interface LensEvidence {
   visualMatchSources: string[];
   matchConfidence: 'high' | 'medium' | 'low' | 'none';
   details: LensSearchResult;
+  hasBrandOrAuthorizedMatch?: boolean;
+  unverifiedSources?: string[];
 }
 
 export interface PriceSignal {
@@ -125,7 +129,7 @@ export class BeacontraService {
       let visualSignal: VisualSignal;
 
       if (index < BeacontraService.MAX_LENS_CALLS) {
-        lensEvidence = await this.runVisualVerification(candidate.thumbnail, input.officialImageUrl);
+        lensEvidence = await this.runVisualVerification(candidate.thumbnail, input.officialImageUrl, input);
         visualSignal = this.analyzeVisual(lensEvidence);
       } else {
         lensEvidence = this.emptyLensEvidence();
@@ -177,25 +181,7 @@ export class BeacontraService {
   }
 
   private isVariantMismatch(title: string, productName: string): boolean {
-    const t = title.toLowerCase();
-    const p = productName.toLowerCase();
-    
-    // Filter out common accessories if the original product is not an accessory
-    const accessoryTokens = ['case', 'cover', 'skin', 'silicone', 'pouch', 'protector'];
-    if (accessoryTokens.some(token => t.includes(token) && !p.includes(token))) {
-      return true;
-    }
-    
-    // Filter out variants that change the SKU price (Pro, ANC, Gen 2, etc.)
-    const variantTokens = ['pro', 'anc', 'gen 2', 'gen2', 'elite', 'max', 'plus', 'ultra', 'neo', 'active', 'lite'];
-    for (const token of variantTokens) {
-      const regex = new RegExp(`\\b${token}\\b`, 'i');
-      if (regex.test(t) && !regex.test(p)) {
-        return true;
-      }
-    }
-    
-    return false;
+    return isVariantMismatch(title, productName).isMismatch;
   }
 
   private extractCandidates(response: SerpApiResponse, productName: string): ListingCandidate[] {
@@ -221,7 +207,8 @@ export class BeacontraService {
 
   private async runVisualVerification(
     listingImageUrl: string,
-    officialImageUrl: string
+    officialImageUrl: string,
+    input?: BeacontraInput
   ): Promise<LensEvidence> {
     try {
       // First, try to upload the image to get image_id for better exact_matches
@@ -287,33 +274,55 @@ export class BeacontraService {
       const visualMatchSources = visualMatches.map(m => m.source).filter((s): s is string => Boolean(s));
       const productSources = products.map(m => m.source).filter((s): s is string => Boolean(s));
 
-      // Check for exact match with official image
-      const hasExactMatch = exactMatches.some(
-        m => m.link?.includes(officialImageUrl) || m.source?.includes('official') || m.source?.includes('brand')
+      // Domain-aware and authorized seller source classification
+      const classifyCandidate = (m: { source?: string; link?: string }) => {
+        return classifyMatchSource(
+          m.source ?? '',
+          m.link,
+          input?.productName ?? '',
+          input?.knownAuthorizedSellers ?? [],
+          officialImageUrl
+        );
+      };
+
+      const classifiedExact = exactMatches.map(classifyCandidate);
+      const classifiedVisual = [...visualMatches, ...products].map(classifyCandidate);
+
+      // Check for exact match with official image or verified brand/authorized channel
+      const hasExactMatch = exactMatches.some((m, idx) => {
+        const cls = classifiedExact[idx];
+        return (
+          Boolean(cls?.isOfficialBrand) ||
+          Boolean(cls?.isAuthorizedSeller) ||
+          Boolean(m.source?.toLowerCase().includes('official') || m.source?.toLowerCase().includes('brand')) ||
+          Boolean(officialImageUrl && m.link?.includes(officialImageUrl))
+        );
+      });
+
+      const hasBrandOrAuthorizedMatch = [...classifiedExact, ...classifiedVisual].some(
+        c => c.isOfficialBrand || c.isAuthorizedSeller || c.isRecognizedMarketplace
       );
 
-      // Check for visual match with official image
-      const hasVisualMatch = visualMatches.some(
-        m => m.link?.includes(officialImageUrl) || m.source?.includes('official') || m.source?.includes('brand')
-      );
+      const unverifiedSources = classifiedVisual
+        .filter(c => !c.isOfficialBrand && !c.isAuthorizedSeller && !c.isRecognizedMarketplace)
+        .map(c => c.sourceDomain || 'unverified');
 
-      // Check for product match with official image
-      const hasProductMatch = products.some(
-        m => m.link?.includes(officialImageUrl) || m.source?.includes('official') || m.source?.includes('brand')
-      );
+      const hasVisualMatch = visualMatches.length > 0 || products.length > 0;
 
       let matchConfidence: 'high' | 'medium' | 'low' | 'none' = 'none';
       if (hasExactMatch) matchConfidence = 'high';
-      else if (hasVisualMatch || hasProductMatch) {
+      else if (hasVisualMatch) {
         if (visualMatches.length >= 3 || products.length >= 3) matchConfidence = 'medium';
         else matchConfidence = 'low';
       }
 
       return {
         hasExactMatch,
-        hasVisualMatch: hasVisualMatch || hasProductMatch,
+        hasVisualMatch,
         hasLensData: true,
         callFailed: false,
+        hasBrandOrAuthorizedMatch,
+        unverifiedSources,
         exactMatchSources,
         visualMatchSources: [...visualMatchSources, ...productSources],
         matchConfidence,
@@ -341,14 +350,11 @@ export class BeacontraService {
       const apiKey = this.client.getApiKey?.() || '';
       if (!apiKey) return undefined;
 
-      const imgResponse = await fetch(imageUrl);
-      if (!imgResponse.ok) return undefined;
-
-      const imageBuffer = await imgResponse.arrayBuffer();
-      if (imageBuffer.byteLength > 500 * 1024) return undefined;
+      const fetchResult = await safeFetchImage(imageUrl, 500 * 1024);
+      if (!fetchResult.ok || !fetchResult.buffer) return undefined;
 
       const formData = new FormData();
-      const blob = new Blob([imageBuffer]);
+      const blob = new Blob([fetchResult.buffer]);
       formData.append('image', blob, 'upload.jpg');
       formData.append('api_key', apiKey);
 
@@ -382,54 +388,102 @@ export class BeacontraService {
   private analyzePrice(candidate: ListingCandidate, input: BeacontraInput): PriceSignal {
     const price = candidate.extractedPrice;
     const mrp = input.mrp;
+    const range = input.expectedPriceRange;
 
-    if (mrp && price < mrp * 0.5) {
-      return {
-        isAnomalous: true,
-        anomalyType: 'below_mrp',
-        mrp,
-        priceRatio: price / mrp,
-        details: `Price ₹${price} is ${Math.round((1 - price / mrp) * 100)}% below MRP ₹${mrp} (Extreme deviation)`,
-      };
-    }
+    // 1. If expectedPriceRange is provided, it takes precedence as the realistic commercial baseline
+    // (Addresses the Indian market reality where printed statutory MRP is 2x-4x genuine retail street price)
+    if (range && range.min > 0) {
+      const { min, max } = range;
+      const effectiveMax = max >= min ? max : min;
 
-    if (mrp && price < mrp * 0.7) {
-      return {
-        isAnomalous: true,
-        anomalyType: 'large_deviation',
-        mrp,
-        priceRatio: price / mrp,
-        details: `Price ₹${price} is ${Math.round((1 - price / mrp) * 100)}% below MRP ₹${mrp}`,
-      };
-    }
+      if (price >= min && price <= effectiveMax) {
+        const discountFromMrp = mrp && mrp > price ? Math.round((1 - price / mrp) * 100) : undefined;
+        return {
+          isAnomalous: false,
+          anomalyType: 'normal',
+          mrp,
+          priceRatio: price / min,
+          details: `Price ₹${price} is within expected retail range ₹${min}–₹${effectiveMax}${discountFromMrp ? ` (${discountFromMrp}% discount off statutory MRP ₹${mrp} is standard retail street pricing)` : ''}`,
+        };
+      }
 
-    if (mrp && price < mrp * 0.9) {
-      const discountPct = Math.round((1 - price / mrp) * 100);
-      return {
-        isAnomalous: false,
-        anomalyType: 'moderate_discount',
-        mrp,
-        priceRatio: price / mrp,
-        details: `Price ₹${price} is ${discountPct}% below MRP ₹${mrp} (Standard market discount)`,
-      };
-    }
-
-    if (input.expectedPriceRange) {
-      const { min, max } = input.expectedPriceRange;
-      if (price < min * 0.7) { // Using 0.7 instead of the removed PRICE_ANOMALY_THRESHOLD
+      if (price < min * 0.7) {
         return {
           isAnomalous: true,
           anomalyType: 'below_range',
+          mrp,
           priceRatio: price / min,
-          details: `Price ₹${price} is significantly below expected range ₹${min}-₹${max}`,
+          details: `Price ₹${price} is significantly below expected retail minimum ₹${min} (${Math.round((1 - price / min) * 100)}% below minimum)`,
         };
       }
+
+      if (price < min) {
+        return {
+          isAnomalous: true,
+          anomalyType: 'below_range',
+          mrp,
+          priceRatio: price / min,
+          details: `Price ₹${price} is below expected retail minimum ₹${min} (${Math.round((1 - price / min) * 100)}% deviation)`,
+        };
+      }
+
+      // price > effectiveMax
+      return {
+        isAnomalous: false,
+        anomalyType: 'normal',
+        mrp,
+        priceRatio: price / effectiveMax,
+        details: `Price ₹${price} aligns with or exceeds expected retail range ₹${min}–₹${effectiveMax}`,
+      };
     }
 
+    // 2. Fallback when expectedPriceRange is NOT provided: analyze against statutory MRP
+    if (mrp && mrp > 0) {
+      if (price < mrp * 0.5) {
+        return {
+          isAnomalous: true,
+          anomalyType: 'below_mrp',
+          mrp,
+          priceRatio: price / mrp,
+          details: `Price ₹${price} is ${Math.round((1 - price / mrp) * 100)}% below MRP ₹${mrp} (Extreme deviation)`,
+        };
+      }
+
+      if (price < mrp * 0.7) {
+        return {
+          isAnomalous: true,
+          anomalyType: 'large_deviation',
+          mrp,
+          priceRatio: price / mrp,
+          details: `Price ₹${price} is ${Math.round((1 - price / mrp) * 100)}% below MRP ₹${mrp}`,
+        };
+      }
+
+      if (price < mrp * 0.9) {
+        const discountPct = Math.round((1 - price / mrp) * 100);
+        return {
+          isAnomalous: false,
+          anomalyType: 'moderate_discount',
+          mrp,
+          priceRatio: price / mrp,
+          details: `Price ₹${price} is ${discountPct}% below MRP ₹${mrp} (Standard market discount)`,
+        };
+      }
+
+      return {
+        isAnomalous: false,
+        anomalyType: 'normal',
+        mrp,
+        priceRatio: price / mrp,
+        details: `Price ₹${price} is within standard range of MRP ₹${mrp}`,
+      };
+    }
+
+    // 3. Neither expectedPriceRange nor MRP provided
     return {
       isAnomalous: false,
       anomalyType: 'normal',
-      details: `Price ₹${price} within expected range`,
+      details: `Price ₹${price} recorded (no MRP or expected price range provided for baseline comparison)`,
     };
   }
 
@@ -504,34 +558,40 @@ export class BeacontraService {
         anomalyType: 'matched',
         confidence: 'high',
         matchSources: evidence.exactMatchSources,
-        details: 'Listing photo matches official product image',
+        details: 'Listing photo matches official product reference image across brand or authorized channels',
         status: 'matched',
       };
     }
 
     // Lens worked and found visual matches
     if (evidence.hasVisualMatch) {
-      const hasBrandMismatch = evidence.visualMatchSources.some(
-        s => !s.includes('official') && !s.includes('brand') && !s.includes('manufacturer')
+      // Check if matches belong to recognized brand or authorized retail channels
+      const hasRecognizedMatch = evidence.hasBrandOrAuthorizedMatch ?? (
+        evidence.exactMatchSources.length > 0 ||
+        evidence.visualMatchSources.some(s => {
+          const l = s.toLowerCase();
+          return l.includes('official') || l.includes('brand') || l.includes('amazon') || l.includes('flipkart') || l.includes('croma') || l.includes('reliance');
+        })
       );
 
-      if (hasBrandMismatch) {
+      if (hasRecognizedMatch) {
         return {
-          isAnomalous: true,
-          anomalyType: 'unverified_photo_source',
-          confidence: 'high',
+          isAnomalous: false,
+          anomalyType: 'visual_match',
+          confidence: 'medium',
           matchSources: evidence.visualMatchSources,
-          details: `Listing photo matches other sources (${evidence.visualMatchSources.join(', ')}) but not official brand - unverified photo origin requiring review`,
+          details: `Visual matches found across recognized retail or catalog sources (${evidence.visualMatchSources.slice(0, 3).join(', ')})`,
           status: 'visual_match',
         };
       }
 
+      // Visual match exists strictly on unverified third-party sources
       return {
-        isAnomalous: false,
-        anomalyType: 'visual_match',
+        isAnomalous: true,
+        anomalyType: 'unverified_photo_source',
         confidence: 'medium',
         matchSources: evidence.visualMatchSources,
-        details: `Visual matches found but not with official brand - possible variant or similar product`,
+        details: `Listing photo matches third-party sources (${evidence.visualMatchSources.slice(0, 3).join(', ')}) outside known brand channels — unverified photo origin requiring review`,
         status: 'visual_match',
       };
     }

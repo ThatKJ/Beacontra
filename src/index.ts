@@ -1,9 +1,10 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { SerpApiClient, SerpApiError } from './lib/serpapi-client';
-import { createTieredCache } from './lib/cache';
-import { createBeacontraService, type BeacontraInput } from './lib/beacontra';
+import { getSharedCache } from './lib/cache';
+import { createBeacontraService, type BeacontraInput, type BeacontraScanResult } from './lib/beacontra';
 import { getSerpApiKey, isSerpApiConfigured, getSerpApiHealthStatus } from './lib/config';
+import { isSafePublicUrl } from './lib/security';
 import type { BaseSearchParams, SerpApiEngine, SerpApiResponse } from './lib/types';
 
 
@@ -16,10 +17,22 @@ interface Env {
 
 const app = new Hono<{ Bindings: Env }>();
 
-app.use('*', cors());
+app.use('*', cors({
+  origin: (origin) => {
+    if (!origin) return '*';
+    if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) return origin;
+    if (origin.startsWith('chrome-extension://')) return origin;
+    return '*';
+  },
+  allowMethods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposeHeaders: ['Content-Length', 'X-Scan-Id'],
+  maxAge: 86400,
+}));
 
 app.get('/health', (c) => {
-  const health = getSerpApiHealthStatus(c.env as unknown as Record<string, unknown>);
+  const env = c.env || ({} as Env);
+  const health = getSerpApiHealthStatus(env as unknown as Record<string, unknown>);
   return c.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -31,12 +44,13 @@ app.get('/health', (c) => {
 
 // The frontend is served by Workers Static Assets (wrangler.jsonc).
 
-function createClient(env: Env) {
-  const configured = isSerpApiConfigured(env as unknown as Record<string, unknown>);
+function createClient(env?: Env) {
+  const safeEnv = env || ({} as Env);
+  const configured = isSerpApiConfigured(safeEnv as unknown as Record<string, unknown>);
   let apiKey = '';
   if (configured) {
     try {
-      apiKey = getSerpApiKey(env as unknown as Record<string, unknown>);
+      apiKey = getSerpApiKey(safeEnv as unknown as Record<string, unknown>);
     } catch {
       apiKey = '';
     }
@@ -44,14 +58,14 @@ function createClient(env: Env) {
 
   return new SerpApiClient({
     apiKey,
-    cache: createTieredCache(env.CACHE_KV),
-    fixtureMode: !configured || (env.ENVIRONMENT === 'development' && !configured),
+    cache: getSharedCache(safeEnv.CACHE_KV),
+    fixtureMode: !configured || (safeEnv.ENVIRONMENT === 'development' && !configured),
   });
 }
 
 
 app.post('/api/search', async (c) => {
-  const env = c.env;
+  const env = c.env || ({} as Env);
   const client = createClient(env);
 
   try {
@@ -93,7 +107,7 @@ app.post('/api/search', async (c) => {
 });
 
 app.post('/api/beacontra/scan', async (c) => {
-  const env = c.env;
+  const env = c.env || ({} as Env);
   const client = createClient(env);
   const beacontra = createBeacontraService(client);
 
@@ -194,7 +208,24 @@ app.post('/api/beacontra/scan', async (c) => {
       }
     }
 
+    if (input.officialImageUrl && !input.officialImageUrl.startsWith('local-upload://') && !input.officialImageUrl.startsWith('serpapi:image_id:')) {
+      const urlCheck = isSafePublicUrl(input.officialImageUrl);
+      if (!urlCheck.isSafe) {
+        return c.json({ error: `Invalid officialImageUrl: ${urlCheck.reason}` }, 400);
+      }
+    }
+
     const result = await beacontra.scan(input);
+
+    // Persist scan result in shared cache for subsequent retrieval by scanId
+    const cache = getSharedCache(env.CACHE_KV);
+    await cache.set(`scan:${result.scanId}`, {
+      data: result,
+      timestamp: Date.now(),
+      ttl: 7 * 24 * 60 * 60 * 1000, // 7 days
+      engine: 'beacontra_scan',
+      paramsHash: result.scanId,
+    });
 
     return c.json({
       data: result,
@@ -227,7 +258,29 @@ app.post('/api/beacontra/scan', async (c) => {
 
 app.get('/api/beacontra/results/:scanId', async (c) => {
   const scanId = c.req.param('scanId');
-  return c.json({ error: 'Scan results retrieval not yet implemented - use scan endpoint', scanId }, 501);
+  if (!scanId) {
+    return c.json({ error: 'scanId is required' }, 400);
+  }
+
+  const env = c.env || ({} as Env);
+  const cache = getSharedCache(env.CACHE_KV);
+  const cached = await cache.get<BeacontraScanResult>(`scan:${scanId}`);
+
+  if (!cached || !cached.data) {
+    return c.json({ error: 'Scan result not found or expired', scanId }, 404);
+  }
+
+  return c.json({
+    data: cached.data,
+    meta: {
+      scanId: cached.data.scanId,
+      dataSource: cached.data.dataSource,
+      creditsUsed: cached.data.creditsUsed,
+      totalListingsFound: cached.data.totalListingsFound,
+      retrievedAt: new Date().toISOString(),
+      cachedAt: new Date(cached.timestamp).toISOString(),
+    },
+  });
 });
 
 app.get('/api/engines', (c) => {

@@ -217,3 +217,224 @@ export function sanitizeForLogging(obj: unknown): unknown {
   }
   return obj;
 }
+
+export interface VariantMismatchResult {
+  isMismatch: boolean;
+  reason?: 'accessory' | 'hardware_tier' | 'version_generation' | 'capacity' | 'bundle';
+  details?: string;
+}
+
+/**
+ * Robust product-variant normalization
+ * Identifies accessories, hardware tier differences (Pro, Max, ANC), and version generations
+ * while preserving legitimate cosmetic/color variations.
+ */
+export function isVariantMismatch(title: string, productName: string): VariantMismatchResult {
+  if (!title || !productName) {
+    return { isMismatch: false };
+  }
+
+  const t = title.toLowerCase();
+  const p = productName.toLowerCase();
+
+  // 1. Filter out common accessories if query product is not an accessory
+  const accessoryTokens = [
+    'case', 'cover', 'skin', 'silicone', 'pouch', 'protector', 'tempered glass',
+    'strap', 'charging cable', 'cable', 'ear tips', 'eartips', 'sleeve',
+    'cushion', 'adapter', 'charging case only', 'stand', 'mount', 'lanyard', 'holster'
+  ];
+  for (const token of accessoryTokens) {
+    const regex = new RegExp(`\\b${token}\\b`, 'i');
+    if (regex.test(t) && !regex.test(p)) {
+      return {
+        isMismatch: true,
+        reason: 'accessory',
+        details: `Listing title contains accessory descriptor "${token}" not present in target product`,
+      };
+    }
+  }
+
+  // 2. Filter out bundle / multi-pack variants
+  const bundleTokens = [
+    'pack of 2', 'pack of 3', 'pack of 4', 'combo pack', '2 pack', '3 pack',
+    'set of 2', 'set of 3', '2 in 1 combo', 'pair pack'
+  ];
+  for (const token of bundleTokens) {
+    if (t.includes(token) && !p.includes(token)) {
+      return {
+        isMismatch: true,
+        reason: 'bundle',
+        details: `Listing appears to be a bundled/multipack offering ("${token}")`,
+      };
+    }
+  }
+
+  // 3. Filter out hardware SKU tier modifiers (Pro, ANC, Plus, Max, Ultra, Lite, etc.)
+  const tierTokens = [
+    'pro', 'anc', 'plus', 'max', 'ultra', 'lite', 'neo', 'elite', 'active', 'se', 'mini', 'prime', 'fe'
+  ];
+  for (const token of tierTokens) {
+    const regex = new RegExp(`\\b${token}\\b`, 'i');
+    const inTitle = regex.test(t);
+    const inProduct = regex.test(p);
+    if (inTitle !== inProduct) {
+      return {
+        isMismatch: true,
+        reason: 'hardware_tier',
+        details: `Hardware tier modifier "${token}" ${inTitle ? 'present in listing but absent from target product' : 'missing from listing'}`,
+      };
+    }
+  }
+
+  // 4. Filter out generation/version modifiers (Gen 2, V2, 2nd Gen, etc.)
+  const genTokens = [
+    'gen 2', 'gen2', 'gen 3', 'gen3', 'gen 4', 'gen4',
+    'v2', 'v3', 'v4', 'version 2', 'version 3',
+    '2nd gen', '3rd gen', '4th gen',
+    '2023 edition', '2024 edition', '2025 edition', '2026 edition'
+  ];
+  for (const token of genTokens) {
+    const regex = new RegExp(`\\b${token}\\b`, 'i');
+    const inTitle = regex.test(t);
+    const inProduct = regex.test(p);
+    if (inTitle !== inProduct) {
+      return {
+        isMismatch: true,
+        reason: 'version_generation',
+        details: `Generation/version modifier "${token}" ${inTitle ? 'present in listing but absent from target product' : 'missing from listing'}`,
+      };
+    }
+  }
+
+  // 5. Storage capacity differences (e.g. 128GB vs 256GB)
+  const capacityRegex = /\b(\d+)\s*(gb|tb)\b/gi;
+  const productCapMatches = Array.from(p.matchAll(capacityRegex)).map(m => `${m[1]}${(m[2] ?? '').toLowerCase()}`);
+  const titleCapMatches = Array.from(t.matchAll(capacityRegex)).map(m => `${m[1]}${(m[2] ?? '').toLowerCase()}`);
+
+  if (productCapMatches.length > 0 && titleCapMatches.length > 0) {
+    const productCap = productCapMatches[0];
+    const titleCap = titleCapMatches[0];
+    if (productCap !== titleCap) {
+      return {
+        isMismatch: true,
+        reason: 'capacity',
+        details: `Capacity mismatch: target specifies ${productCap}, listing specifies ${titleCap}`,
+      };
+    }
+  }
+
+  return { isMismatch: false };
+}
+
+export interface SourceClassification {
+  isOfficialBrand: boolean;
+  isAuthorizedSeller: boolean;
+  isRecognizedMarketplace: boolean;
+  isKnownSafeChannel: boolean;
+  matchType: 'official_brand' | 'authorized_retailer' | 'recognized_marketplace' | 'unverified_third_party';
+  sourceDomain: string;
+  details: string;
+}
+
+/**
+ * Classifies a match source from Google Lens or marketplace search
+ * Replaces crude substring heuristics (like searching for the word 'official')
+ * with domain-aware, brand-token, and authorized seller reconciliation.
+ */
+export function classifyMatchSource(
+  source: string,
+  link: string | undefined,
+  brandOrProductName: string,
+  authorizedSellers: string[] = [],
+  officialImageUrl?: string
+): SourceClassification {
+  const normSource = normalizeSellerName(source || '');
+  const domainFromLink = link ? extractDomain(link) : '';
+  const sourceDomain = domainFromLink !== 'unknown' && domainFromLink !== '' ? domainFromLink : normalizeDomain(source || '');
+
+  // Extract brand keywords
+  const brandKeywords: string[] = [];
+  if (brandOrProductName) {
+    const words = brandOrProductName.toLowerCase().split(/\s+/).filter(w => w.length >= 3);
+    if (words.length > 0) {
+      brandKeywords.push(words[0]!); // First word is typically the brand (e.g., boAt, Apple, Nike)
+      if (words.length > 1 && words[1] === 'india') {
+        brandKeywords.push(`${words[0]} india`);
+      }
+    }
+  }
+
+  // Extract official domain from officialImageUrl if present
+  let officialDomain = '';
+  if (officialImageUrl && officialImageUrl.startsWith('http')) {
+    try {
+      const url = new URL(officialImageUrl);
+      officialDomain = normalizeDomain(url.hostname);
+    } catch {
+      // ignore
+    }
+  }
+
+  // 1. Check for official brand channel
+  const isOfficialDomain = officialDomain && (sourceDomain.includes(officialDomain) || officialDomain.includes(sourceDomain));
+  const isBrandNameMatch = brandKeywords.some(bk => normSource.includes(bk) || sourceDomain.includes(bk));
+  const isOfficialBrand = Boolean(isOfficialDomain || (isBrandNameMatch && (normSource.includes('store') || normSource.includes('official') || sourceDomain.includes(brandKeywords[0] || ''))));
+
+  if (isOfficialBrand) {
+    return {
+      isOfficialBrand: true,
+      isAuthorizedSeller: true,
+      isRecognizedMarketplace: false,
+      isKnownSafeChannel: true,
+      matchType: 'official_brand',
+      sourceDomain,
+      details: `Source matches official brand identity (${sourceDomain || normSource})`,
+    };
+  }
+
+  // 2. Check for authorized sellers
+  const isAuthorized = isLikelyAuthorizedSeller(normSource, authorizedSellers) ||
+    (sourceDomain && authorizedSellers.some(auth => {
+      const normAuth = normalizeSellerName(auth);
+      return sourceDomain.includes(normAuth) || normAuth.includes(sourceDomain);
+    }));
+
+  if (isAuthorized) {
+    return {
+      isOfficialBrand: false,
+      isAuthorizedSeller: true,
+      isRecognizedMarketplace: true,
+      isKnownSafeChannel: true,
+      matchType: 'authorized_retailer',
+      sourceDomain,
+      details: `Source "${source}" is in the authorized seller list`,
+    };
+  }
+
+  // 3. Check for recognized major marketplace
+  const marketplace = getMarketplaceFromSource(source || sourceDomain);
+  const isRecognizedMarketplace = marketplace !== 'other';
+
+  if (isRecognizedMarketplace) {
+    return {
+      isOfficialBrand: false,
+      isAuthorizedSeller: false,
+      isRecognizedMarketplace: true,
+      isKnownSafeChannel: true,
+      matchType: 'recognized_marketplace',
+      sourceDomain,
+      details: `Recognized marketplace (${marketplace}) but seller not specifically authorized`,
+    };
+  }
+
+  // 4. Unverified third-party
+  return {
+    isOfficialBrand: false,
+    isAuthorizedSeller: false,
+    isRecognizedMarketplace: false,
+    isKnownSafeChannel: false,
+    matchType: 'unverified_third_party',
+    sourceDomain,
+    details: `Unverified third-party domain (${sourceDomain || source || 'unknown'})`,
+  };
+}
