@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investigation: boAt Airdopes 141 — Marketplace Pricing &amp; Photo Verification — Beacontra Evidence Desk</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 15mm 15mm 15mm 15mm;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #0f172a;
+      background: #f1f5f9;
+      line-height: 1.45;
+      padding: 24px;
+    }
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 36px 40px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+    }
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 18px;
+      margin-bottom: 20px;
+    }
+    .brand-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #0f172a;
+    }
+    .brand-subtitle {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+    .case-meta-header {
+      text-align: right;
+    }
+    .case-id {
+      font-family: monospace;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+    }
+    .disclaimer-banner {
+      background: #fffbeb;
+      border: 1px solid #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 12px 16px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      font-size: 11.5px;
+      color: #78350f;
+      line-height: 1.5;
+    }
+    .disclaimer-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 11px;
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0f172a;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 6px;
+      margin-top: 24px;
+      margin-bottom: 12px;
+    }
+    .dossier-grid {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 20px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 16px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+    .dossier-img {
+      width: 140px;
+      height: 140px;
+      object-fit: contain;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+    }
+    .dossier-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 16px;
+      font-size: 12.5px;
+    }
+    .field-label {
+      font-weight: 600;
+      color: #64748b;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+    .field-value {
+      font-weight: 600;
+      color: #0f172a;
+      margin-top: 2px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+    th {
+      background: #f1f5f9;
+      color: #334155;
+      text-align: left;
+      padding: 10px 12px;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid #cbd5e1;
+    }
+    .actions-bar {
+      margin-top: 30px;
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn {
+      display: inline-block;
+      padding: 8px 16px;
+      background: #0f172a;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+    }
+    .btn:hover {
+      background: #1e293b;
+    }
+    .signoff-box {
+      margin-top: 24px;
+      padding: 16px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 6px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      font-size: 12px;
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        padding: 0;
+      }
+      .container {
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+      }
+      .actions-bar {
+        display: none !important;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      tr {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-bar">
+      <div>
+        <div class="brand-title">BEACONTRA EVIDENCE DESK</div>
+        <div class="brand-subtitle">Commercial & Visual Marketplace Listing Investigation Report</div>
+      </div>
+      <div class="case-meta-header">
+        <div class="case-id">CASE #case_1790877415513_44vr26</div>
+        <div style="margin-top: 6px; display: flex; gap: 8px; justify-content: flex-end;">
+          <span style="background:#f59e0b;color:#fff;padding:4px 10px;border-radius:4px;font-weight:600;font-size:12px;text-transform:uppercase;">under review</span>
+          <span style="background:#ef4444;color:#fff;padding:4px 10px;border-radius:4px;font-weight:600;font-size:12px;text-transform:uppercase;">high Priority</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="disclaimer-banner">
+      <div class="disclaimer-title">&#9888; Regulatory & Legal Compliance Disclaimer</div>
+      <div>NON-LEGAL ADVISORY NOTICE: This investigation report provides technical and commercial risk signals derived from algorithmic marketplace co-occurrence, price variance analysis, and automated reverse-image matching. It is intended exclusively to assist human analysts with triage and review. This report does NOT constitute legal proof of counterfeit status, trademark infringement, or commercial fraud. All findings must be independently verified by authorized brand representatives and legal counsel before initiating enforcement or takedown actions.</div>
+    </div>
+
+    <div class="section-title">Target Product Profile</div>
+    <div class="dossier-grid">
+      <img src="https://images.unsplash.com/photo-1590658268037-6bf12165a8df" alt="boAt Airdopes 141" class="dossier-img" onerror="this.src='https://placehold.co/140x140?text=No+Photo';" />
+      <div class="dossier-fields">
+        <div>
+          <div class="field-label">Target Product Name</div>
+          <div class="field-value">boAt Airdopes 141</div>
+        </div>
+        <div>
+          <div class="field-label">Brand Entity</div>
+          <div class="field-value">boAt</div>
+        </div>
+        <div>
+          <div class="field-label">Statutory MRP</div>
+          <div class="field-value">₹4,490</div>
+        </div>
+        <div>
+          <div class="field-label">Expected Retail Street Band</div>
+          <div class="field-value">₹1,000 – ₹1,500</div>
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <div class="field-label">Authorized Retail Partners</div>
+          <div class="field-value">Amazon, Flipkart, boAt Lifestyle, Croma, Reliance Digital</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Marketplace Findings & Commercial Anomalies</div>
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40px; text-align: center;">#</th>
+            <th>Marketplace Listing</th>
+            <th style="width: 90px;">Price</th>
+            <th style="width: 170px;">Price Signal</th>
+            <th style="width: 170px;">Seller Signal</th>
+            <th style="width: 180px;">Visual Co-occurrence</th>
+            <th style="width: 100px; text-align: center;">Risk Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 10px 12px; font-weight: 600; text-align: center;">1</td>
+          <td style="padding: 10px 12px;">
+            <div style="font-weight: 600; color: #0f172a;">iPhone 15 128GB - Pink</div>
+            <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
+              Source: <strong>Reliance Digital</strong> | Seller: <em>Reliance Digital</em>
+            </div>
+            <div style="font-size: 11px; color: #2563eb; margin-top: 2px; word-break: break-all;"><a href="https://www.reliancedigital.in/apple-iphone-15/p/123456" target="_blank" rel="noopener noreferrer">View Marketplace Listing &rarr;</a></div>
+          </td>
+          <td style="padding: 10px 12px; white-space: nowrap; font-weight: 700; color: #0f172a;">₹74,999</td>
+          <td style="padding: 10px 12px; font-size: 12px;">
+            <span style="color: #15803d; font-weight: 600;">
+              normal
+            </span>
+            <div style="font-size: 11px; color: #475569;">Price ₹74999 aligns with or exceeds expected retail range ₹1000–₹1500</div>
+          </td>
+          <td style="padding: 10px 12px; font-size: 12px;">
+            <span style="color: #15803d; font-weight: 600;">
+              authorized
+            </span>
+            <div style="font-size: 11px; color: #475569;">Seller &quot;Reliance Digital&quot; is in authorized sellers list</div>
+          </td>
+          <td style="padding: 10px 12px; font-size: 12px;">
+            <span style="color: #0369a1; font-weight: 600;">
+              matched
+            </span>
+            <div style="font-size: 11px; color: #475569;">Listing photo matches official product reference image across brand or authorized channels</div>
+          </td>
+          <td style="padding: 10px 12px; text-align: center; white-space: nowrap;">
+            <div style="display: inline-block; padding: 4px 8px; border-radius: 4px; background: #10b981; color: #fff; font-weight: 700; font-size: 12px;">
+              5/100
+            </div>
+            <div style="font-size: 10px; color: #64748b; margin-top: 2px; text-transform: uppercase;">
+              likely genuine
+            </div>
+          </td>
+        </tr>
+      
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 10px 12px; font-weight: 600; text-align: center;">2</td>
+          <td style="padding: 10px 12px;">
+            <div style="font-weight: 600; color: #0f172a;">Apple iPhone 15 128GB Blue</div>
+            <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
+              Source: <strong>Amazon</strong> | Seller: <em>Amazon</em>
+            </div>
+            <div style="font-size: 11px; color: #2563eb; margin-top: 2px; word-break: break-all;"><a href="https://www.amazon.in/dp/B0CHX1W1XY" target="_blank" rel="noopener noreferrer">View Marketplace Listing &rarr;</a></div>
+          </td>
+          <td style="padding: 10px 12px; white-space: nowrap; font-weight: 700; color: #0f172a;">₹73,900</td>
+          <td style="padding: 10px 12px; font-size: 12px;">
+            <span style="color: #15803d; font-weight: 600;">
+              normal
+            </span>
+            <div style="font-size: 11px; color: #475569;">Price ₹73900 aligns with or exceeds expected retail range ₹1000–₹1500</div>
+          </td>
+          <td style="padding: 10px 12px; font-size: 12px;">
+            <span style="color: #15803d; font-weight: 600;">
+              authorized
+            </span>
+            <div style="font-size: 11px; color: #475569;">Seller &quot;Amazon&quot; is in authorized sellers list</div>
+          </td>
+          <td style="padding: 10px 12px; font-size: 12px;">
+            <span style="color: #0369a1; font-weight: 600;">
+              matched
+            </span>
+            <div style="font-size: 11px; color: #475569;">Listing photo matches official product reference image across brand or authorized channels</div>
+          </td>
+          <td style="padding: 10px 12px; text-align: center; white-space: nowrap;">
+            <div style="display: inline-block; padding: 4px 8px; border-radius: 4px; background: #10b981; color: #fff; font-weight: 700; font-size: 12px;">
+              5/100
+            </div>
+            <div style="font-size: 10px; color: #64748b; margin-top: 2px; text-transform: uppercase;">
+              likely genuine
+            </div>
+          </td>
+        </tr>
+      
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 10px 12px; font-weight: 600; text-align: center;">3</td>
+          <td style="padding: 10px 12px;">
+            <div style="font-weight: 600; color: #0f172a;">Apple iPhone 15 128GB Green</div>
+            <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
+              Source: <strong>Croma</strong> | Seller: <em>Croma</em>
+            </div>
+            <div style="font-size: 11px; color: #2563eb; margin-top: 2px; word-break: break-all;"><a href="https://www.croma.com/apple-iphone-15-/p/123457" target="_blank" rel="noopener noreferrer">View Marketplace Listing &rarr;</a></div>
+          </td>
+          <td style="padding: 10px 12px; white-space: nowrap; font-weight: 700; color: #0f172a;">₹73,490</td>
+          <td style="padding: 10px 12px; font-size: 12px;">
+            <span style="color: #15803d; font-weight: 600;">
+              normal
+            </span>
+            <div style="font-size: 11px; color: #475569;">Price ₹73490 aligns with or exceeds expected retail range ₹1000–₹1500</div>
+          </td>
+          <td style="padding: 10px 12px; font-size: 12px;">
+            <span style="color: #15803d; font-weight: 600;">
+              authorized
+            </span>
+            <div style="font-size: 11px; color: #475569;">Seller &quot;Croma&quot; is in authorized sellers list</div>
+          </td>
+          <td style="padding: 10px 12px; font-size: 12px;">
+            <span style="color: #0369a1; font-weight: 600;">
+              matched
+            </span>
+            <div style="font-size: 11px; color: #475569;">Listing photo matches official product reference image across brand or authorized channels</div>
+          </td>
+          <td style="padding: 10px 12px; text-align: center; white-space: nowrap;">
+            <div style="display: inline-block; padding: 4px 8px; border-radius: 4px; background: #10b981; color: #fff; font-weight: 700; font-size: 12px;">
+              5/100
+            </div>
+            <div style="font-size: 10px; color: #64748b; margin-top: 2px; text-transform: uppercase;">
+              likely genuine
+            </div>
+          </td>
+        </tr>
+      
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 10px 12px; font-weight: 600; text-align: center;">4</td>
+          <td style="padding: 10px 12px;">
+            <div style="font-weight: 600; color: #0f172a;">Apple iPhone 15 (128 GB) - Black</div>
+            <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
+              Source: <strong>Flipkart</strong> | Seller: <em>Flipkart</em>
+            </div>
+            <div style="font-size: 11px; color: #2563eb; margin-top: 2px; word-break: break-all;"><a href="https://www.flipkart.com/apple-iphone-15-black-128-gb/p/itm123" target="_blank" rel="noopener noreferrer">View Marketplace Listing &rarr;</a></div>
+          </td>
+          <td style="padding: 10px 12px; white-space: nowrap; font-weight: 700; color: #0f172a;">₹72,999</td>
+          <td style="padding: 10px 12px; font-size: 12px;">
+            <span style="color: #15803d; font-weight: 600;">
+              normal
+            </span>
+            <div style="font-size: 11px; color: #475569;">Price ₹72999 aligns with or exceeds expected retail range ₹1000–₹1500</div>
+          </td>
+          <td style="padding: 10px 12px; font-size: 12px;">
+            <span style="color: #15803d; font-weight: 600;">
+              authorized
+            </span>
+            <div style="font-size: 11px; color: #475569;">Seller &quot;Flipkart&quot; is in authorized sellers list</div>
+          </td>
+          <td style="padding: 10px 12px; font-size: 12px;">
+            <span style="color: #0369a1; font-weight: 600;">
+              matched
+            </span>
+            <div style="font-size: 11px; color: #475569;">Listing photo matches official product reference image across brand or authorized channels</div>
+          </td>
+          <td style="padding: 10px 12px; text-align: center; white-space: nowrap;">
+            <div style="display: inline-block; padding: 4px 8px; border-radius: 4px; background: #10b981; color: #fff; font-weight: 700; font-size: 12px;">
+              5/100
+            </div>
+            <div style="font-size: 10px; color: #64748b; margin-top: 2px; text-transform: uppercase;">
+              likely genuine
+            </div>
+          </td>
+        </tr>
+      
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-title">Evidence Observations & Provenance Log</div>
+    <div>
+      
+        <div style="margin-bottom: 12px; padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div>
+              <span style="background:#b45309; color:#fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; text-transform: uppercase;">
+                price
+              </span>
+              <strong style="margin-left: 8px; font-size: 13px; color: #0f172a;">iPhone 15 128GB - Pink</strong>
+            </div>
+            <span style="font-size: 11px; color: #64748b;">2026-10-01T17:56:55.508Z</span>
+          </div>
+          <div style="font-size: 12px; color: #1e293b; margin-bottom: 4px;">
+            <strong>Observation:</strong> Extracted price: ₹74999 (₹74,999) — <em>Price ₹74999 aligns with or exceeds expected retail range ₹1000–₹1500</em>
+          </div>
+          <div style="font-size: 11px; color: #64748b; background: #ffffff; padding: 6px 8px; border-radius: 4px; border-left: 3px solid #cbd5e1;">
+            <strong>Uncertainty Note:</strong> Price evaluation compares marketplace offer against specified MRP and expected street price. Legitimate authorized promotional sales and seasonal discounts may occur.
+          </div>
+        </div>
+      
+        <div style="margin-bottom: 12px; padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div>
+              <span style="background:#4338ca; color:#fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; text-transform: uppercase;">
+                seller
+              </span>
+              <strong style="margin-left: 8px; font-size: 13px; color: #0f172a;">iPhone 15 128GB - Pink</strong>
+            </div>
+            <span style="font-size: 11px; color: #64748b;">2026-10-01T17:56:55.508Z</span>
+          </div>
+          <div style="font-size: 12px; color: #1e293b; margin-bottom: 4px;">
+            <strong>Observation:</strong> Seller entity: &quot;Reliance Digital&quot; — <em>Seller &quot;Reliance Digital&quot; is in authorized sellers list</em>
+          </div>
+          <div style="font-size: 11px; color: #64748b; background: #ffffff; padding: 6px 8px; border-radius: 4px; border-left: 3px solid #cbd5e1;">
+            <strong>Uncertainty Note:</strong> Seller evaluation is based on known authorized entity lists and naming heuristics. Unlisted sellers may include authorized sub-distributors or new partner accounts.
+          </div>
+        </div>
+      
+        <div style="margin-bottom: 12px; padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div>
+              <span style="background:#047857; color:#fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; text-transform: uppercase;">
+                visual
+              </span>
+              <strong style="margin-left: 8px; font-size: 13px; color: #0f172a;">iPhone 15 128GB - Pink</strong>
+            </div>
+            <span style="font-size: 11px; color: #64748b;">2026-10-01T17:56:55.508Z</span>
+          </div>
+          <div style="font-size: 12px; color: #1e293b; margin-bottom: 4px;">
+            <strong>Observation:</strong> Visual search status: matched — <em>Listing photo matches official product reference image across brand or authorized channels</em>
+          </div>
+          <div style="font-size: 11px; color: #64748b; background: #ffffff; padding: 6px 8px; border-radius: 4px; border-left: 3px solid #cbd5e1;">
+            <strong>Uncertainty Note:</strong> Reverse-image matching evaluates visual co-occurrence indexed by search providers. Matches represent identical or similar imagery across web pages, not proof of physical product provenance.
+          </div>
+        </div>
+      
+        <div style="margin-bottom: 12px; padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div>
+              <span style="background:#b45309; color:#fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; text-transform: uppercase;">
+                price
+              </span>
+              <strong style="margin-left: 8px; font-size: 13px; color: #0f172a;">Apple iPhone 15 128GB Blue</strong>
+            </div>
+            <span style="font-size: 11px; color: #64748b;">2026-10-01T17:56:55.508Z</span>
+          </div>
+          <div style="font-size: 12px; color: #1e293b; margin-bottom: 4px;">
+            <strong>Observation:</strong> Extracted price: ₹73900 (₹73,900) — <em>Price ₹73900 aligns with or exceeds expected retail range ₹1000–₹1500</em>
+          </div>
+          <div style="font-size: 11px; color: #64748b; background: #ffffff; padding: 6px 8px; border-radius: 4px; border-left: 3px solid #cbd5e1;">
+            <strong>Uncertainty Note:</strong> Price evaluation compares marketplace offer against specified MRP and expected street price. Legitimate authorized promotional sales and seasonal discounts may occur.
+          </div>
+        </div>
+      
+        <div style="margin-bottom: 12px; padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div>
+              <span style="background:#4338ca; color:#fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; text-transform: uppercase;">
+                seller
+              </span>
+              <strong style="margin-left: 8px; font-size: 13px; color: #0f172a;">Apple iPhone 15 128GB Blue</strong>
+            </div>
+            <span style="font-size: 11px; color: #64748b;">2026-10-01T17:56:55.508Z</span>
+          </div>
+          <div style="font-size: 12px; color: #1e293b; margin-bottom: 4px;">
+            <strong>Observation:</strong> Seller entity: &quot;Amazon&quot; — <em>Seller &quot;Amazon&quot; is in authorized sellers list</em>
+          </div>
+          <div style="font-size: 11px; color: #64748b; background: #ffffff; padding: 6px 8px; border-radius: 4px; border-left: 3px solid #cbd5e1;">
+            <strong>Uncertainty Note:</strong> Seller evaluation is based on known authorized entity lists and naming heuristics. Unlisted sellers may include authorized sub-distributors or new partner accounts.
+          </div>
+        </div>
+      
+        <div style="margin-bottom: 12px; padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div>
+              <span style="background:#047857; color:#fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; text-transform: uppercase;">
+                visual
+              </span>
+              <strong style="margin-left: 8px; font-size: 13px; color: #0f172a;">Apple iPhone 15 128GB Blue</strong>
+            </div>
+            <span style="font-size: 11px; color: #64748b;">2026-10-01T17:56:55.508Z</span>
+          </div>
+          <div style="font-size: 12px; color: #1e293b; margin-bottom: 4px;">
+            <strong>Observation:</strong> Visual search status: matched — <em>Listing photo matches official product reference image across brand or authorized channels</em>
+          </div>
+          <div style="font-size: 11px; color: #64748b; background: #ffffff; padding: 6px 8px; border-radius: 4px; border-left: 3px solid #cbd5e1;">
+            <strong>Uncertainty Note:</strong> Reverse-image matching evaluates visual co-occurrence indexed by search providers. Matches represent identical or similar imagery across web pages, not proof of physical product provenance.
+          </div>
+        </div>
+      
+        <div style="margin-bottom: 12px; padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div>
+              <span style="background:#b45309; color:#fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; text-transform: uppercase;">
+                price
+              </span>
+              <strong style="margin-left: 8px; font-size: 13px; color: #0f172a;">Apple iPhone 15 128GB Green</strong>
+            </div>
+            <span style="font-size: 11px; color: #64748b;">2026-10-01T17:56:55.508Z</span>
+          </div>
+          <div style="font-size: 12px; color: #1e293b; margin-bottom: 4px;">
+            <strong>Observation:</strong> Extracted price: ₹73490 (₹73,490) — <em>Price ₹73490 aligns with or exceeds expected retail range ₹1000–₹1500</em>
+          </div>
+          <div style="font-size: 11px; color: #64748b; background: #ffffff; padding: 6px 8px; border-radius: 4px; border-left: 3px solid #cbd5e1;">
+            <strong>Uncertainty Note:</strong> Price evaluation compares marketplace offer against specified MRP and expected street price. Legitimate authorized promotional sales and seasonal discounts may occur.
+          </div>
+        </div>
+      
+        <div style="margin-bottom: 12px; padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div>
+              <span style="background:#4338ca; color:#fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; text-transform: uppercase;">
+                seller
+              </span>
+              <strong style="margin-left: 8px; font-size: 13px; color: #0f172a;">Apple iPhone 15 128GB Green</strong>
+            </div>
+            <span style="font-size: 11px; color: #64748b;">2026-10-01T17:56:55.508Z</span>
+          </div>
+          <div style="font-size: 12px; color: #1e293b; margin-bottom: 4px;">
+            <strong>Observation:</strong> Seller entity: &quot;Croma&quot; — <em>Seller &quot;Croma&quot; is in authorized sellers list</em>
+          </div>
+          <div style="font-size: 11px; color: #64748b; background: #ffffff; padding: 6px 8px; border-radius: 4px; border-left: 3px solid #cbd5e1;">
+            <strong>Uncertainty Note:</strong> Seller evaluation is based on known authorized entity lists and naming heuristics. Unlisted sellers may include authorized sub-distributors or new partner accounts.
+          </div>
+        </div>
+      
+        <div style="margin-bottom: 12px; padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div>
+              <span style="background:#047857; color:#fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; text-transform: uppercase;">
+                visual
+              </span>
+              <strong style="margin-left: 8px; font-size: 13px; color: #0f172a;">Apple iPhone 15 128GB Green</strong>
+            </div>
+            <span style="font-size: 11px; color: #64748b;">2026-10-01T17:56:55.508Z</span>
+          </div>
+          <div style="font-size: 12px; color: #1e293b; margin-bottom: 4px;">
+            <strong>Observation:</strong> Visual search status: matched — <em>Listing photo matches official product reference image across brand or authorized channels</em>
+          </div>
+          <div style="font-size: 11px; color: #64748b; background: #ffffff; padding: 6px 8px; border-radius: 4px; border-left: 3px solid #cbd5e1;">
+            <strong>Uncertainty Note:</strong> Reverse-image matching evaluates visual co-occurrence indexed by search providers. Matches represent identical or similar imagery across web pages, not proof of physical product provenance.
+          </div>
+        </div>
+      
+        <div style="margin-bottom: 12px; padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div>
+              <span style="background:#b45309; color:#fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; text-transform: uppercase;">
+                price
+              </span>
+              <strong style="margin-left: 8px; font-size: 13px; color: #0f172a;">Apple iPhone 15 (128 GB) - Black</strong>
+            </div>
+            <span style="font-size: 11px; color: #64748b;">2026-10-01T17:56:55.508Z</span>
+          </div>
+          <div style="font-size: 12px; color: #1e293b; margin-bottom: 4px;">
+            <strong>Observation:</strong> Extracted price: ₹72999 (₹72,999) — <em>Price ₹72999 aligns with or exceeds expected retail range ₹1000–₹1500</em>
+          </div>
+          <div style="font-size: 11px; color: #64748b; background: #ffffff; padding: 6px 8px; border-radius: 4px; border-left: 3px solid #cbd5e1;">
+            <strong>Uncertainty Note:</strong> Price evaluation compares marketplace offer against specified MRP and expected street price. Legitimate authorized promotional sales and seasonal discounts may occur.
+          </div>
+        </div>
+      
+        <div style="margin-bottom: 12px; padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div>
+              <span style="background:#4338ca; color:#fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; text-transform: uppercase;">
+                seller
+              </span>
+              <strong style="margin-left: 8px; font-size: 13px; color: #0f172a;">Apple iPhone 15 (128 GB) - Black</strong>
+            </div>
+            <span style="font-size: 11px; color: #64748b;">2026-10-01T17:56:55.508Z</span>
+          </div>
+          <div style="font-size: 12px; color: #1e293b; margin-bottom: 4px;">
+            <strong>Observation:</strong> Seller entity: &quot;Flipkart&quot; — <em>Seller &quot;Flipkart&quot; is in authorized sellers list</em>
+          </div>
+          <div style="font-size: 11px; color: #64748b; background: #ffffff; padding: 6px 8px; border-radius: 4px; border-left: 3px solid #cbd5e1;">
+            <strong>Uncertainty Note:</strong> Seller evaluation is based on known authorized entity lists and naming heuristics. Unlisted sellers may include authorized sub-distributors or new partner accounts.
+          </div>
+        </div>
+      
+        <div style="margin-bottom: 12px; padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div>
+              <span style="background:#047857; color:#fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; text-transform: uppercase;">
+                visual
+              </span>
+              <strong style="margin-left: 8px; font-size: 13px; color: #0f172a;">Apple iPhone 15 (128 GB) - Black</strong>
+            </div>
+            <span style="font-size: 11px; color: #64748b;">2026-10-01T17:56:55.508Z</span>
+          </div>
+          <div style="font-size: 12px; color: #1e293b; margin-bottom: 4px;">
+            <strong>Observation:</strong> Visual search status: matched — <em>Listing photo matches official product reference image across brand or authorized channels</em>
+          </div>
+          <div style="font-size: 11px; color: #64748b; background: #ffffff; padding: 6px 8px; border-radius: 4px; border-left: 3px solid #cbd5e1;">
+            <strong>Uncertainty Note:</strong> Reverse-image matching evaluates visual co-occurrence indexed by search providers. Matches represent identical or similar imagery across web pages, not proof of physical product provenance.
+          </div>
+        </div>
+      
+    </div>
+
+    <div class="section-title">Investigation Notes & Analyst Audit</div>
+    <div>
+      
+      <div style="padding: 10px 14px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 8px;">
+        <div style="font-size: 11px; color: #64748b; margin-bottom: 4px;">
+          <strong>Investigator</strong> &bull; 2026-10-01T17:56:55.513Z
+        </div>
+        <div style="font-size: 13px; color: #1e293b; white-space: pre-wrap;">Case initiated from Beacontra Lens Chrome Companion following automated marketplace alert.</div>
+      </div>
+    
+      <div style="padding: 10px 14px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 8px;">
+        <div style="font-size: 11px; color: #64748b; margin-bottom: 4px;">
+          <strong>Senior Brand Analyst</strong> &bull; 2026-10-01T17:56:55.514Z
+        </div>
+        <div style="font-size: 13px; color: #1e293b; white-space: pre-wrap;">Reviewed reverse-image co-occurrence. Visual matches on authorized domains indicate genuine syndicated assets. Price signals fall cleanly within expected street price band.</div>
+      </div>
+    
+    </div>
+
+    <div class="signoff-box">
+      <div>
+        <strong>Analyst Verification:</strong>
+        <div style="margin-top: 8px; color: #64748b;">Signature / ID: _________________________</div>
+        <div style="margin-top: 4px; color: #64748b;">Verification Date: 1/10/2026, 11:26:55 pm</div>
+      </div>
+      <div>
+        <strong>Case Resolution / Action Taken:</strong>
+        <div style="margin-top: 8px; color: #64748b;">Status: UNDER_REVIEW</div>
+        <div style="margin-top: 4px; color: #64748b;">Last Updated: 1/10/2026, 11:26:55 pm</div>
+      </div>
+    </div>
+
+    <div class="actions-bar">
+      <div style="font-size: 11px; color: #64748b;">
+        Generated by Beacontra Evidence Desk &bull; Provenance ID: scan_1790877415508_vbw1xnc7j
+      </div>
+      <div>
+        <button class="btn" onclick="window.print()">Print / Save as PDF</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
