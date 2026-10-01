@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beacontra Lens</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div class="panel-header">
+    <div>
+      <div class="panel-title">BEACONTRA LENS</div>
+      <div class="panel-subtitle">Marketplace Cross-Verification Companion</div>
+    </div>
+    <div id="backendStatusPill" class="status-pill status-ready">READY</div>
+  </div>
+
+  <div class="panel-content">
+    <!-- Tab Extractor Card -->
+    <div class="card extract-card">
+      <div class="card-header">
+        <span class="card-title">1. Context Extraction</span>
+        <span class="marketplace-tag">Amazon India</span>
+      </div>
+      <p class="helper-text">Extract product details directly from the active marketplace product page.</p>
+      <button id="extractBtn" class="btn btn-secondary btn-full">
+        <span class="btn-icon">&#128269;</span> Extract Active Tab Product
+      </button>
+      <div id="extractAlert" class="alert hidden"></div>
+    </div>
+
+    <!-- Review & Refine Form -->
+    <div class="card form-card">
+      <div class="card-header">
+        <span class="card-title">2. Review &amp; Configure</span>
+      </div>
+      
+      <div class="form-group">
+        <label for="productName">Target Product Name</label>
+        <input type="text" id="productName" placeholder="e.g. boAt Airdopes 141" required />
+      </div>
+
+      <div class="form-group">
+        <label for="officialImageUrl">Official Reference Image URL</label>
+        <div class="image-input-row">
+          <input type="url" id="officialImageUrl" placeholder="https://..." required />
+          <img id="imagePreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24'%3E%3Cpath fill='%2394a3b8' d='M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'/%3E%3C/svg%3E" alt="Preview" class="image-thumb" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="mrp">Printed MRP (₹)</label>
+          <input type="number" id="mrp" placeholder="e.g. 4490" min="0" />
+        </div>
+        <div class="form-group">
+          <label for="currentPriceRef">Listing Price (₹)</label>
+          <input type="number" id="currentPriceRef" placeholder="e.g. 1199" min="0" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="priceMin">Expected Street Min (₹)</label>
+          <input type="number" id="priceMin" placeholder="e.g. 1000" min="0" />
+        </div>
+        <div class="form-group">
+          <label for="priceMax">Expected Street Max (₹)</label>
+          <input type="number" id="priceMax" placeholder="e.g. 1500" min="0" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="authorizedSellers">Known Authorized Sellers</label>
+        <input type="text" id="authorizedSellers" placeholder="Amazon, Appario Retail, boAt" value="Amazon, Appario Retail, boAt" />
+      </div>
+
+      <details class="settings-details">
+        <summary>Backend Configuration</summary>
+        <div class="form-group" style="margin-top: 8px;">
+          <label for="backendUrl">Beacontra API URL</label>
+          <input type="url" id="backendUrl" value="http://localhost:8787" />
+        </div>
+      </details>
+
+      <button id="scanBtn" class="btn btn-primary btn-full" style="margin-top: 14px;">
+        <span class="btn-icon">&#9889;</span> Run Beacontra Cross-Check
+      </button>
+    </div>
+
+    <!-- Scan Progress State -->
+    <div id="loadingState" class="card loading-card hidden">
+      <div class="spinner"></div>
+      <div class="loading-title">Investigating Marketplaces</div>
+      <div id="loadingMessage" class="loading-subtitle">Querying marketplace index &amp; reverse-image matching...</div>
+    </div>
+
+    <!-- Investigation Results -->
+    <div id="resultsCard" class="card results-card hidden">
+      <div class="card-header">
+        <span class="card-title">3. Investigation Findings</span>
+        <span id="dataSourceBadge" class="source-badge">LIVE</span>
+      </div>
+
+      <div class="metrics-row">
+        <div class="metric-box">
+          <div class="metric-num" id="totalListingsNum">0</div>
+          <div class="metric-lbl">Listings Checked</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-num" id="topRiskScoreNum">0</div>
+          <div class="metric-lbl">Top Risk Score</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-num" id="creditsUsedNum">0</div>
+          <div class="metric-lbl">Credits Used</div>
+        </div>
+      </div>
+
+      <div id="recommendationAlert" class="recommendation-bar"></div>
+
+      <div class="section-heading">Ranked Listing Anomalies</div>
+      <div id="listingsList" class="listings-container"></div>
+
+      <!-- Evidence Desk Case Action -->
+      <div class="evidence-actions">
+        <button id="saveCaseBtn" class="btn btn-secondary btn-full">
+          <span class="btn-icon">&#128196;</span> Save to Evidence Desk Case
+        </button>
+        <div id="caseSavedNotice" class="alert alert-success hidden"></div>
+      </div>
+    </div>
+
+    <div class="disclaimer-footer">
+      <strong>Notice:</strong> Algorithmic risk signals for human analyst review. Does not establish legal counterfeit status.
+    </div>
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>
