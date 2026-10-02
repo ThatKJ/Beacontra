@@ -33,6 +33,10 @@ import {
   WatchtowerService,
   type WatchtowerSnapshot,
 } from './lib/watchtower';
+import {
+  InvestigationIntelligenceService,
+  type FindingContext,
+} from './lib/investigation-intelligence';
 import type { BaseSearchParams, SerpApiEngine, SerpApiResponse } from './lib/types';
 
 
@@ -879,6 +883,23 @@ app.post('/api/watchtower/compare', async (c) => {
     const watchtower = new WatchtowerService(repo);
     const diff = watchtower.compareSnapshots(body.baselineSnapshot, body.currentSnapshot);
     return c.json({ data: diff });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+// --- Investigation Intelligence Routes ---
+app.post('/api/intelligence/explain-finding', async (c) => {
+  try {
+    const body = await c.req.json<FindingContext>();
+    if (!body.productName) {
+      return c.json({ error: 'productName is required' }, 400);
+    }
+
+    const service = new InvestigationIntelligenceService();
+    const explanation = service.explainFinding(body);
+    return c.json({ data: explanation });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Internal error';
     return c.json({ error: msg }, 500);
