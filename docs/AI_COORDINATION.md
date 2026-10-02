@@ -47,17 +47,16 @@
 
 ## Agent Heartbeats
 
-ANTIGRAVITY — PRINCIPAL ENGINEER / PRODUCT ARCHITECT (T-040):
-Current: T-040 (Beacontra Investigation Autopilot) is fully implemented, verified, and integrated across both the Web OS and Chrome extension. 
-Capabilities:
-- Deterministic evidence gap analysis (missing visual evidence, unverified sellers, baseline depth, variant divergence).
-- Multi-engine investigation planner with reusable templates (fast_baseline, anomaly_verification, deep_forensic_sweep).
-- Strict server-side search budget cap enforcement (max 10 credits) with mandatory user authorization.
-- Bounded autonomous execution updating the Evidence Graph and generating Before/After evidence delta cards.
-- Chronological investigation replay system with interactive step scrubber.
-- Deep-link handoff from Beacontra Lens Chrome extension directly into the Autopilot workbench.
-Verification: 158 tests passing across 17 test suites (+ 1 skipped live smoke test); typecheck clean; lint 0 warnings/0 errors; build successful; Headless Chromium E2E verification test passed with screenshots captured in `docs/screenshots/autopilot_*.png`. 0 live paid SerpApi credits consumed.
-Next: Ready for review and user testing.
+ANTIGRAVITY — PRINCIPAL ENGINEER / PRODUCT ARCHITECT (T-040 & T-041):
+Current: T-041 (Strict UI Consistency and Overview Design System Enforcement) is complete.
+Achievements:
+- Reverse-engineered Overview page, verified master tokens, created authoritative `docs/OVERVIEW_DESIGN_SYSTEM.md`.
+- Unified all secondary modules (Brand Vault, Market Radar, Evidence Graph, Watchtower, Cases Desk, Autopilot) under the Overview's atmospheric ink, tactile hairlines, signal lime accents, and Newsreader display headings.
+- Re-skinned Chrome extension sidepanel (`extension/sidepanel.css`) with Overview design tokens and 3px precision geometry.
+- Verified 0 visual regressions on Overview page (<1% byte delta) via Playwright automated visual regression suite.
+- 158 tests passing / 1 skipped, typecheck clean, lint 0 warnings/0 errors, build successful.
+Last Completed: T-040 (Investigation Autopilot), T-041 (Strict UI Consistency).
+Next: Ready for final review.
 Blocked: None. Untracked AGENTS.md preserved untouched.
 
 CODEX — PREMIUM JOURNEY REDESIGN (T-039):

@@ -11,6 +11,23 @@
 
 ## Tasks
 
+### T-041: Strict UI Consistency and Overview Design System Enforcement
+**OWNER:** ANTIGRAVITY / STAFF FRONTEND ARCHITECT
+**STATUS:** DONE
+**PRIORITY:** P0
+**FILES:** docs/OVERVIEW_DESIGN_SYSTEM.md, public/beacontra-os.css, public/beacontra-os.js, public/index.html, extension/sidepanel.css, extension/sidepanel.html, scripts/capture-overview-baseline.mjs, scripts/visual-qa-suite.mjs, docs/screenshots/baseline/*, docs/screenshots/after/*
+**ISSUE:** Secondary modules (Brand Vault, Market Radar, Evidence Graph, Watchtower, Cases Desk, Autopilot) and Chrome Extension used divergent styling (navy/teal slate gradients, rounded bubbles, inconsistent buttons) conflicting with the approved editorial aesthetic of the Overview page.
+**ACCEPTANCE CRITERIA:**
+- [x] Phase 1: Captured baseline screenshots of Overview page at Desktop (1440px), Tablet (768px), and Mobile (390px). Extracted master design tokens and created authoritative docs/OVERVIEW_DESIGN_SYSTEM.md.
+- [x] Phase 2: Created unified shared CSS variables mapping all OS tokens to Overview master tokens (--ink, --paper, --signal, --moss, --line-dark, --line-light, Newsreader display, monospace labels).
+- [x] Phase 3: Unified all secondary modules (Brand Vault, Market Radar, Evidence Graph, Watchtower, Cases Desk, Autopilot) to inherit Overview visual identity, cards, buttons, badges, tables, and metrics.
+- [x] Phase 4: Strict visual preservation of Overview page verified via pixel/byte regression checks (<1% variance).
+- [x] Phase 5: Sticky OS module navigation bar harmonized with site header aesthetic.
+- [x] Phase 6: Standardized micro-interactions and transitions with full prefers-reduced-motion support.
+- [x] Phase 7: Re-skinned Chrome extension sidepanel using Overview palette, typography, and 3px precision geometry.
+- [x] Phase 8: 158 tests passing, typecheck clean, lint 0 warnings/0 errors, production build verified.
+- [x] Phase 9: Automated visual QA and screenshots captured across all viewports and modules.
+
 ### T-040: Beacontra Investigation Autopilot — Intelligent Evidence-Gap Resolution Engine
 **OWNER:** ANTIGRAVITY / STAFF ARCHITECT
 **STATUS:** DONE

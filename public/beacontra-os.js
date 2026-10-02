@@ -109,7 +109,7 @@
         .map(
           (p) => `
         <div class="os-card" style="display: flex; gap: 20px; align-items: center;">
-          <div style="width: 72px; height: 72px; flex: 0 0 72px; background: #fff; border-radius: 4px; overflow: hidden; display: grid; place-items: center;">
+          <div style="width: 72px; height: 72px; flex: 0 0 72px; background: #fff; border-radius: 2px; border: 1px solid var(--line-light); overflow: hidden; display: grid; place-items: center;">
             <img src="${p.canonicalImageUrl}" alt="${p.productName}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
           </div>
           <div style="flex: 1; min-width: 0;">
@@ -118,7 +118,7 @@
               ${p.modelNumber ? `<span class="os-tag">${p.modelNumber}</span>` : ''}
               <span class="os-tag">${p.variants?.length || 0} Variants</span>
             </div>
-            <h3 style="margin: 0; font-size: 1.1rem;">${p.productName}</h3>
+            <h3 style="margin: 0; font-family: var(--display); font-size: 1.25rem; font-weight: 420;">${p.productName}</h3>
             <p class="mono" style="margin: 4px 0 0; font-size: 0.75rem; color: var(--os-text-muted);">
               Statutory MRP: ${money(p.statutoryMrp)} | Authorized Sellers: ${(p.authorizedSellers || []).join(', ') || 'None listed'}
             </p>
@@ -355,7 +355,7 @@
               ${report.comparableListings
                 .map(
                   (item) => `
-                <tr style="border-bottom: 1px solid rgba(148, 163, 184, 0.08); ${item.requiresReview ? 'background: rgba(239, 68, 68, 0.06);' : ''}">
+                <tr style="border-bottom: 1px solid var(--line-dark); ${item.requiresReview ? 'background: rgba(158, 73, 52, 0.12);' : ''}">
                   <td style="padding: 12px 10px; max-width: 320px;">
                     <a href="${item.url}" target="_blank" rel="noopener noreferrer" style="color: var(--os-text-primary); text-decoration: none; font-weight: 500;">
                       ${item.title}
@@ -590,8 +590,8 @@
         </p>
         <p style="font-size: 0.9rem; margin-top: 12px;">${diff.summary}</p>
 
-        <div style="margin-top: 16px; padding: 12px; background: rgba(239, 68, 68, 0.08); border-left: 3px solid var(--os-red); border-radius: 4px;">
-          <div class="mono" style="font-size: 0.65rem; color: var(--os-red); font-weight: 700;">PROVENANCE ADVISORY</div>
+        <div style="margin-top: 16px; padding: 14px 18px; background: rgba(158, 73, 52, 0.12); border-left: 3px solid var(--rust); border-radius: 2px;">
+          <div class="mono" style="font-size: 0.65rem; color: var(--rust); font-weight: 700; letter-spacing: 0.08em;">PROVENANCE ADVISORY</div>
           <div style="font-size: 0.78rem; margin-top: 4px; color: var(--os-text-secondary);">${diff.absenceDisclaimer}</div>
         </div>
       </div>
@@ -600,11 +600,11 @@
       ${diff.alerts.length > 0
         ? `
         <div class="os-card">
-          <h4 style="margin: 0 0 14px; font-size: 1rem; color: var(--os-amber);">Actionable Commercial Alerts (${diff.alerts.length})</h4>
+          <h4 style="margin: 0 0 14px; font-family: var(--display); font-size: 1.15rem; font-weight: 420; color: var(--os-amber);">Actionable Commercial Alerts (${diff.alerts.length})</h4>
           ${diff.alerts
             .map(
               (a) => `
-            <div style="padding: 12px; background: var(--os-navy-700); border-radius: 6px; margin-bottom: 8px;">
+            <div style="padding: 12px 16px; background: var(--ink-3); border: 1px solid var(--line-dark); border-radius: 2px; margin-bottom: 8px;">
               <div style="display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.65rem; color: var(--os-amber);">
                 <span>${a.ruleType.toUpperCase()}</span>
                 <span>${a.severity.toUpperCase()}</span>
@@ -919,7 +919,7 @@
                 </div>
                 <h4 style="margin: 6px 0 4px; font-size: 0.9rem;">${g.title}</h4>
                 <p style="font-size: 0.78rem; color: var(--os-text-secondary); margin: 0 0 8px;">${g.description}</p>
-                <div style="font-size: 0.74rem; color: var(--os-teal-light); background: rgba(20, 184, 166, 0.08); padding: 6px 10px; border-radius: 4px;">
+                <div style="font-size: 0.74rem; color: var(--signal); background: rgba(212, 245, 143, 0.08); padding: 8px 12px; border-radius: 2px; border: 1px solid rgba(212, 245, 143, 0.2);">
                   <strong>Action:</strong> ${g.recommendedAction}
                 </div>
               </div>
@@ -952,7 +952,7 @@
                   <div class="mono" style="font-size: 0.68rem; color: var(--os-text-muted); margin-top: 4px;">Why: ${s.reason}</div>
                 </div>
                 <div style="text-align: right; min-width: 80px;">
-                  <span class="mono" style="font-size: 0.78rem; color: var(--os-teal-light);">
+                  <span class="mono" style="font-size: 0.78rem; color: var(--signal);">
                     ${s.estimatedCredits} Credit${s.estimatedCredits === 1 ? '' : 's'}
                   </span>
                 </div>
@@ -963,11 +963,11 @@
           </div>
 
           <!-- User Budget Approval Card -->
-          <div class="os-card" style="border-color: var(--os-border-active); background: rgba(20, 184, 166, 0.04);">
+          <div class="os-card" style="border-color: var(--line-dark); background: var(--ink-2);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
               <div>
                 <span class="mono" style="font-size: 0.72rem; color: var(--os-text-muted);">TOTAL ESTIMATED SEARCH USAGE</span>
-                <div style="font-family: var(--display); font-size: 1.5rem; color: var(--os-teal-light);">
+                <div style="font-family: var(--display); font-size: 1.5rem; color: var(--signal);">
                   ${plan.totalEstimatedCredits} Credit${plan.totalEstimatedCredits === 1 ? '' : 's'}
                 </div>
               </div>
