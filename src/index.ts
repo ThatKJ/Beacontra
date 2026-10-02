@@ -19,6 +19,10 @@ import {
   type UpdateProductInput,
   type UserCorrection,
 } from './lib/brand-dna';
+import {
+  DurableEvidenceRepository,
+  type EvidenceRepository,
+} from './lib/evidence-core';
 import type { BaseSearchParams, SerpApiEngine, SerpApiResponse } from './lib/types';
 
 
@@ -643,6 +647,72 @@ app.post('/api/brand-dna/products/:id/evaluate', async (c) => {
     const msg = err instanceof Error ? err.message : 'Internal error';
     return c.json({ error: msg }, 500);
   }
+});
+
+// --- Unified Evidence Foundation Routes ---
+function getEvidenceRepository(env?: Env): EvidenceRepository {
+  const safeEnv = env || ({} as Env);
+  const cache = getSharedCache(safeEnv.CACHE_KV);
+  return new DurableEvidenceRepository(cache);
+}
+
+app.get('/api/evidence/products', async (c) => {
+  const brandId = c.req.query('brandId');
+  const env = c.env || ({} as Env);
+  const repo = getEvidenceRepository(env);
+  const products = await repo.listProducts(brandId);
+  return c.json({ data: products });
+});
+
+app.get('/api/evidence/products/:id', async (c) => {
+  const id = c.req.param('id');
+  const env = c.env || ({} as Env);
+  const repo = getEvidenceRepository(env);
+  const product = await repo.getProduct(id);
+  if (!product) return c.json({ error: 'Product not found' }, 404);
+  return c.json({ data: product });
+});
+
+app.get('/api/evidence/listings', async (c) => {
+  const merchantId = c.req.query('merchantId');
+  const env = c.env || ({} as Env);
+  const repo = getEvidenceRepository(env);
+  const listings = await repo.listListings(merchantId ? { merchantId } : undefined);
+  return c.json({ data: listings });
+});
+
+app.get('/api/evidence/listings/:id', async (c) => {
+  const id = c.req.param('id');
+  const env = c.env || ({} as Env);
+  const repo = getEvidenceRepository(env);
+  const listing = await repo.getListing(id);
+  if (!listing) return c.json({ error: 'Listing not found' }, 404);
+  const visual = await repo.getVisualEvidenceForListing(id);
+  const commercial = await repo.getCommercialEvidenceForListing(id);
+  return c.json({ data: { ...listing, visualEvidence: visual, commercialEvidence: commercial } });
+});
+
+app.get('/api/evidence/merchants', async (c) => {
+  const env = c.env || ({} as Env);
+  const repo = getEvidenceRepository(env);
+  const merchants = await repo.listMerchants();
+  return c.json({ data: merchants });
+});
+
+app.get('/api/evidence/cases', async (c) => {
+  const productId = c.req.query('productId');
+  const env = c.env || ({} as Env);
+  const repo = getEvidenceRepository(env);
+  const cases = await repo.listCases(productId);
+  return c.json({ data: cases });
+});
+
+app.post('/api/evidence/migrate', async (c) => {
+  const env = c.env || ({} as Env);
+  const cache = getSharedCache(env.CACHE_KV);
+  const repo = getEvidenceRepository(env);
+  const migratedCount = await repo.migrateFromLegacyKvCases(cache);
+  return c.json({ success: true, migratedCount });
 });
 
 export default app;
