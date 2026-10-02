@@ -3,26 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Beacontra Lens</title>
+  <title>Beacontra Lens 2.0</title>
   <link rel="stylesheet" href="sidepanel.css">
 </head>
 <body>
   <div class="panel-header">
     <div>
-      <div class="panel-title">BEACONTRA LENS</div>
-      <div class="panel-subtitle">Marketplace Cross-Verification Companion</div>
+      <div class="panel-title">BEACONTRA LENS 2.0</div>
+      <div class="panel-subtitle">Marketplace Cross-Verification &amp; Brand DNA</div>
     </div>
     <div id="backendStatusPill" class="status-pill status-ready">READY</div>
   </div>
 
   <div class="panel-content">
+    <!-- Context Menu Notification Banner (shown if triggered from right-click on image) -->
+    <div id="contextImageBanner" class="alert alert-info hidden" style="margin-bottom: 12px;">
+      <span><strong>&#128247; Context Investigation:</strong> Pre-filled image from right-click context menu.</span>
+    </div>
+
     <!-- Tab Extractor Card -->
     <div class="card extract-card">
       <div class="card-header">
-        <span class="card-title">1. Context Extraction</span>
-        <span class="marketplace-tag">Amazon India</span>
+        <span class="card-title">1. Marketplace Extraction</span>
+        <span class="marketplace-tag" id="supportedMarketplacesTag">Amazon &amp; Flipkart</span>
       </div>
-      <p class="helper-text">Extract product details directly from the active marketplace product page.</p>
+      <p class="helper-text">Extract listing metadata directly from the active marketplace product page.</p>
       <button id="extractBtn" class="btn btn-secondary btn-full">
         <span class="btn-icon">&#128269;</span> Extract Active Tab Product
       </button>
@@ -32,7 +37,16 @@
     <!-- Review & Refine Form -->
     <div class="card form-card">
       <div class="card-header">
-        <span class="card-title">2. Review &amp; Configure</span>
+        <span class="card-title">2. Target Calibration &amp; Brand DNA</span>
+      </div>
+
+      <!-- Brand DNA Profile Linker -->
+      <div class="form-group">
+        <label for="brandDnaSelect">Link Saved Brand Profile (Optional)</label>
+        <select id="brandDnaSelect" class="form-select">
+          <option value="">-- Manual Calibration / No Profile --</option>
+        </select>
+        <span class="helper-text">Linking automatically applies verified MRP, authorized sellers, and canonical imagery.</span>
       </div>
       
       <div class="form-group">
@@ -54,7 +68,7 @@
           <input type="number" id="mrp" placeholder="e.g. 4490" min="0" />
         </div>
         <div class="form-group">
-          <label for="currentPriceRef">Listing Price (₹)</label>
+          <label for="currentPriceRef">Observed Price (₹)</label>
           <input type="number" id="currentPriceRef" placeholder="e.g. 1199" min="0" />
         </div>
       </div>
@@ -75,6 +89,21 @@
         <input type="text" id="authorizedSellers" placeholder="Amazon, Appario Retail, boAt" value="Amazon, Appario Retail, boAt" />
       </div>
 
+      <!-- Investigation Mode Selection -->
+      <div class="form-group">
+        <label>Investigation Mode</label>
+        <div class="mode-selector-row">
+          <label class="radio-label">
+            <input type="radio" name="investigationMode" value="quick" checked />
+            <span><strong>Quick Scan</strong> (1 credit)</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="investigationMode" value="deep" />
+            <span><strong>Deep Scan</strong> (Selective offers)</span>
+          </label>
+        </div>
+      </div>
+
       <details class="settings-details">
         <summary>Backend Configuration</summary>
         <div class="form-group" style="margin-top: 8px;">
@@ -84,7 +113,7 @@
       </details>
 
       <button id="scanBtn" class="btn btn-primary btn-full" style="margin-top: 14px;">
-        <span class="btn-icon">&#9889;</span> Run Beacontra Cross-Check
+        <span class="btn-icon">&#9889;</span> Run Beacontra Investigation
       </button>
     </div>
 
@@ -119,15 +148,29 @@
 
       <div id="recommendationAlert" class="recommendation-bar"></div>
 
+      <!-- Missing Evidence Notice -->
+      <div id="missingEvidenceNotice" class="missing-evidence-box">
+        <div class="box-title">&#9432; Evidence Coverage Status</div>
+        <div id="missingEvidenceText" class="box-content">Evaluating coverage...</div>
+      </div>
+
       <div class="section-heading">Ranked Listing Anomalies</div>
       <div id="listingsList" class="listings-container"></div>
 
-      <!-- Evidence Desk Case Action -->
+      <!-- Evidence Desk Case Action & Annotations -->
       <div class="evidence-actions">
+        <div class="form-group">
+          <label for="caseNoteInput">Case Annotation (Optional)</label>
+          <textarea id="caseNoteInput" rows="2" class="form-textarea" placeholder="Add analyst notes before saving to case..."></textarea>
+        </div>
         <button id="saveCaseBtn" class="btn btn-secondary btn-full">
           <span class="btn-icon">&#128196;</span> Save to Evidence Desk Case
         </button>
         <div id="caseSavedNotice" class="alert alert-success hidden"></div>
+        <div id="navLinksContainer" class="nav-links-row hidden" style="margin-top: 8px;">
+          <button id="openDeskBtn" class="btn btn-outline btn-sm">Open in Evidence Desk</button>
+          <button id="openGraphBtn" class="btn btn-outline btn-sm">View Evidence Graph</button>
+        </div>
       </div>
     </div>
 

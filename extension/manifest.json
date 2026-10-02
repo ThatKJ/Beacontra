@@ -1,16 +1,18 @@
 {
   "manifest_version": 3,
-  "name": "Beacontra Lens — Evidence Desk Companion",
-  "version": "1.0.0",
-  "description": "Cross-verify marketplace listings against verified brand product reference images.",
+  "name": "Beacontra Lens 2.0 — Evidence Desk Companion",
+  "version": "2.0.0",
+  "description": "Cross-verify marketplace listings against verified brand DNA profiles and visual evidence.",
   "permissions": [
     "sidePanel",
     "activeTab",
     "scripting",
-    "storage"
+    "storage",
+    "contextMenus"
   ],
   "host_permissions": [
     "https://*.amazon.in/*",
+    "https://*.flipkart.com/*",
     "http://localhost:*/*",
     "http://127.0.0.1:*/*"
   ],
@@ -21,11 +23,14 @@
     "default_path": "sidepanel.html"
   },
   "action": {
-    "default_title": "Open Beacontra Lens"
+    "default_title": "Open Beacontra Lens 2.0"
   },
   "content_scripts": [
     {
-      "matches": ["https://*.amazon.in/*"],
+      "matches": [
+        "https://*.amazon.in/*",
+        "https://*.flipkart.com/*"
+      ],
       "js": ["content.js"],
       "run_at": "document_idle"
     }

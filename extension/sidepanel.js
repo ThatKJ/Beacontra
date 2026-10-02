@@ -1,15 +1,21 @@
 /**
- * Beacontra Lens — Side Panel Controller
+ * Beacontra Lens 2.0 — Side Panel Controller
  * 
- * Coordinates product extraction from active Amazon India tabs,
- * allows manual review and calibration, runs marketplace scans via
- * the Beacontra backend, and persists cases into the Evidence Desk.
+ * Features:
+ * - Extensible product extraction (Amazon.in & Flipkart.com)
+ * - Brand DNA profile loading and linking
+ * - Image context menu investigation intake
+ * - Quick Scan vs Deep Investigation mode selection
+ * - Missing evidence coverage evaluation
+ * - Case annotations & direct links to Evidence Graph / Evidence Desk
  */
 
 document.addEventListener('DOMContentLoaded', () => {
   // DOM Elements
   const extractBtn = document.getElementById('extractBtn');
   const extractAlert = document.getElementById('extractAlert');
+  const contextImageBanner = document.getElementById('contextImageBanner');
+  const brandDnaSelect = document.getElementById('brandDnaSelect');
   const productNameInput = document.getElementById('productName');
   const officialImageUrlInput = document.getElementById('officialImageUrl');
   const imagePreview = document.getElementById('imagePreview');
@@ -28,31 +34,104 @@ document.addEventListener('DOMContentLoaded', () => {
   const topRiskScoreNum = document.getElementById('topRiskScoreNum');
   const creditsUsedNum = document.getElementById('creditsUsedNum');
   const recommendationAlert = document.getElementById('recommendationAlert');
+  const missingEvidenceNotice = document.getElementById('missingEvidenceNotice');
+  const missingEvidenceText = document.getElementById('missingEvidenceText');
   const listingsList = document.getElementById('listingsList');
+  const caseNoteInput = document.getElementById('caseNoteInput');
   const saveCaseBtn = document.getElementById('saveCaseBtn');
   const caseSavedNotice = document.getElementById('caseSavedNotice');
+  const navLinksContainer = document.getElementById('navLinksContainer');
+  const openDeskBtn = document.getElementById('openDeskBtn');
+  const openGraphBtn = document.getElementById('openGraphBtn');
   const backendStatusPill = document.getElementById('backendStatusPill');
 
   let latestScanResult = null;
+  let savedCaseId = null;
+  let loadedProducts = [];
 
-  // Restore saved backend URL from storage if present
-  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.get(['beacontraBackendUrl'], (res) => {
-      if (res && res.beacontraBackendUrl) {
-        backendUrlInput.value = res.beacontraBackendUrl;
-      }
-    });
+  // Helper: Show Alert
+  function showAlert(el, msg, type = 'info') {
+    el.className = `alert alert-${type}`;
+    el.textContent = msg;
+    el.classList.remove('hidden');
   }
 
-  // Update image preview on URL change
-  officialImageUrlInput.addEventListener('input', () => {
-    const url = officialImageUrlInput.value.trim();
-    if (url.startsWith('http')) {
-      imagePreview.src = url;
+  // 1. Restore Backend URL
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+    chrome.storage.local.get(['beacontraBackendUrl', 'pendingImageInvestigation'], (res) => {
+      if (res?.beacontraBackendUrl) {
+        backendUrlInput.value = res.beacontraBackendUrl;
+      }
+      if (res?.pendingImageInvestigation) {
+        const pending = res.pendingImageInvestigation;
+        if (pending.imageUrl) {
+          officialImageUrlInput.value = pending.imageUrl;
+          imagePreview.src = pending.imageUrl;
+          contextImageBanner.classList.remove('hidden');
+          // Clear after consuming
+          chrome.storage.local.remove(['pendingImageInvestigation']);
+        }
+      }
+      loadBrandProfiles();
+    });
+  } else {
+    loadBrandProfiles();
+  }
+
+  // 2. Fetch Brand DNA Profiles
+  async function loadBrandProfiles() {
+    const backendUrl = backendUrlInput.value.trim().replace(/\/+$/, '');
+    try {
+      const resp = await fetch(`${backendUrl}/api/brand-dna/products`);
+      if (resp.ok) {
+        const json = await resp.json();
+        loadedProducts = json.data || [];
+        brandDnaSelect.innerHTML = '<option value="">-- Manual Calibration / No Profile --</option>';
+        for (const p of loadedProducts) {
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          opt.textContent = `${p.brandName || p.brandId} — ${p.productName}`;
+          brandDnaSelect.appendChild(opt);
+        }
+        backendStatusPill.className = 'status-pill status-ready';
+        backendStatusPill.textContent = 'ONLINE';
+      }
+    } catch {
+      backendStatusPill.className = 'status-pill status-offline';
+      backendStatusPill.textContent = 'LOCAL DEV';
     }
+  }
+
+  // Auto-fill from Brand DNA Selection
+  brandDnaSelect.addEventListener('change', () => {
+    const selectedId = brandDnaSelect.value;
+    if (!selectedId) return;
+    const prod = loadedProducts.find(p => p.id === selectedId);
+    if (!prod) return;
+
+    productNameInput.value = prod.productName;
+    if (prod.canonicalImageUrl) {
+      officialImageUrlInput.value = prod.canonicalImageUrl;
+      imagePreview.src = prod.canonicalImageUrl;
+    }
+    if (prod.statutoryMrp) mrpInput.value = prod.statutoryMrp;
+    if (prod.expectedPriceRange) {
+      priceMinInput.value = prod.expectedPriceRange.min;
+      priceMaxInput.value = prod.expectedPriceRange.max;
+    }
+    if (prod.authorizedSellers && prod.authorizedSellers.length > 0) {
+      authorizedSellersInput.value = prod.authorizedSellers.join(', ');
+    }
+    showAlert(extractAlert, `Loaded Brand DNA profile for "${prod.productName}"`, 'success');
   });
 
-  // Extract from active Amazon tab
+  // Image Preview
+  officialImageUrlInput.addEventListener('input', () => {
+    const url = officialImageUrlInput.value.trim();
+    if (url.startsWith('http')) imagePreview.src = url;
+  });
+
+  // 3. Extract Active Tab Product
   extractBtn.addEventListener('click', async () => {
     extractAlert.className = 'alert hidden';
     extractBtn.disabled = true;
@@ -60,21 +139,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (!activeTab || !activeTab.id) {
-        throw new Error('No active browser tab detected.');
-      }
+      if (!activeTab || !activeTab.id) throw new Error('No active browser tab detected.');
 
-      if (!activeTab.url || !activeTab.url.includes('amazon.in')) {
-        showAlert(extractAlert, 'Please navigate to an Amazon India (amazon.in) product page to extract details automatically.', 'error');
-        return;
-      }
-
-      chrome.tabs.sendMessage(activeTab.id, { action: 'EXTRACT_PRODUCT_CONTEXT' }, (response) => {
+      chrome.tabs.sendMessage(activeTab.id, { action: 'extractProduct' }, (response) => {
         extractBtn.disabled = false;
         extractBtn.innerHTML = '<span class="btn-icon">&#128269;</span> Extract Active Tab Product';
 
         if (chrome.runtime.lastError || !response || !response.success) {
-          const errMsg = chrome.runtime.lastError?.message || response?.error || 'Could not extract product details. Ensure you are on a product detail page.';
+          const errMsg = chrome.runtime.lastError?.message || response?.error || 'Could not extract product details. Ensure you are on Amazon.in or Flipkart.com.';
           showAlert(extractAlert, errMsg, 'error');
           return;
         }
@@ -85,10 +157,9 @@ document.addEventListener('DOMContentLoaded', () => {
           officialImageUrlInput.value = data.imageUrl;
           imagePreview.src = data.imageUrl;
         }
-        if (data.mrp) mrpInput.value = data.mrp;
+        if (data.mrp || data.extractedMrp) mrpInput.value = data.extractedMrp || data.mrp;
         if (data.extractedPrice) {
           currentPriceRefInput.value = data.extractedPrice;
-          // Set sensible expected street price window around extracted price
           priceMinInput.value = Math.round(data.extractedPrice * 0.85);
           priceMaxInput.value = Math.round(data.extractedPrice * 1.15);
         }
@@ -96,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
           authorizedSellersInput.value = `${authorizedSellersInput.value}, ${data.seller}`;
         }
 
-        showAlert(extractAlert, `Extracted "${data.title.substring(0, 40)}..." successfully! Review parameters below.`, 'success');
+        showAlert(extractAlert, `Extracted "${(data.title || '').slice(0, 35)}..." from ${data.platform || 'marketplace'}!`, 'success');
       });
     } catch (err) {
       extractBtn.disabled = false;
@@ -105,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Run Beacontra Scan
+  // 4. Run Investigation Scan
   scanBtn.addEventListener('click', async () => {
     const productName = productNameInput.value.trim();
     const officialImageUrl = officialImageUrlInput.value.trim();
@@ -118,202 +189,181 @@ document.addEventListener('DOMContentLoaded', () => {
       : undefined;
 
     const backendUrl = backendUrlInput.value.trim().replace(/\/+$/, '');
+    const modeEl = document.querySelector('input[name="investigationMode"]:checked');
+    const mode = modeEl ? modeEl.value : 'quick';
 
     if (!productName) {
-      alert('Please enter a target product name.');
-      productNameInput.focus();
+      showAlert(extractAlert, 'Product Name is required to run a scan.', 'error');
       return;
     }
     if (!officialImageUrl) {
-      alert('Please provide an official reference image URL.');
-      officialImageUrlInput.focus();
+      showAlert(extractAlert, 'Reference Image URL is required for visual matching.', 'error');
       return;
     }
 
-    // Persist backend URL
+    // Persist Backend URL
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
       chrome.storage.local.set({ beacontraBackendUrl: backendUrl });
     }
 
-    // Show loading
-    scanBtn.disabled = true;
-    resultsCard.classList.add('hidden');
-    caseSavedNotice.classList.add('hidden');
     loadingState.classList.remove('hidden');
-    backendStatusPill.className = 'status-pill status-busy';
-    backendStatusPill.textContent = 'SCANNING';
-
-    const payload = {
-      productName,
-      officialImageUrl,
-      mrp,
-      expectedPriceRange: priceMin && priceMax ? { min: priceMin, max: priceMax } : undefined,
-      knownAuthorizedSellers,
-    };
+    resultsCard.classList.add('hidden');
+    scanBtn.disabled = true;
+    loadingMessage.textContent = mode === 'deep' ? 'Running Deep Investigation...' : 'Running Quick Scan...';
 
     try {
-      loadingMessage.textContent = 'Querying marketplace index & reverse-image matching...';
-      const response = await fetch(`${backendUrl}/api/beacontra/scan`, {
+      const resp = await fetch(`${backendUrl}/api/beacontra/scan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          productName,
+          officialImageUrl,
+          mrp,
+          expectedPriceRange: priceMin && priceMax ? { min: priceMin, max: priceMax } : undefined,
+          knownAuthorizedSellers,
+        }),
       });
 
-      if (!response.ok) {
-        const errorJson = await response.json().catch(() => ({}));
-        throw new Error(errorJson.error || `Server returned HTTP ${response.status}`);
+      if (!resp.ok) {
+        const errJson = await resp.json().catch(() => ({}));
+        throw new Error(errJson.error || `Scan request failed with HTTP ${resp.status}`);
       }
 
-      const resJson = await response.json();
-      latestScanResult = resJson.data;
+      const scanResult = await resp.json();
+      latestScanResult = scanResult;
 
-      // Render findings
-      renderScanResults(latestScanResult);
-      loadingState.classList.add('hidden');
-      resultsCard.classList.remove('hidden');
-      backendStatusPill.className = 'status-pill status-ready';
-      backendStatusPill.textContent = 'READY';
+      // Render Results
+      renderResults(scanResult);
     } catch (err) {
-      loadingState.classList.add('hidden');
-      backendStatusPill.className = 'status-pill status-ready';
-      backendStatusPill.textContent = 'READY';
-      alert(`Investigation failed: ${err.message}`);
+      showAlert(extractAlert, `Investigation error: ${err.message}`, 'error');
     } finally {
+      loadingState.classList.add('hidden');
       scanBtn.disabled = false;
     }
   });
 
-  // Save Case to Evidence Desk
+  // 5. Render Results & Missing Evidence Analysis
+  function renderResults(res) {
+    resultsCard.classList.remove('hidden');
+    navLinksContainer.classList.add('hidden');
+    caseSavedNotice.classList.add('hidden');
+
+    // Data Source Badge
+    dataSourceBadge.textContent = (res.dataSource || 'LIVE').toUpperCase();
+    dataSourceBadge.className = `source-badge source-${res.dataSource || 'live'}`;
+
+    totalListingsNum.textContent = res.totalListingsFound || 0;
+    creditsUsedNum.textContent = res.creditsUsed ?? 1;
+
+    const maxScore = res.results && res.results.length > 0
+      ? Math.max(...res.results.map((r) => r.compositeScore))
+      : 0;
+    topRiskScoreNum.textContent = maxScore;
+
+    // Recommendation Bar
+    const urgentCount = (res.results || []).filter(r => r.recommendation === 'review_urgently').length;
+    if (urgentCount > 0) {
+      recommendationAlert.className = 'recommendation-bar bar-urgent';
+      recommendationAlert.textContent = `${urgentCount} listing(s) flagged for urgent commercial review.`;
+    } else {
+      recommendationAlert.className = 'recommendation-bar bar-normal';
+      recommendationAlert.textContent = 'Marketplace offers align with expected commercial parameters.';
+    }
+
+    // Missing Evidence Assessment
+    const missingItems = [];
+    if (!res.results || res.results.length === 0) {
+      missingItems.push('No concurrent marketplace listings returned in search window.');
+    }
+    const hasVisualMatches = (res.results || []).some(r => r.visualSignal?.matchFound);
+    if (!hasVisualMatches) {
+      missingItems.push('Absence of indexed visual co-occurrences in Google Lens (unindexed or unique photograph).');
+    }
+    const hasSellerAuth = (res.results || []).some(r => r.sellerSignal?.isAuthorized);
+    if (!hasSellerAuth) {
+      missingItems.push('No recognized authorized distributors found among seller results.');
+    }
+
+    if (missingItems.length > 0) {
+      missingEvidenceText.innerHTML = `<ul>${missingItems.map(m => `<li>${m}</li>`).join('')}</ul>`;
+      missingEvidenceNotice.classList.remove('hidden');
+    } else {
+      missingEvidenceText.textContent = 'Full cross-verification evidence coverage achieved.';
+      missingEvidenceNotice.classList.remove('hidden');
+    }
+
+    // Render Listings
+    listingsList.innerHTML = '';
+    for (const item of (res.results || []).slice(0, 10)) {
+      const el = document.createElement('div');
+      el.className = 'listing-item';
+      el.innerHTML = `
+        <div class="listing-top">
+          <span class="listing-source">${item.listing.source || 'Marketplace'}</span>
+          <span class="listing-price">${item.listing.price || `₹${item.listing.extractedPrice}`}</span>
+        </div>
+        <div class="listing-title">${item.listing.title}</div>
+        <div class="listing-seller">Seller: <strong>${item.listing.seller}</strong></div>
+        <div class="listing-score">Review Priority Score: ${item.compositeScore}/100</div>
+      `;
+      listingsList.appendChild(el);
+    }
+  }
+
+  // 6. Save Case with Annotations
   saveCaseBtn.addEventListener('click', async () => {
     if (!latestScanResult) return;
+    saveCaseBtn.disabled = true;
+    saveCaseBtn.textContent = 'Saving Case...';
 
     const backendUrl = backendUrlInput.value.trim().replace(/\/+$/, '');
-    saveCaseBtn.disabled = true;
-    saveCaseBtn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;margin:0;display:inline-block;vertical-align:middle;"></span> Saving...';
-
-    const productName = productNameInput.value.trim();
-    const officialImageUrl = officialImageUrlInput.value.trim();
-    const mrp = mrpInput.value ? Number(mrpInput.value) : undefined;
-    const priceMin = priceMinInput.value ? Number(priceMinInput.value) : undefined;
-    const priceMax = priceMaxInput.value ? Number(priceMaxInput.value) : undefined;
-    const rawSellers = authorizedSellersInput.value.trim();
-    const knownAuthorizedSellers = rawSellers
-      ? rawSellers.split(',').map((s) => s.trim()).filter(Boolean)
-      : undefined;
-
-    const casePayload = {
-      productName,
-      officialImageUrl,
-      mrp,
-      expectedPriceRange: priceMin && priceMax ? { min: priceMin, max: priceMax } : undefined,
-      knownAuthorizedSellers,
-      scanId: latestScanResult.scanId,
-      initialNote: 'Case created via Beacontra Lens Chrome Extension.',
-      tags: ['chrome-extension', 'marketplace-investigation'],
-    };
+    const note = caseNoteInput.value.trim();
 
     try {
-      const response = await fetch(`${backendUrl}/api/cases`, {
+      const resp = await fetch(`${backendUrl}/api/cases`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(casePayload),
+        body: JSON.stringify({
+          scanId: latestScanResult.scanId,
+          productName: productNameInput.value.trim(),
+          officialImageUrl: officialImageUrlInput.value.trim(),
+          mrp: mrpInput.value ? Number(mrpInput.value) : undefined,
+          initialNote: note || 'Opened via Beacontra Lens 2.0 Chrome Extension',
+        }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to save case (HTTP ${response.status})`);
-      }
+      if (!resp.ok) throw new Error('Failed to create investigation case');
+      const json = await resp.json();
+      savedCaseId = json.data?.id;
 
-      const resJson = await response.json();
-      const savedCase = resJson.data;
-
-      const reportUrl = `${backendUrl}/api/cases/${savedCase.id}/report`;
-      caseSavedNotice.innerHTML = `
-        <strong>&#10004; Case Saved:</strong> ${escapeText(savedCase.id)}<br/>
-        <a href="${escapeText(reportUrl)}" target="_blank" style="color: #38bdf8; text-decoration: underline; font-weight: 600; display: inline-block; margin-top: 4px;">
-          Open Complete HTML Evidence Report &rarr;
-        </a>
-      `;
-      caseSavedNotice.className = 'alert alert-success';
-      caseSavedNotice.classList.remove('hidden');
+      showAlert(caseSavedNotice, `Investigation Case ${savedCaseId} successfully saved to Evidence Desk!`, 'success');
+      navLinksContainer.classList.remove('hidden');
     } catch (err) {
-      alert(`Could not save case: ${err.message}`);
+      showAlert(caseSavedNotice, `Could not save case: ${err.message}`, 'error');
     } finally {
       saveCaseBtn.disabled = false;
       saveCaseBtn.innerHTML = '<span class="btn-icon">&#128196;</span> Save to Evidence Desk Case';
     }
   });
 
-  function renderScanResults(scan) {
-    dataSourceBadge.textContent = scan.dataSource.toUpperCase();
-    totalListingsNum.textContent = scan.totalListingsFound;
-    creditsUsedNum.textContent = scan.creditsUsed;
-
-    const results = scan.results || [];
-    const maxScore = results.length > 0 ? Math.max(...results.map((r) => r.compositeScore)) : 0;
-    topRiskScoreNum.textContent = `${maxScore}/100`;
-
-    // Recommendation Bar
-    if (maxScore >= 70) {
-      recommendationAlert.className = 'recommendation-bar rec-urgently';
-      recommendationAlert.textContent = 'High Commercial Discrepancy — Review Urgently';
-    } else if (maxScore >= 50) {
-      recommendationAlert.className = 'recommendation-bar rec-review';
-      recommendationAlert.textContent = 'Moderate Variance — Analyst Review Advised';
+  // 7. Navigation Links
+  openDeskBtn.addEventListener('click', () => {
+    const backendUrl = backendUrlInput.value.trim().replace(/\/+$/, '');
+    const url = savedCaseId ? `${backendUrl}/#cases` : `${backendUrl}/#desk`;
+    if (typeof chrome !== 'undefined' && chrome.tabs) {
+      chrome.tabs.create({ url });
     } else {
-      recommendationAlert.className = 'recommendation-bar rec-genuine';
-      recommendationAlert.textContent = 'Consistent Commercial Signals — Low Anomaly';
+      window.open(url, '_blank');
     }
+  });
 
-    // Listings Container
-    listingsList.innerHTML = '';
-    if (results.length === 0) {
-      listingsList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 12px;">No listings matched query.</div>';
-      return;
+  openGraphBtn.addEventListener('click', () => {
+    const backendUrl = backendUrlInput.value.trim().replace(/\/+$/, '');
+    const url = `${backendUrl}/api/evidence-graph`;
+    if (typeof chrome !== 'undefined' && chrome.tabs) {
+      chrome.tabs.create({ url });
+    } else {
+      window.open(url, '_blank');
     }
-
-    results.slice(0, 10).forEach((item) => {
-      const listingDiv = document.createElement('div');
-      listingDiv.className = 'listing-item';
-
-      const priceChipClass = item.priceSignal.isAnomalous ? 'chip-danger' : 'chip-success';
-      const sellerChipClass = item.sellerSignal.isAnomalous ? 'chip-danger' : 'chip-neutral';
-      const visualChipClass = item.visualSignal.isAnomalous
-        ? 'chip-danger'
-        : item.visualSignal.status === 'matched'
-          ? 'chip-info'
-          : 'chip-neutral';
-
-      listingDiv.innerHTML = `
-        <div class="listing-header">
-          <div class="listing-title">${escapeText(item.listing.title)}</div>
-          <div class="listing-score">${item.compositeScore}</div>
-        </div>
-        <div style="font-size: 11px; color: #9ca3af; margin-top: 3px;">
-          ${escapeText(item.listing.source)} &bull; <strong>${escapeText(item.listing.price)}</strong>
-        </div>
-        <div class="listing-chips">
-          <span class="chip ${priceChipClass}">Price: ${escapeText(item.priceSignal.anomalyType)}</span>
-          <span class="chip ${sellerChipClass}">Seller: ${escapeText(item.sellerSignal.anomalyType)}</span>
-          <span class="chip ${visualChipClass}">Visual: ${escapeText(item.visualSignal.status || item.visualSignal.anomalyType)}</span>
-        </div>
-      `;
-      listingsList.appendChild(listingDiv);
-    });
-  }
-
-  function showAlert(el, msg, type) {
-    el.textContent = msg;
-    el.className = `alert alert-${type}`;
-    el.classList.remove('hidden');
-  }
-
-  function escapeText(str) {
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
+  });
 });
