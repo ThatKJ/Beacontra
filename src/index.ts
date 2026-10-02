@@ -29,6 +29,10 @@ import {
   type EvidenceGraph,
   type GraphFilterOptions,
 } from './lib/visual-forensics';
+import {
+  WatchtowerService,
+  type WatchtowerSnapshot,
+} from './lib/watchtower';
 import type { BaseSearchParams, SerpApiEngine, SerpApiResponse } from './lib/types';
 
 
@@ -816,6 +820,65 @@ app.post('/api/evidence-graph/filter', async (c) => {
 
     const filtered = forensics.filterGraph(body.graph, body.options || {});
     return c.json({ data: filtered });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+// --- Watchtower Historical Intelligence Routes ---
+app.post('/api/watchtower/snapshots', async (c) => {
+  try {
+    const body = await c.req.json<{
+      report: import('./lib/market-radar').MarketRadarReport;
+      brandId: string;
+    }>();
+    if (!body.report || !body.brandId) {
+      return c.json({ error: 'report and brandId are required' }, 400);
+    }
+
+    const env = c.env || ({} as Env);
+    const repo = getEvidenceRepository(env);
+    const watchtower = new WatchtowerService(repo);
+    const snapshot = await watchtower.captureSnapshot(body.report, body.brandId);
+    return c.json({ data: snapshot }, 201);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.get('/api/watchtower/snapshots', async (c) => {
+  try {
+    const productId = c.req.query('productId');
+    if (!productId) {
+      return c.json({ error: 'productId query param is required' }, 400);
+    }
+    const env = c.env || ({} as Env);
+    const repo = getEvidenceRepository(env);
+    const snapshots = await repo.getSnapshotsForProduct(productId);
+    return c.json({ data: snapshots });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.post('/api/watchtower/compare', async (c) => {
+  try {
+    const body = await c.req.json<{
+      baselineSnapshot: WatchtowerSnapshot;
+      currentSnapshot: WatchtowerSnapshot;
+    }>();
+    if (!body.baselineSnapshot || !body.currentSnapshot) {
+      return c.json({ error: 'baselineSnapshot and currentSnapshot are required' }, 400);
+    }
+
+    const env = c.env || ({} as Env);
+    const repo = getEvidenceRepository(env);
+    const watchtower = new WatchtowerService(repo);
+    const diff = watchtower.compareSnapshots(body.baselineSnapshot, body.currentSnapshot);
+    return c.json({ data: diff });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Internal error';
     return c.json({ error: msg }, 500);
