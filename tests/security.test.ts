@@ -44,6 +44,38 @@ describe('Security - SSRF & URL Validation', () => {
     expect(isSafePublicUrl('not a url').isSafe).toBe(false);
   });
 
+  it('should reject alternative IP encodings (decimal integer, hex, octal, short-form)', () => {
+    // Decimal IP 2130706433 is 127.0.0.1
+    expect(isSafePublicUrl('http://2130706433/image.jpg').isSafe).toBe(false);
+    // Hex IP 0x7f000001 is 127.0.0.1
+    expect(isSafePublicUrl('http://0x7f000001/admin.png').isSafe).toBe(false);
+    // Dotted hex 0x7f.0.0.1
+    expect(isSafePublicUrl('http://0x7f.0.0.1/').isSafe).toBe(false);
+    // Octal IP 0177.0.0.1 is 127.0.0.1
+    expect(isSafePublicUrl('http://0177.0.0.1/logo.png').isSafe).toBe(false);
+    // Short IP notation 127.1 is 127.0.0.1
+    expect(isSafePublicUrl('http://127.1/').isSafe).toBe(false);
+    // Decimal private 10.0.0.1 = 167772161
+    expect(isSafePublicUrl('http://167772161/').isSafe).toBe(false);
+  });
+
+  it('should reject DNS rebinding wildcard domains resolving to internal IPs', () => {
+    expect(isSafePublicUrl('http://127.0.0.1.nip.io/photo.jpg').isSafe).toBe(false);
+    expect(isSafePublicUrl('http://metadata.169.254.169.254.nip.io/').isSafe).toBe(false);
+    expect(isSafePublicUrl('http://10.0.0.1.sslip.io/').isSafe).toBe(false);
+    expect(isSafePublicUrl('http://app.localtest.me/').isSafe).toBe(false);
+  });
+
+  it('should reject dangerous non-web ports', () => {
+    expect(isSafePublicUrl('http://example.com:22/img.png').isSafe).toBe(false); // SSH
+    expect(isSafePublicUrl('http://example.com:25/img.png').isSafe).toBe(false); // SMTP
+    expect(isSafePublicUrl('http://example.com:6379/img.png').isSafe).toBe(false); // Redis
+    expect(isSafePublicUrl('http://example.com:9200/img.png').isSafe).toBe(false); // Elasticsearch
+    // Safe ports should pass
+    expect(isSafePublicUrl('https://example.com:443/img.png').isSafe).toBe(true);
+    expect(isSafePublicUrl('http://example.com:8080/img.png').isSafe).toBe(true);
+  });
+
   it('should reject unsafe URLs in safeFetchImage without initiating network traffic', async () => {
     const res = await safeFetchImage('http://169.254.169.254/latest/meta-data/');
     expect(res.ok).toBe(false);

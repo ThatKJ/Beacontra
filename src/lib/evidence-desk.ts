@@ -232,6 +232,17 @@ export class EvidenceDeskService {
       updatedAt: now,
     };
 
+    // Deduplication check: if case already created with same scanId and productName, return existing
+    if (input.scanId) {
+      const existingCases = await this.listCases();
+      const duplicate = existingCases.find(
+        c => c.scanId === input.scanId && c.targetProduct.productName.toLowerCase() === input.productName.toLowerCase()
+      );
+      if (duplicate) {
+        return duplicate;
+      }
+    }
+
     // Store case
     await this.cache.set(`${EvidenceDeskService.CASE_PREFIX}${caseId}`, {
       data: investigationCase,
@@ -248,17 +259,33 @@ export class EvidenceDeskService {
   }
 
   async getCase(caseId: string): Promise<InvestigationCase | null> {
-    const cached = await this.cache.get<InvestigationCase>(`${EvidenceDeskService.CASE_PREFIX}${caseId}`);
-    return cached?.data ?? null;
+    try {
+      const cached = await this.cache.get<InvestigationCase>(`${EvidenceDeskService.CASE_PREFIX}${caseId}`);
+      if (!cached || !cached.data || typeof cached.data !== 'object') return null;
+      return cached.data;
+    } catch {
+      return null;
+    }
   }
 
   async listCases(filter?: { status?: CaseStatus; search?: string }): Promise<InvestigationCase[]> {
-    const indexEntry = await this.cache.get<string[]>(EvidenceDeskService.INDEX_KEY);
-    const caseIds = indexEntry?.data ?? [];
+    let caseIds: string[] = [];
+    try {
+      const indexEntry = await this.cache.get<string[]>(EvidenceDeskService.INDEX_KEY);
+      if (Array.isArray(indexEntry?.data)) {
+        caseIds = indexEntry.data;
+      }
+    } catch {
+      caseIds = [];
+    }
+
+    // Fetch up to 100 cases concurrently with corruption protection
+    const caseResults = await Promise.all(
+      caseIds.slice(0, 100).map(id => this.getCase(id).catch(() => null))
+    );
 
     const cases: InvestigationCase[] = [];
-    for (const id of caseIds) {
-      const c = await this.getCase(id);
+    for (const c of caseResults) {
       if (c) {
         let matches = true;
         if (filter?.status && c.status !== filter.status) {
@@ -266,10 +293,10 @@ export class EvidenceDeskService {
         }
         if (filter?.search) {
           const q = filter.search.toLowerCase();
-          const matchesTitle = c.title.toLowerCase().includes(q);
-          const matchesProduct = c.targetProduct.productName.toLowerCase().includes(q);
-          const matchesBrand = c.targetProduct.brand.toLowerCase().includes(q);
-          const matchesTag = c.tags.some(t => t.toLowerCase().includes(q));
+          const matchesTitle = c.title?.toLowerCase().includes(q);
+          const matchesProduct = c.targetProduct?.productName?.toLowerCase().includes(q);
+          const matchesBrand = c.targetProduct?.brand?.toLowerCase().includes(q);
+          const matchesTag = c.tags?.some(t => t.toLowerCase().includes(q));
           if (!matchesTitle && !matchesProduct && !matchesBrand && !matchesTag) {
             matches = false;
           }
@@ -364,6 +391,19 @@ function escapeHtml(str: unknown): string {
 }
 
 /**
+ * Validates and sanitizes URLs rendered in href or src attributes.
+ * Rejects javascript:, data:, and other non-http(s) protocols.
+ */
+function sanitizeUrl(urlStr: unknown, fallback = '#'): string {
+  if (!urlStr || typeof urlStr !== 'string') return fallback;
+  const trimmed = urlStr.trim();
+  if (trimmed.startsWith('https://') || trimmed.startsWith('http://')) {
+    return trimmed;
+  }
+  return fallback;
+}
+
+/**
  * Generates a standalone, beautiful HTML investigation report with embedded printable styles
  */
 export function generateInvestigationHtmlReport(investigationCase: InvestigationCase): string {
@@ -403,7 +443,7 @@ export function generateInvestigationHtmlReport(investigationCase: Investigation
             <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
               Source: <strong>${escapeHtml(r.listing.source)}</strong> | Seller: <em>${escapeHtml(r.listing.seller)}</em>
             </div>
-            ${r.listing.productLink ? `<div style="font-size: 11px; color: #2563eb; margin-top: 2px; word-break: break-all;"><a href="${escapeHtml(r.listing.productLink)}" target="_blank" rel="noopener noreferrer">View Marketplace Listing &rarr;</a></div>` : ''}
+            ${r.listing.productLink ? `<div style="font-size: 11px; color: #2563eb; margin-top: 2px; word-break: break-all;"><a href="${escapeHtml(sanitizeUrl(r.listing.productLink))}" target="_blank" rel="noopener noreferrer">View Marketplace Listing &rarr;</a></div>` : ''}
           </td>
           <td style="padding: 10px 12px; white-space: nowrap; font-weight: 700; color: #0f172a;">${escapeHtml(r.listing.price)}</td>
           <td style="padding: 10px 12px; font-size: 12px;">
@@ -704,7 +744,7 @@ export function generateInvestigationHtmlReport(investigationCase: Investigation
 
     <div class="section-title">Target Product Profile</div>
     <div class="dossier-grid">
-      <img src="${escapeHtml(target.officialImageUrl)}" alt="${escapeHtml(target.productName)}" class="dossier-img" onerror="this.src='https://placehold.co/140x140?text=No+Photo';" />
+      <img src="${escapeHtml(sanitizeUrl(target.officialImageUrl, 'https://placehold.co/140x140?text=No+Photo'))}" alt="${escapeHtml(target.productName)}" class="dossier-img" onerror="this.src='https://placehold.co/140x140?text=No+Photo';" />
       <div class="dossier-fields">
         <div>
           <div class="field-label">Target Product Name</div>

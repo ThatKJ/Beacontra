@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let latestScanResult = null;
 
   // Restore saved backend URL from storage if present
-  if (chrome.storage && chrome.storage.local) {
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
     chrome.storage.local.get(['beacontraBackendUrl'], (res) => {
       if (res && res.beacontraBackendUrl) {
         backendUrlInput.value = res.beacontraBackendUrl;
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Persist backend URL
-    if (chrome.storage && chrome.storage.local) {
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
       chrome.storage.local.set({ beacontraBackendUrl: backendUrl });
     }
 
@@ -228,8 +228,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const reportUrl = `${backendUrl}/api/cases/${savedCase.id}/report`;
       caseSavedNotice.innerHTML = `
-        <strong>&#10004; Case Saved:</strong> ${savedCase.id}<br/>
-        <a href="${reportUrl}" target="_blank" style="color: #38bdf8; text-decoration: underline; font-weight: 600; display: inline-block; margin-top: 4px;">
+        <strong>&#10004; Case Saved:</strong> ${escapeText(savedCase.id)}<br/>
+        <a href="${escapeText(reportUrl)}" target="_blank" style="color: #38bdf8; text-decoration: underline; font-weight: 600; display: inline-block; margin-top: 4px;">
           Open Complete HTML Evidence Report &rarr;
         </a>
       `;
@@ -313,6 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 });

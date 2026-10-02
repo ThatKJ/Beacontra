@@ -328,5 +328,116 @@ describe('Stage 2 - Evidence Desk & Case Management', () => {
       expect(html).toContain(caseId);
       expect(html).toContain('window.print()');
     });
+
+    it('should sanitize javascript: and data: URLs in generated HTML report to prevent protocol execution', () => {
+      const maliciousCase: InvestigationCase = {
+        id: 'case_malicious_123',
+        title: 'Investigation: Malicious URLs Test',
+        status: 'active',
+        priority: 'high',
+        targetProduct: {
+          productName: 'Sample Product',
+          brand: 'Brand',
+          officialImageUrl: 'javascript:alert(document.cookie)',
+        },
+        scanSnapshot: {
+          scanId: 'scan_malicious_1',
+          createdAt: new Date().toISOString(),
+          productName: 'Sample Product',
+          officialImageUrl: 'javascript:alert(1)',
+          dataSource: 'fixture',
+          totalListingsFound: 1,
+          creditsUsed: 1,
+          results: [
+            {
+              listing: {
+                position: 1,
+                title: 'Listing with malicious link',
+                price: '₹999',
+                extractedPrice: 999,
+                seller: 'Attacker Seller',
+                productLink: 'javascript:alert(document.domain)',
+                source: 'Google Shopping',
+              },
+              compositeScore: 90,
+              recommendation: 'review_urgently',
+              priceSignal: { isAnomalous: true, anomalyType: 'below_mrp', details: 'test' },
+              sellerSignal: { isAnomalous: false, anomalyType: 'authorized', details: 'test' },
+              visualSignal: { isAnomalous: false, anomalyType: 'unverified', confidence: 'low', details: 'test', matchSources: [] },
+            },
+          ],
+        } as unknown as any,
+        evidenceObservations: [],
+        notes: [],
+        tags: ['test'],
+        findingsSummary: 'Testing protocol sanitization',
+        legalDisclaimer: NON_LEGAL_EVIDENCE_DISCLAIMER,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      const html = generateInvestigationHtmlReport(maliciousCase);
+      // javascript: protocols must not appear in href or src attributes
+      expect(html).not.toContain('href="javascript:');
+      expect(html).not.toContain('src="javascript:');
+    });
+
+    it('should deduplicate case creation for identical scanId and productName', async () => {
+      const payload = {
+        productName: 'boAt Airdopes 141 Dedupe Test',
+        officialImageUrl: 'https://images.unsplash.com/dedupe.jpg',
+        scanId: 'scan_dedupe_123',
+      };
+
+      const res1 = await app.request('/api/cases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data1 = (await res1.json()) as { data: InvestigationCase };
+
+      const res2 = await app.request('/api/cases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data2 = (await res2.json()) as { data: InvestigationCase };
+
+      expect(res1.status).toBe(201);
+      expect(res2.status).toBe(201);
+      // Must return the existing case rather than creating a duplicate
+      expect(data2.data.id).toBe(data1.data.id);
+    });
+
+    it('should enforce rate limits on /api/beacontra/scan when rate is exceeded', async () => {
+      // Send 11 rapid requests with the same simulated client IP
+      const mockHeaders = {
+        'Content-Type': 'application/json',
+        'cf-connecting-ip': '198.51.100.99', // distinct test IP
+      };
+      const scanPayload = JSON.stringify({
+        productName: 'boAt Airdopes 141',
+        officialImageUrl: 'https://images.unsplash.com/rate-test.jpg',
+      });
+
+      let hitRateLimit = false;
+      for (let i = 0; i < 12; i++) {
+        const res = await app.request('/api/beacontra/scan', {
+          method: 'POST',
+          headers: mockHeaders,
+          body: scanPayload,
+        });
+
+        if (res.status === 429) {
+          hitRateLimit = true;
+          expect(res.headers.get('Retry-After')).toBeDefined();
+          const errBody = (await res.json()) as { error: string };
+          expect(errBody.error).toContain('Rate limit exceeded');
+          break;
+        }
+      }
+
+      expect(hitRateLimit).toBe(true);
+    });
   });
 });

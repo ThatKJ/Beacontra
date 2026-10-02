@@ -113,7 +113,48 @@ app.post('/api/search', async (c) => {
   }
 });
 
+// Rate limiter to prevent rapid exhaustion of monthly SerpApi credits
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const MAX_SCANS_PER_WINDOW = 10;
+const scanRateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+export function checkScanRateLimit(ip: string): { allowed: boolean; resetInSeconds: number } {
+  const now = Date.now();
+  const record = scanRateLimitMap.get(ip);
+  if (!record || now > record.resetAt) {
+    scanRateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true, resetInSeconds: 60 };
+  }
+  if (record.count >= MAX_SCANS_PER_WINDOW) {
+    const remainingSecs = Math.max(1, Math.ceil((record.resetAt - now) / 1000));
+    return { allowed: false, resetInSeconds: remainingSecs };
+  }
+  record.count++;
+  return { allowed: true, resetInSeconds: Math.max(1, Math.ceil((record.resetAt - now) / 1000)) };
+}
+
+export function resetScanRateLimitForTesting(): void {
+  scanRateLimitMap.clear();
+}
+
 app.post('/api/beacontra/scan', async (c) => {
+  const clientIp =
+    c.req.header('cf-connecting-ip') ||
+    c.req.header('x-real-ip') ||
+    c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ||
+    'direct-client';
+
+  const rateCheck = checkScanRateLimit(clientIp);
+  if (!rateCheck.allowed) {
+    c.header('Retry-After', String(rateCheck.resetInSeconds));
+    return c.json(
+      {
+        error: `Rate limit exceeded. To protect SerpApi credit quotas, investigations are limited to ${MAX_SCANS_PER_WINDOW} scans per minute. Retry in ${rateCheck.resetInSeconds}s.`,
+      },
+      429
+    );
+  }
+
   const env = c.env || ({} as Env);
   const client = createClient(env);
   const beacontra = createBeacontraService(client);
