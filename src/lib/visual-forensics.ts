@@ -315,7 +315,8 @@ export class VisualForensicsService {
       });
 
       // Link listing to marketplace platform
-      const marketplaceId = `mkt_${listing.marketplace.toLowerCase()}`;
+      const marketplaceName = listing.marketplace || listing.source || 'marketplace';
+      const marketplaceId = `mkt_${marketplaceName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
       if (!nodesMap.has(marketplaceId)) {
         nodesMap.set(marketplaceId, {
           id: marketplaceId,

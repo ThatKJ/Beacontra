@@ -37,6 +37,11 @@ import {
   InvestigationIntelligenceService,
   type FindingContext,
 } from './lib/investigation-intelligence';
+import {
+  InvestigationAutopilotService,
+  INVESTIGATION_TEMPLATES,
+  type AutopilotInvestigationPlan,
+} from './lib/autopilot';
 import type { BaseSearchParams, SerpApiEngine, SerpApiResponse } from './lib/types';
 
 
@@ -900,6 +905,93 @@ app.post('/api/intelligence/explain-finding', async (c) => {
     const service = new InvestigationIntelligenceService();
     const explanation = service.explainFinding(body);
     return c.json({ data: explanation });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+// --- Investigation Autopilot Routes ---
+function getAutopilotService(env?: Env) {
+  const safeEnv = env || ({} as Env);
+  const client = createClient(safeEnv);
+  const repo = getEvidenceRepository(safeEnv);
+  const brandDna = getBrandDnaService(safeEnv);
+  return new InvestigationAutopilotService(client, repo, brandDna);
+}
+
+app.get('/api/autopilot/templates', (c) => {
+  return c.json({ data: INVESTIGATION_TEMPLATES });
+});
+
+app.post('/api/autopilot/gaps', async (c) => {
+  try {
+    const body = await c.req.json<{ productId: string }>();
+    if (!body.productId) return c.json({ error: 'productId is required' }, 400);
+    const env = c.env || ({} as Env);
+    const brandDna = getBrandDnaService(env);
+    const product = await brandDna.getProduct(body.productId);
+    if (!product) return c.json({ error: 'Product not found' }, 404);
+    const autopilot = getAutopilotService(env);
+    const gaps = await autopilot.analyzeEvidenceGaps(product);
+    return c.json({ data: gaps });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.post('/api/autopilot/plan', async (c) => {
+  try {
+    const body = await c.req.json<{
+      productId: string;
+      templateId?: 'fast_baseline' | 'anomaly_verification' | 'deep_marketplace_sweep';
+      customMaxCredits?: number;
+    }>();
+    if (!body.productId) return c.json({ error: 'productId is required' }, 400);
+    const env = c.env || ({} as Env);
+    const brandDna = getBrandDnaService(env);
+    const product = await brandDna.getProduct(body.productId);
+    if (!product) return c.json({ error: 'Product not found' }, 404);
+    const autopilot = getAutopilotService(env);
+    const plan = await autopilot.createInvestigationPlan(product, body.templateId, body.customMaxCredits);
+    return c.json({ data: plan });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.post('/api/autopilot/execute', async (c) => {
+  try {
+    const body = await c.req.json<{
+      plan: AutopilotInvestigationPlan;
+      authorization: {
+        userApproved: boolean;
+        approvedBudgetCredits: number;
+      };
+    }>();
+    if (!body.plan || !body.authorization) {
+      return c.json({ error: 'plan and authorization are required' }, 400);
+    }
+    const env = c.env || ({} as Env);
+    const autopilot = getAutopilotService(env);
+    const result = await autopilot.executePlan(body.plan, body.authorization);
+    return c.json({ data: result });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.get('/api/autopilot/replay/:executionId', async (c) => {
+  try {
+    const executionId = c.req.param('executionId');
+    const env = c.env || ({} as Env);
+    const autopilot = getAutopilotService(env);
+    const replay = await autopilot.getReplay(executionId);
+    if (!replay) return c.json({ error: 'Replay not found or expired', executionId }, 404);
+    return c.json({ data: replay });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Internal error';
     return c.json({ error: msg }, 500);
