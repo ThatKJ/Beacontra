@@ -24,6 +24,11 @@ import {
   type EvidenceRepository,
 } from './lib/evidence-core';
 import { MarketRadarService } from './lib/market-radar';
+import {
+  VisualForensicsService,
+  type EvidenceGraph,
+  type GraphFilterOptions,
+} from './lib/visual-forensics';
 import type { BaseSearchParams, SerpApiEngine, SerpApiResponse } from './lib/types';
 
 
@@ -747,6 +752,70 @@ app.post('/api/market-radar/scan', async (c) => {
     });
 
     return c.json({ data: report });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.post('/api/visual-forensics/investigate', async (c) => {
+  try {
+    const body = await c.req.json<{ listingId: string }>();
+    if (!body.listingId) {
+      return c.json({ error: 'listingId is required' }, 400);
+    }
+
+    const env = c.env || ({} as Env);
+    const repo = getEvidenceRepository(env);
+    const listing = await repo.getListing(body.listingId);
+    if (!listing) {
+      return c.json({ error: 'Listing not found' }, 404);
+    }
+
+    const client = createClient(env);
+    const forensics = new VisualForensicsService(client, repo);
+    const result = await forensics.investigateImage(listing);
+    return c.json({ data: result });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.get('/api/evidence-graph', async (c) => {
+  try {
+    const productId = c.req.query('productId');
+    const caseId = c.req.query('caseId');
+    const env = c.env || ({} as Env);
+    const client = createClient(env);
+    const repo = getEvidenceRepository(env);
+    const forensics = new VisualForensicsService(client, repo);
+
+    const graph = await forensics.buildGraph({ productId, caseId });
+    return c.json({ data: graph });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.post('/api/evidence-graph/filter', async (c) => {
+  try {
+    const body = await c.req.json<{
+      graph: EvidenceGraph;
+      options: GraphFilterOptions;
+    }>();
+    if (!body.graph) {
+      return c.json({ error: 'graph is required' }, 400);
+    }
+
+    const env = c.env || ({} as Env);
+    const client = createClient(env);
+    const repo = getEvidenceRepository(env);
+    const forensics = new VisualForensicsService(client, repo);
+
+    const filtered = forensics.filterGraph(body.graph, body.options || {});
+    return c.json({ data: filtered });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Internal error';
     return c.json({ error: msg }, 500);
