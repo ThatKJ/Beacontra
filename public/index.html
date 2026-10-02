@@ -38,8 +38,10 @@
     />
     <link rel="stylesheet" href="/styles.css" />
     <link rel="stylesheet" href="/experience.css" />
+    <link rel="stylesheet" href="/beacontra-os.css" />
     <script src="/experience.js" defer></script>
     <script src="/app.js" defer></script>
+    <script src="/beacontra-os.js" defer></script>
   </head>
   <body data-view="home">
     <div class="boot" id="boot" aria-hidden="true">
@@ -83,6 +85,17 @@
         </button>
       </div>
     </header>
+    <nav class="os-module-bar" aria-label="Beacontra OS Modules">
+      <div class="wrap" style="display: flex; gap: 8px; align-items: center; width: 100%;">
+        <span class="os-tag os-tag-teal" style="margin-right: 8px; font-weight: 600;">BEACONTRA OS</span>
+        <button type="button" class="os-module-btn is-active" data-target="overview">Overview</button>
+        <button type="button" class="os-module-btn" data-target="brand-vault">Brand Vault <span class="os-module-badge">M1</span></button>
+        <button type="button" class="os-module-btn" data-target="market-radar">Market Radar <span class="os-module-badge">M3</span></button>
+        <button type="button" class="os-module-btn" data-target="evidence-graph">Evidence Graph <span class="os-module-badge">M4</span></button>
+        <button type="button" class="os-module-btn" data-target="watchtower">Watchtower <span class="os-module-badge">M5</span></button>
+        <button type="button" class="os-module-btn" data-target="cases-desk">Cases Desk <span class="os-module-badge">M8</span></button>
+      </div>
+    </nav>
     <main id="main">
       <div id="home">
         <!-- ════════════════════ HERO ════════════════════ -->
@@ -813,6 +826,165 @@
         </section>
       </div>
 
+      <!-- ════════════════════ BRAND VAULT (M1) ════════════════════ -->
+      <section id="brand-vault" class="os-section" aria-labelledby="vaultTitle">
+        <div class="wrap">
+          <header class="section-head">
+            <p class="tech">MODULE 01 · CANONICAL REGISTRATION</p>
+            <h1 id="vaultTitle" class="section-title">Brand Vault<br /><em>DNA Profiles.</em></h1>
+            <p class="section-lede">
+              Manage canonical product identities, authorized seller baselines, official imagery, and SKU normalization models.
+            </p>
+          </header>
+
+          <div class="os-grid-2">
+            <div>
+              <div class="os-card">
+                <h3 style="margin-top: 0; font-family: var(--display); font-size: 1.3rem;">Register Canonical Product</h3>
+                <p class="muted" style="font-size: 0.82rem; margin-bottom: 20px;">
+                  Define ground-truth attributes for your brand to prevent false positives and isolate commercial anomalies.
+                </p>
+                <form id="createProductForm" novalidate>
+                  <div style="margin-bottom: 14px;">
+                    <label for="vaultBrandName" style="display:block; font-size: 0.78rem; font-family: var(--mono); margin-bottom: 6px;">BRAND NAME <span class="required">*</span></label>
+                    <input id="vaultBrandName" required placeholder="e.g. boAt, Noise, Tata Tea" style="width: 100%;" />
+                  </div>
+                  <div style="margin-bottom: 14px;">
+                    <label for="vaultProductName" style="display:block; font-size: 0.78rem; font-family: var(--mono); margin-bottom: 6px;">CANONICAL PRODUCT NAME <span class="required">*</span></label>
+                    <input id="vaultProductName" required placeholder="e.g. boAt Airdopes 141 (Active Black)" style="width: 100%;" />
+                  </div>
+                  <div style="margin-bottom: 14px;">
+                    <label for="vaultImageUrl" style="display:block; font-size: 0.78rem; font-family: var(--mono); margin-bottom: 6px;">CANONICAL IMAGE URL</label>
+                    <input type="url" id="vaultImageUrl" placeholder="https://cdn.brand.com/official-product.jpg" style="width: 100%;" />
+                  </div>
+                  <div style="margin-bottom: 14px;">
+                    <label for="vaultMrp" style="display:block; font-size: 0.78rem; font-family: var(--mono); margin-bottom: 6px;">STATUTORY MRP (₹)</label>
+                    <input type="number" id="vaultMrp" placeholder="4490" style="width: 100%;" />
+                  </div>
+                  <div style="margin-bottom: 20px;">
+                    <label for="vaultAuthorizedSellers" style="display:block; font-size: 0.78rem; font-family: var(--mono); margin-bottom: 6px;">AUTHORIZED SELLERS (COMMA-SEPARATED)</label>
+                    <input id="vaultAuthorizedSellers" placeholder="boAt Lifestyle, Appario Retail, Cloudtail" style="width: 100%;" />
+                  </div>
+                  <button type="submit" class="cta cta-solid" style="width: 100%; justify-content: center;">
+                    REGISTER PROFILE IN VAULT <span aria-hidden="true">→</span>
+                  </button>
+                  <div id="vaultFormStatus" style="margin-top: 10px; font-family: var(--mono); font-size: 0.78rem;"></div>
+                </form>
+              </div>
+            </div>
+
+            <div>
+              <h3 style="margin-top: 0; font-family: var(--display); font-size: 1.3rem;">Registered Brand DNA Profiles</h3>
+              <p class="muted" style="font-size: 0.82rem; margin-bottom: 20px;">
+                Durable catalog profiles surviving Worker restarts. Click any profile to launch Market Radar.
+              </p>
+              <div id="vaultProductList"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════ MARKET RADAR (M3) ════════════════════ -->
+      <section id="market-radar" class="os-section" aria-labelledby="radarTitle">
+        <div class="wrap">
+          <header class="section-head">
+            <p class="tech">MODULE 03 · DISCOVERY &amp; BASELINES</p>
+            <h1 id="radarTitle" class="section-title">Market Radar<br /><em>Price Intelligence.</em></h1>
+            <p class="section-lede">
+              Discover marketplace offers, compute IQR robust pricing baselines, isolate variant divergence, and plan SerpApi credit consumption.
+            </p>
+          </header>
+
+          <div class="os-card" style="margin-bottom: 32px;">
+            <div class="os-grid-2" style="align-items: center;">
+              <div>
+                <label for="radarProductSelect" style="display:block; font-size: 0.78rem; font-family: var(--mono); margin-bottom: 8px;">SELECT BRAND VAULT PRODUCT</label>
+                <select id="radarProductSelect" style="width: 100%; padding: 10px 12px; background: var(--os-navy-700); color: var(--os-text-primary); border: 1px solid var(--os-border); border-radius: var(--os-radius);">
+                  <option value="">-- Choose a Product Profile --</option>
+                </select>
+              </div>
+              <div>
+                <label style="display:block; font-size: 0.78rem; font-family: var(--mono); margin-bottom: 8px;">INVESTIGATION SEARCH PLAN</label>
+                <div style="display: flex; gap: 20px; align-items: center; margin-top: 6px;">
+                  <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; cursor: pointer;">
+                    <input type="radio" name="radarScanMode" value="quick" checked />
+                    <span>Quick Scan <small class="muted">(1 Credit)</small></span>
+                  </label>
+                  <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; cursor: pointer;">
+                    <input type="radio" name="radarScanMode" value="deep" />
+                    <span>Deep Investigation <small class="muted">(Bounded Lens calls)</small></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+              <button id="runRadarScanBtn" class="cta cta-solid" type="button">
+                RUN MARKET RADAR SCAN <span aria-hidden="true">→</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="radarResultsArea">
+            <div class="os-card" style="text-align: center; padding: 48px;">
+              <h3 style="font-family: var(--display); color: var(--os-text-muted);">Radar Idle</h3>
+              <p class="muted">Select a product profile above and launch a Quick or Deep scan to analyze marketplace offers.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════ EVIDENCE GRAPH (M4) ════════════════════ -->
+      <section id="evidence-graph" class="os-section" aria-labelledby="graphTitle">
+        <div class="wrap">
+          <header class="section-head">
+            <p class="tech">MODULE 04 · VISUAL FORENSICS</p>
+            <h1 id="graphTitle" class="section-title">Evidence Graph<br /><em>Factual Lineage.</em></h1>
+            <p class="section-lede">
+              Interactive relationship network connecting products, listings, images, and Lens matches. Every edge is grounded in concrete factual evidence.
+            </p>
+          </header>
+
+          <div class="graph-container">
+            <canvas id="graphCanvasContainer" class="graph-canvas"></canvas>
+            <aside id="graphNodeDetails" class="graph-sidebar">
+              <h4 style="margin-top: 0; font-family: var(--mono); font-size: 0.85rem; color: var(--os-teal-light);">NODE INSPECTOR</h4>
+              <p class="muted" style="font-size: 0.8rem;">Click any node in the graph canvas to inspect evidence provenance, source URLs, and match confidence.</p>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════ WATCHTOWER (M5) ════════════════════ -->
+      <section id="watchtower" class="os-section" aria-labelledby="watchtowerTitle">
+        <div class="wrap">
+          <header class="section-head">
+            <p class="tech">MODULE 05 · MARKETPLACE TIMELINE</p>
+            <h1 id="watchtowerTitle" class="section-title">Watchtower<br /><em>Historical Monitoring.</em></h1>
+            <p class="section-lede">
+              Compare genuine marketplace scan snapshots across time. Surface newly discovered listings, missing offers, drastic price drops, and seller shifts.
+            </p>
+          </header>
+
+          <div id="watchtowerSnapshotsList"></div>
+        </div>
+      </section>
+
+      <!-- ════════════════════ CASES DESK (M8) ════════════════════ -->
+      <section id="cases-desk" class="os-section" aria-labelledby="casesTitle">
+        <div class="wrap">
+          <header class="section-head">
+            <p class="tech">MODULE 08 · ACTION CENTER</p>
+            <h1 id="casesTitle" class="section-title">Cases Desk<br /><em>Investigation Dossiers.</em></h1>
+            <p class="section-lede">
+              Formal case files containing multi-source evidence, human triage playbooks, exportable dossiers, and clear non-legal risk disclosures.
+            </p>
+          </header>
+
+          <div id="casesDeskList"></div>
+        </div>
+      </section>
+      </div>
+
       <!-- ════════════════════ LOADING ════════════════════ -->
       <section
         id="loading"
@@ -968,5 +1140,14 @@
         <p>Enable JavaScript to scan marketplaces and explore the evidence.</p>
       </div>
     </noscript>
+    <div id="explainModalBackdrop" class="os-modal-backdrop" hidden>
+      <div class="os-modal" role="dialog" aria-modal="true" aria-labelledby="explainModalTitle">
+        <div class="os-modal-head">
+          <h2 id="explainModalTitle" class="os-modal-title">Investigation Intelligence</h2>
+          <button id="closeExplainModalBtn" type="button" class="cta cta-ghost" style="padding: 4px 10px;">Close <span aria-hidden="true">×</span></button>
+        </div>
+        <div id="explainModalBody"></div>
+      </div>
+    </div>
   </body>
 </html>
