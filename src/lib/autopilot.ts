@@ -9,12 +9,11 @@
  */
 
 import type { SerpApiClient } from './serpapi-client';
-import type { EvidenceRepository, MarketplaceListing, VisualEvidence } from './evidence-core';
+import type { EvidenceRepository, MarketplaceListing } from './evidence-core';
 import type { BrandDnaService, ProductProfile } from './brand-dna';
 import { MarketRadarService, type MarketRadarReport } from './market-radar';
-import { VisualForensicsService, type EvidenceGraph, type VisualInvestigationResult } from './visual-forensics';
-import { WatchtowerService, type WatchtowerSnapshot, type SnapshotComparisonResult } from './watchtower';
-import { generateInvestigationHtmlReport, type InvestigationCase } from './evidence-desk';
+import { VisualForensicsService, type EvidenceGraph } from './visual-forensics';
+import { WatchtowerService } from './watchtower';
 
 export type GapSeverity = 'high' | 'medium' | 'low';
 
@@ -342,7 +341,7 @@ export class InvestigationAutopilotService {
     if (template.allowedEngines.includes('google_lens')) {
       const visualGaps = gaps
         .filter((g) => g.type === 'missing_visual_evidence' && g.targetImageUrl)
-        .sort((a, b) => (a.severity === 'high' ? -1 : 1));
+        .sort((a, _b) => (a.severity === 'high' ? -1 : 1));
 
       for (const gap of visualGaps) {
         if (allocatedCredits + 1 <= budgetLimit) {

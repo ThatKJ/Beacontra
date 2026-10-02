@@ -366,4 +366,51 @@ document.addEventListener('DOMContentLoaded', () => {
       window.open(url, '_blank');
     }
   });
+
+  // 8. Autopilot Launch
+  const autopilotBtn = document.getElementById('autopilotBtn');
+  if (autopilotBtn) {
+    autopilotBtn.addEventListener('click', async () => {
+      const backendUrl = backendUrlInput.value.trim().replace(/\/+$/, '');
+      const selectedProductId = brandDnaSelect.value;
+      let targetUrl = `${backendUrl}/#investigation-autopilot`;
+
+      if (selectedProductId) {
+        targetUrl += `?autopilotProductId=${encodeURIComponent(selectedProductId)}`;
+      } else if (productNameInput.value.trim()) {
+        try {
+          autopilotBtn.disabled = true;
+          autopilotBtn.innerHTML = '<span class="btn-icon">&#9203;</span> Syncing...';
+          const regResp = await fetch(`${backendUrl}/api/brand-dna/products`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              brandId: 'brand_extracted',
+              productName: productNameInput.value.trim(),
+              canonicalImageUrl: officialImageUrlInput.value.trim() || 'https://example.com/canonical.jpg',
+              statutoryMrp: mrpInput.value ? Number(mrpInput.value) : undefined,
+              authorizedSellers: authorizedSellersInput.value.split(',').map((s) => s.trim()).filter(Boolean),
+            }),
+          });
+          if (regResp.ok) {
+            const regJson = await regResp.json();
+            if (regJson.data?.id) {
+              targetUrl += `?autopilotProductId=${encodeURIComponent(regJson.data.id)}`;
+            }
+          }
+        } catch (e) {
+          console.error('Auto-registration before Autopilot failed:', e);
+        } finally {
+          autopilotBtn.disabled = false;
+          autopilotBtn.innerHTML = '<span class="btn-icon">&#128640;</span> Autopilot';
+        }
+      }
+
+      if (typeof chrome !== 'undefined' && chrome.tabs) {
+        chrome.tabs.create({ url: targetUrl });
+      } else {
+        window.open(targetUrl, '_blank');
+      }
+    });
+  }
 });

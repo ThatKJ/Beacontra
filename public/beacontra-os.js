@@ -36,7 +36,7 @@
 
     // Handle hash on initial load
     const hash = window.location.hash.replace('#', '');
-    if (['brand-vault', 'market-radar', 'evidence-graph', 'watchtower', 'cases-desk'].includes(hash)) {
+    if (['brand-vault', 'market-radar', 'evidence-graph', 'watchtower', 'cases-desk', 'investigation-autopilot'].includes(hash)) {
       switchModule(hash);
     }
   }
@@ -78,6 +78,7 @@
     if (targetId === 'evidence-graph') loadEvidenceGraphView();
     if (targetId === 'watchtower') loadWatchtowerView();
     if (targetId === 'cases-desk') loadCasesDeskView();
+    if (targetId === 'investigation-autopilot') loadAutopilotView();
   }
 
   // ==========================================
@@ -778,11 +779,519 @@
     });
   }
 
+  // ==========================================
+  // 6. INVESTIGATION AUTOPILOT
+  // ==========================================
+  async function loadAutopilotView() {
+    const select = $('autopilotProductSelect');
+    if (!select) return;
+
+    if (OSState.products.length === 0) {
+      try {
+        const resp = await fetch('/api/brand-dna/products');
+        if (resp.ok) {
+          const json = await resp.json();
+          OSState.products = json.data || [];
+        }
+      } catch (e) {
+        console.error('Failed to load products for Autopilot:', e);
+      }
+    }
+
+    select.innerHTML = '<option value="">-- Choose a Product Profile --</option>';
+    for (const p of OSState.products) {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = `${p.brandName || p.brandId} — ${p.productName}`;
+      if (OSState.activeProduct && OSState.activeProduct.id === p.id) {
+        opt.selected = true;
+      }
+      select.appendChild(opt);
+    }
+
+    // Check query params e.g. ?autopilotProductId=...
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramProdId = urlParams.get('autopilotProductId');
+    if (paramProdId) {
+      select.value = paramProdId;
+      triggerGenerateAutopilotPlan(paramProdId);
+    }
+  }
+
+  function setPipelineStage(stageNum) {
+    const stageIds = ['stage-select', 'stage-gaps', 'stage-plan', 'stage-budget', 'stage-execute', 'stage-graph'];
+    stageIds.forEach((id, idx) => {
+      const el = $(id);
+      if (!el) return;
+      el.classList.remove('is-current', 'is-complete');
+      if (idx + 1 < stageNum) {
+        el.classList.add('is-complete');
+      } else if (idx + 1 === stageNum) {
+        el.classList.add('is-current');
+      }
+    });
+  }
+
+  function initAutopilotControls() {
+    const planBtn = $('btnGenerateAutopilotPlan');
+    const select = $('autopilotProductSelect');
+    if (!planBtn || !select) return;
+
+    planBtn.addEventListener('click', () => {
+      const prodId = select.value;
+      if (!prodId) {
+        alert('Please select a product from the Brand Vault first.');
+        return;
+      }
+      triggerGenerateAutopilotPlan(prodId);
+    });
+  }
+
+  async function triggerGenerateAutopilotPlan(productId) {
+    const planContainer = $('autopilotPlanContainer');
+    const terminal = $('autopilotExecutionTerminal');
+    const resultsArea = $('autopilotResultsArea');
+    if (!planContainer) return;
+
+    planContainer.removeAttribute('hidden');
+    if (terminal) terminal.setAttribute('hidden', '');
+    if (resultsArea) resultsArea.setAttribute('hidden', '');
+
+    setPipelineStage(2);
+    planContainer.innerHTML = `
+      <div class="os-card" style="text-align: center; padding: 36px;">
+        <div class="spinner" style="margin: 0 auto 16px;"></div>
+        <p class="mono" style="color: var(--os-teal-light);">ANALYZING EVIDENCE GAPS &amp; COMPILING DETERMINISTIC PLAN...</p>
+      </div>
+    `;
+
+    try {
+      const template = document.querySelector('input[name="autopilotTemplate"]:checked')?.value || 'anomaly_verification';
+      const resp = await fetch('/api/autopilot/plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, templateId: template }),
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.error || 'Failed to generate plan');
+      }
+
+      const json = await resp.json();
+      OSState.autopilotPlan = json.data;
+      setPipelineStage(3);
+      renderAutopilotPlan(json.data);
+    } catch (err) {
+      planContainer.innerHTML = `<div class="os-card"><p class="hint error">Plan generation failed: ${err.message}</p></div>`;
+    }
+  }
+
+  function renderAutopilotPlan(plan) {
+    const container = $('autopilotPlanContainer');
+    if (!container) return;
+
+    const gaps = plan.detectedGaps || [];
+    const steps = plan.steps || [];
+
+    container.innerHTML = `
+      <div class="os-grid-2" style="margin-top: 24px; align-items: start;">
+        <!-- Left Column: Detected Evidence Gaps -->
+        <div>
+          <h3 style="margin-top: 0; font-family: var(--display); font-size: 1.25rem;">
+            Evidence Gaps Identified (${gaps.length})
+          </h3>
+          <p class="muted" style="font-size: 0.8rem; margin-bottom: 16px;">
+            Factual deficiencies observed in the current evidence store for <strong>${plan.productName}</strong>.
+          </p>
+          ${
+            gaps.length === 0
+              ? '<div class="os-card"><p class="muted">No critical evidence gaps detected. Baseline is sufficient and verified.</p></div>'
+              : gaps
+                  .map(
+                    (g) => `
+              <div class="gap-card gap-${g.severity}">
+                <div class="gap-head">
+                  <span class="os-tag os-tag-${g.severity === 'high' ? 'red' : g.severity === 'medium' ? 'amber' : 'teal'}">
+                    ${g.severity.toUpperCase()} PRIORITY GAP
+                  </span>
+                  <span class="mono" style="font-size: 0.65rem; color: var(--os-text-muted);">Est. +${g.estimatedCredits} Credit</span>
+                </div>
+                <h4 style="margin: 6px 0 4px; font-size: 0.9rem;">${g.title}</h4>
+                <p style="font-size: 0.78rem; color: var(--os-text-secondary); margin: 0 0 8px;">${g.description}</p>
+                <div style="font-size: 0.74rem; color: var(--os-teal-light); background: rgba(20, 184, 166, 0.08); padding: 6px 10px; border-radius: 4px;">
+                  <strong>Action:</strong> ${g.recommendedAction}
+                </div>
+              </div>
+            `
+                  )
+                  .join('')
+          }
+        </div>
+
+        <!-- Right Column: Proposed Execution Plan & Budget Authorization -->
+        <div>
+          <h3 style="margin-top: 0; font-family: var(--display); font-size: 1.25rem;">
+            Planned Investigation Steps (${steps.length})
+          </h3>
+          <p class="muted" style="font-size: 0.8rem; margin-bottom: 16px;">
+            Bounded, deterministic search actions requiring explicit authorization.
+          </p>
+
+          <div class="os-card" style="padding: 0; overflow: hidden; margin-bottom: 20px;">
+            ${steps
+              .map(
+                (s) => `
+              <div class="autopilot-step-row">
+                <div style="flex: 1; padding-right: 12px;">
+                  <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 4px;">
+                    <span class="os-tag">${s.engine.toUpperCase()}</span>
+                    <strong>${s.action}</strong>
+                  </div>
+                  <div class="muted" style="font-size: 0.76rem;">${s.description}</div>
+                  <div class="mono" style="font-size: 0.68rem; color: var(--os-text-muted); margin-top: 4px;">Why: ${s.reason}</div>
+                </div>
+                <div style="text-align: right; min-width: 80px;">
+                  <span class="mono" style="font-size: 0.78rem; color: var(--os-teal-light);">
+                    ${s.estimatedCredits} Credit${s.estimatedCredits === 1 ? '' : 's'}
+                  </span>
+                </div>
+              </div>
+            `
+              )
+              .join('')}
+          </div>
+
+          <!-- User Budget Approval Card -->
+          <div class="os-card" style="border-color: var(--os-border-active); background: rgba(20, 184, 166, 0.04);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <div>
+                <span class="mono" style="font-size: 0.72rem; color: var(--os-text-muted);">TOTAL ESTIMATED SEARCH USAGE</span>
+                <div style="font-family: var(--display); font-size: 1.5rem; color: var(--os-teal-light);">
+                  ${plan.totalEstimatedCredits} Credit${plan.totalEstimatedCredits === 1 ? '' : 's'}
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <label for="autopilotApprovedBudget" style="display:block; font-size: 0.7rem; font-family: var(--mono); color: var(--os-text-muted);">
+                  APPROVED BUDGET CAP
+                </label>
+                <input
+                  type="number"
+                  id="autopilotApprovedBudget"
+                  value="${plan.totalEstimatedCredits}"
+                  min="1"
+                  max="10"
+                  style="width: 80px; padding: 6px 10px; background: var(--os-navy-700); color: var(--os-text-primary); border: 1px solid var(--os-border); border-radius: var(--os-radius); text-align: center;"
+                />
+              </div>
+            </div>
+
+            <label style="display: flex; align-items: start; gap: 8px; font-size: 0.78rem; cursor: pointer; margin-bottom: 16px;">
+              <input type="checkbox" id="autopilotConsentCheckbox" style="margin-top: 2px;" />
+              <span>
+                I authorize Beacontra to execute these search requests up to the approved budget ceiling.
+                I understand observations will be stored for evidence inspection.
+              </span>
+            </label>
+
+            <button id="btnLaunchAutopilotExecution" type="button" class="cta cta-solid" style="width: 100%; justify-content: center;">
+              APPROVE BUDGET &amp; LAUNCH AUTOPILOT <span aria-hidden="true">→</span>
+            </button>
+            <div id="autopilotLaunchError" style="margin-top: 8px;"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    $('btnLaunchAutopilotExecution')?.addEventListener('click', () => {
+      const consent = $('autopilotConsentCheckbox')?.checked;
+      const errorEl = $('autopilotLaunchError');
+      if (!consent) {
+        if (errorEl) errorEl.innerHTML = '<p class="hint error">Explicit authorization required to proceed.</p>';
+        return;
+      }
+      const budgetVal = Number($('autopilotApprovedBudget')?.value) || plan.totalEstimatedCredits;
+      executeAutopilotPlan(plan, budgetVal);
+    });
+  }
+
+  async function executeAutopilotPlan(plan, approvedBudgetCredits) {
+    const terminal = $('autopilotExecutionTerminal');
+    const resultsArea = $('autopilotResultsArea');
+    if (!terminal) return;
+
+    setPipelineStage(4);
+    terminal.removeAttribute('hidden');
+    if (resultsArea) resultsArea.setAttribute('hidden', '');
+
+    terminal.innerHTML = `
+      <div class="os-card" style="margin-top: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--os-border); padding-bottom: 12px;">
+          <div>
+            <span class="mono" style="font-size: 0.72rem; color: var(--os-teal-light);">AUTONOMOUS INVESTIGATION IN PROGRESS</span>
+            <h4 style="margin: 4px 0 0;">Investigating '${plan.productName}'</h4>
+          </div>
+          <div class="mono" style="font-size: 0.75rem;">
+            Budget: <strong>${approvedBudgetCredits} Credit(s)</strong>
+          </div>
+        </div>
+
+        <div id="terminalStepsList">
+          <div style="padding: 12px; font-family: var(--mono); font-size: 0.8rem; color: var(--os-text-muted);">
+            <div class="spinner" style="display: inline-block; vertical-align: middle; margin-right: 8px; width: 14px; height: 14px;"></div>
+            Executing planned search actions and streaming observations...
+          </div>
+        </div>
+      </div>
+    `;
+
+    setPipelineStage(5);
+
+    try {
+      const resp = await fetch('/api/autopilot/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan,
+          authorization: {
+            userApproved: true,
+            approvedBudgetCredits,
+          },
+        }),
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.error || 'Autopilot execution failed');
+      }
+
+      const json = await resp.json();
+      OSState.autopilotResult = json.data;
+
+      // Update terminal with finished steps
+      const stepsListEl = $('terminalStepsList');
+      if (stepsListEl) {
+        stepsListEl.innerHTML = (json.data.steps || [])
+          .map(
+            (s) => `
+          <div class="autopilot-step-row">
+            <div>
+              <span class="step-status-tag status-${s.status}">
+                ${s.status.toUpperCase()}
+              </span>
+              <strong style="margin-left: 8px;">${s.action}</strong>
+              <div class="muted" style="font-size: 0.76rem; margin-top: 4px;">
+                ${s.executionResult?.summary || s.description}
+              </div>
+            </div>
+            <div class="mono" style="font-size: 0.72rem; color: var(--os-teal-light);">
+              ${s.executionResult?.creditsSpent || 0} cr
+            </div>
+          </div>
+        `
+          )
+          .join('');
+      }
+
+      setPipelineStage(6);
+      renderAutopilotResults(json.data);
+    } catch (err) {
+      terminal.innerHTML = `<div class="os-card"><p class="hint error">Execution Error: ${err.message}</p></div>`;
+    }
+  }
+
+  function renderAutopilotResults(result) {
+    const container = $('autopilotResultsArea');
+    if (!container) return;
+
+    container.removeAttribute('hidden');
+    const diff = result.beforeAndAfter;
+
+    container.innerHTML = `
+      <div class="os-card" style="margin-top: 24px; border-color: var(--os-teal);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--os-border); padding-bottom: 16px;">
+          <div>
+            <span class="os-tag os-tag-teal">AUTOPILOT RUN COMPLETED</span>
+            <h3 style="margin: 8px 0 4px; font-family: var(--display); font-size: 1.4rem;">Investigation Findings Dossier</h3>
+            <p class="muted" style="font-size: 0.8rem; margin: 0;">${result.narrativeSummary}</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <a href="${result.htmlReportUrl}" target="_blank" class="cta cta-ghost" style="font-size: 0.72rem; padding: 8px 12px;">
+              EXPORT DOSSIER REPORT <span aria-hidden="true">↗</span>
+            </a>
+            <button id="btnReplayRun" type="button" class="cta cta-solid" style="font-size: 0.72rem; padding: 8px 12px;">
+              REPLAY RUN CHRONOLOGY <span aria-hidden="true">↻</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Before and After Evidence Deltas -->
+        <h4 style="margin: 0 0 12px; font-family: var(--mono); font-size: 0.8rem; color: var(--os-text-muted);">
+          BEFORE &amp; AFTER EVIDENCE COMPARISON
+        </h4>
+        <div class="os-grid-3" style="margin-bottom: 24px;">
+          <div class="diff-metric-card">
+            <span class="mono" style="font-size: 0.68rem; color: var(--os-text-muted);">DISCOVERED LISTINGS</span>
+            <div style="font-family: var(--display); font-size: 1.6rem; color: var(--os-text-primary); margin: 4px 0;">
+              ${diff.after.listingCount}
+            </div>
+            <div class="diff-metric-delta is-positive">
+              +${diff.deltas.newListingsDiscovered} newly observed
+            </div>
+          </div>
+
+          <div class="diff-metric-card">
+            <span class="mono" style="font-size: 0.68rem; color: var(--os-text-muted);">VISUAL FORENSICS MATCHES</span>
+            <div style="font-family: var(--display); font-size: 1.6rem; color: var(--os-teal-light); margin: 4px 0;">
+              ${diff.after.visualEvidenceCount}
+            </div>
+            <div class="diff-metric-delta is-positive">
+              +${diff.deltas.newLensMatchesDiscovered} Lens matches traced
+            </div>
+          </div>
+
+          <div class="diff-metric-card">
+            <span class="mono" style="font-size: 0.68rem; color: var(--os-text-muted);">PRICE ANOMALIES FLAGGED</span>
+            <div style="font-family: var(--display); font-size: 1.6rem; color: ${diff.after.anomalousListingCount > 0 ? 'var(--os-red)' : 'var(--os-green)'}; margin: 4px 0;">
+              ${diff.after.anomalousListingCount}
+            </div>
+            <div class="diff-metric-delta">
+              ${diff.after.medianPrice ? `Median: ${money(diff.after.medianPrice)}` : 'Baseline: Sparse'}
+            </div>
+          </div>
+        </div>
+
+        <!-- Embedded Evidence Graph for Discovered Lineages -->
+        <h4 style="margin: 0 0 12px; font-family: var(--mono); font-size: 0.8rem; color: var(--os-text-muted);">
+          UPDATED EVIDENCE GRAPH LINEAGE
+        </h4>
+        <div class="graph-container" style="height: 380px;">
+          <div id="autopilotGraphContainer" style="width: 100%; height: 100%; overflow-y: auto;"></div>
+        </div>
+      </div>
+    `;
+
+    // Render nodes inside embedded graph
+    const graphContainer = $('autopilotGraphContainer');
+    if (graphContainer && result.evidenceGraph) {
+      const nodes = result.evidenceGraph.nodes || [];
+      graphContainer.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; padding: 16px;">
+          ${nodes
+            .map(
+              (n) => `
+            <div class="os-card" style="margin: 0; padding: 12px;">
+              <span class="os-tag os-tag-${n.type === 'product' ? 'teal' : n.type === 'listing' ? 'amber' : 'red'}">${n.type}</span>
+              <div style="font-weight: 600; font-size: 0.8rem; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                ${n.label}
+              </div>
+              <div class="muted" style="font-size: 0.7rem;">${n.sublabel || ''}</div>
+            </div>
+          `
+            )
+            .join('')}
+        </div>
+      `;
+    }
+
+    $('btnReplayRun')?.addEventListener('click', () => {
+      loadAutopilotReplay(result.executionId);
+    });
+  }
+
+  async function loadAutopilotReplay(executionId) {
+    const replayContainer = $('autopilotReplayContainer');
+    if (!replayContainer) return;
+
+    replayContainer.removeAttribute('hidden');
+    replayContainer.innerHTML = `
+      <div class="os-card">
+        <p class="mono" style="color: var(--os-teal-light);">LOADING REPLAY RECORD [${executionId}]...</p>
+      </div>
+    `;
+
+    try {
+      const resp = await fetch(`/api/autopilot/replay/${executionId}`);
+      if (!resp.ok) throw new Error('Replay not found');
+      const json = await resp.json();
+      const replay = json.data;
+      const frames = replay.frames || [];
+
+      replayContainer.innerHTML = `
+        <div class="os-card" style="border-color: var(--os-border-active);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+              <span class="os-tag os-tag-teal">CHRONOLOGICAL INVESTIGATION REPLAY</span>
+              <h4 style="margin: 6px 0 0;">${replay.productName}</h4>
+            </div>
+            <div class="mono" style="font-size: 0.75rem; color: var(--os-text-muted);">
+              Total Frames: ${frames.length}
+            </div>
+          </div>
+
+          <!-- Scrubber Control -->
+          <div class="replay-scrubber">
+            <span class="mono" style="font-size: 0.72rem;">SCRUB:</span>
+            <input
+              type="range"
+              id="replayScrubberSlider"
+              min="0"
+              max="${Math.max(0, frames.length - 1)}"
+              value="0"
+              style="flex: 1; accent-color: var(--os-teal);"
+            />
+            <span id="replayFrameIndicator" class="mono" style="font-size: 0.75rem; min-width: 60px; text-align: right;">
+              Frame 0 / ${Math.max(0, frames.length - 1)}
+            </span>
+          </div>
+
+          <div id="replayFrameContent" style="background: var(--os-navy-900); padding: 16px; border-radius: var(--os-radius); border: 1px solid var(--os-border);"></div>
+        </div>
+      `;
+
+      const slider = $('replayScrubberSlider');
+      const indicator = $('replayFrameIndicator');
+      const content = $('replayFrameContent');
+
+      const showFrame = (index) => {
+        const frame = frames[index];
+        if (!frame || !content) return;
+        if (indicator) indicator.textContent = `Frame ${index} / ${frames.length - 1}`;
+        content.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="font-weight: 600; color: var(--os-teal-light); font-size: 0.9rem;">
+              Step ${index}: ${frame.action}
+            </div>
+            <div class="mono" style="font-size: 0.7rem; color: var(--os-text-muted);">
+              Credits Spent So Far: ${frame.creditsSpentSoFar}
+            </div>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--os-text-secondary); margin: 0 0 12px;">${frame.notes}</p>
+          <div style="display: flex; gap: 16px; font-family: var(--mono); font-size: 0.72rem; color: var(--os-text-muted);">
+            <span>Listings Observed: <strong style="color: var(--os-text-primary);">${frame.observationsSnapshot.listingsCount}</strong></span>
+            <span>Visual Evidence: <strong style="color: var(--os-text-primary);">${frame.observationsSnapshot.visualMatchesCount}</strong></span>
+            <span>Active Anomalies: <strong style="color: var(--os-red);">${frame.observationsSnapshot.activeAnomaliesCount}</strong></span>
+          </div>
+        `;
+      };
+
+      slider?.addEventListener('input', (e) => {
+        showFrame(Number(e.target.value));
+      });
+
+      // Show initial frame
+      showFrame(0);
+    } catch (err) {
+      replayContainer.innerHTML = `<div class="os-card"><p class="hint error">Replay error: ${err.message}</p></div>`;
+    }
+  }
+
   // Initial Boot
   document.addEventListener('DOMContentLoaded', () => {
     initModuleNavigation();
     initVaultForm();
     initRadarControls();
+    initAutopilotControls();
     initExplainModal();
   });
 })();

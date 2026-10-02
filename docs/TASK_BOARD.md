@@ -11,6 +11,23 @@
 
 ## Tasks
 
+### T-040: Beacontra Investigation Autopilot — Intelligent Evidence-Gap Resolution Engine
+**OWNER:** ANTIGRAVITY / STAFF ARCHITECT
+**STATUS:** DONE
+**PRIORITY:** P0
+**FILES:** src/lib/autopilot.ts, src/index.ts, public/index.html, public/beacontra-os.css, public/beacontra-os.js, extension/sidepanel.html, extension/sidepanel.js, tests/autopilot.test.ts, scripts/autopilot-integration-check.mjs, docs/screenshots/autopilot_*.png
+**ISSUE:** Fragmented investigation tools (Brand DNA, Market Radar, Visual Forensics, Watchtower, Evidence Graph) required manual cross-referencing. Brand analysts needed an autonomous, bounded engine that examines existing product profiles, detects evidence gaps, plans targeted verification steps, estimates credit costs, requires user authorization, and executes bounded sweeps with before/after delta diffs and chronological replay.
+**ACCEPTANCE CRITERIA:**
+- [x] Deterministic evidence-gap detection (sparse coverage, unverified sellers, missing reverse-image forensics, stale snapshots).
+- [x] Investigation plan compiler with reusable templates (fast_baseline, anomaly_verification, deep_forensic_sweep).
+- [x] Strict server-side budget cap enforcement (max 10 credits) with mandatory user authorization.
+- [x] Autonomous bounded execution engine linking new observations to concrete evidence graph nodes and edges.
+- [x] Before-and-after evidence comparison metrics (listings, visual matches, anomalies flagged).
+- [x] Interactive Evidence Graph lineage and chronological investigation replay scrubber.
+- [x] Beacontra Lens Chrome extension deep-linking into Autopilot workbench.
+- [x] 100% zero live paid SerpApi credits consumed during automated testing; 158 tests passing, typecheck/lint clean.
+- [x] Headless Chromium E2E verification script with screenshot evidence.
+
 ### T-039: Complete premium journey redesign — reference dossier to analyst workspace
 **OWNER:** CODEX
 **STATUS:** DONE — implementation committed as f2650fb

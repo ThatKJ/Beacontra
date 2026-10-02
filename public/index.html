@@ -94,6 +94,7 @@
         <button type="button" class="os-module-btn" data-target="evidence-graph">Evidence Graph <span class="os-module-badge">M4</span></button>
         <button type="button" class="os-module-btn" data-target="watchtower">Watchtower <span class="os-module-badge">M5</span></button>
         <button type="button" class="os-module-btn" data-target="cases-desk">Cases Desk <span class="os-module-badge">M8</span></button>
+        <button type="button" class="os-module-btn" data-target="investigation-autopilot" style="border-color: rgba(20, 184, 166, 0.4);">Autopilot <span class="os-module-badge" style="background: var(--os-teal); color: var(--os-navy-900); font-weight: 600;">AUTO</span></button>
       </div>
     </nav>
     <main id="main">
@@ -983,7 +984,112 @@
           <div id="casesDeskList"></div>
         </div>
       </section>
-      </div>
+
+      <!-- ════════════════════ INVESTIGATION AUTOPILOT ════════════════════ -->
+      <section id="investigation-autopilot" class="os-section" aria-labelledby="autopilotTitle">
+        <div class="wrap">
+          <header class="section-head">
+            <p class="tech">AUTONOMOUS INVESTIGATION WORKBENCH</p>
+            <h1 id="autopilotTitle" class="section-title">Investigation Autopilot<br /><em>Evidence-Gap Resolution.</em></h1>
+            <p class="section-lede">
+              Deterministic gap analysis, server-capped SerpApi request budgets, and user-authorized execution connecting Brand DNA, Market Radar, Visual Forensics, and Watchtower.
+            </p>
+          </header>
+
+          <!-- Pipeline tracker -->
+          <div class="autopilot-pipeline" aria-label="Autopilot Investigation Pipeline">
+            <div class="pipeline-stage is-current" id="stage-select">
+              <span class="stage-badge">1</span>
+              <span>Select Profile</span>
+            </div>
+            <span class="muted">→</span>
+            <div class="pipeline-stage" id="stage-gaps">
+              <span class="stage-badge">2</span>
+              <span>Detect Gaps</span>
+            </div>
+            <span class="muted">→</span>
+            <div class="pipeline-stage" id="stage-plan">
+              <span class="stage-badge">3</span>
+              <span>Review Plan</span>
+            </div>
+            <span class="muted">→</span>
+            <div class="pipeline-stage" id="stage-budget">
+              <span class="stage-badge">4</span>
+              <span>Authorize Budget</span>
+            </div>
+            <span class="muted">→</span>
+            <div class="pipeline-stage" id="stage-execute">
+              <span class="stage-badge">5</span>
+              <span>Execute</span>
+            </div>
+            <span class="muted">→</span>
+            <div class="pipeline-stage" id="stage-graph">
+              <span class="stage-badge">6</span>
+              <span>Dossier &amp; Graph</span>
+            </div>
+          </div>
+
+          <!-- Configuration & Planning Card -->
+          <div class="os-card">
+            <div class="os-grid-2" style="align-items: start;">
+              <div>
+                <label for="autopilotProductSelect" style="display:block; font-size: 0.78rem; font-family: var(--mono); margin-bottom: 8px;">SELECT BRAND VAULT PRODUCT</label>
+                <select id="autopilotProductSelect" style="width: 100%; padding: 10px 12px; background: var(--os-navy-700); color: var(--os-text-primary); border: 1px solid var(--os-border); border-radius: var(--os-radius);">
+                  <option value="">-- Choose a Product Profile --</option>
+                </select>
+                <p class="muted" style="font-size: 0.76rem; margin-top: 6px;">Autopilot examines existing observations for this product to detect evidence gaps.</p>
+              </div>
+
+              <div>
+                <label style="display:block; font-size: 0.78rem; font-family: var(--mono); margin-bottom: 8px;">INVESTIGATION TEMPLATE</label>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                  <label style="display: flex; align-items: start; gap: 8px; font-size: 0.8rem; cursor: pointer; background: var(--os-navy-700); padding: 8px 12px; border-radius: var(--os-radius);">
+                    <input type="radio" name="autopilotTemplate" value="fast_baseline" />
+                    <div>
+                      <strong>Fast Baseline &amp; Anomaly Check</strong> <small class="os-tag" style="margin-left: 4px;">1 Credit</small>
+                      <div class="muted" style="font-size: 0.72rem;">Shopping discovery &amp; IQR price baseline. Zero Lens requests.</div>
+                    </div>
+                  </label>
+
+                  <label style="display: flex; align-items: start; gap: 8px; font-size: 0.8rem; cursor: pointer; background: var(--os-navy-700); padding: 8px 12px; border-radius: var(--os-radius);">
+                    <input type="radio" name="autopilotTemplate" value="anomaly_verification" checked />
+                    <div>
+                      <strong>Counterfeit Lead &amp; Outlier Verification</strong> <small class="os-tag os-tag-teal" style="margin-left: 4px;">Max 3 Credits</small>
+                      <div class="muted" style="font-size: 0.72rem;">Shopping discovery + Google Lens reverse-forensics on top price outliers.</div>
+                    </div>
+                  </label>
+
+                  <label style="display: flex; align-items: start; gap: 8px; font-size: 0.8rem; cursor: pointer; background: var(--os-navy-700); padding: 8px 12px; border-radius: var(--os-radius);">
+                    <input type="radio" name="autopilotTemplate" value="deep_marketplace_sweep" />
+                    <div>
+                      <strong>Deep Marketplace Forensic Sweep</strong> <small class="os-tag os-tag-amber" style="margin-left: 4px;">Max 6 Credits</small>
+                      <div class="muted" style="font-size: 0.72rem;">Full multi-platform sweep + bounded Lens forensics on up to 5 unverified listings.</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+              <button id="btnGenerateAutopilotPlan" class="cta cta-solid" type="button">
+                ANALYZE GAPS &amp; PLAN INVESTIGATION <span aria-hidden="true">→</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic Plan & Approval Review Container -->
+          <div id="autopilotPlanContainer" hidden></div>
+
+          <!-- Live Execution Terminal & Progress -->
+          <div id="autopilotExecutionTerminal" hidden></div>
+
+          <!-- Final Findings, Before & After Deltas, and Graph View -->
+          <div id="autopilotResultsArea" hidden></div>
+
+          <!-- Saved Investigation Replay Container -->
+          <div id="autopilotReplayContainer" style="margin-top: 32px;" hidden></div>
+        </div>
+      </section>
 
       <!-- ════════════════════ LOADING ════════════════════ -->
       <section

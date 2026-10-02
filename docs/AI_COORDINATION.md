@@ -47,6 +47,19 @@
 
 ## Agent Heartbeats
 
+ANTIGRAVITY — PRINCIPAL ENGINEER / PRODUCT ARCHITECT (T-040):
+Current: T-040 (Beacontra Investigation Autopilot) is fully implemented, verified, and integrated across both the Web OS and Chrome extension. 
+Capabilities:
+- Deterministic evidence gap analysis (missing visual evidence, unverified sellers, baseline depth, variant divergence).
+- Multi-engine investigation planner with reusable templates (fast_baseline, anomaly_verification, deep_forensic_sweep).
+- Strict server-side search budget cap enforcement (max 10 credits) with mandatory user authorization.
+- Bounded autonomous execution updating the Evidence Graph and generating Before/After evidence delta cards.
+- Chronological investigation replay system with interactive step scrubber.
+- Deep-link handoff from Beacontra Lens Chrome extension directly into the Autopilot workbench.
+Verification: 158 tests passing across 17 test suites (+ 1 skipped live smoke test); typecheck clean; lint 0 warnings/0 errors; build successful; Headless Chromium E2E verification test passed with screenshots captured in `docs/screenshots/autopilot_*.png`. 0 live paid SerpApi credits consumed.
+Next: Ready for review and user testing.
+Blocked: None. Untracked AGENTS.md preserved untouched.
+
 CODEX — PREMIUM JOURNEY REDESIGN (T-039):
 Current: T-039 is complete on `redesign/premium-experience`. The reference-dossier journey now moves from a dark evidence field through editorial explanation and a bright investigation desk into an honest scan chamber and paper-toned analyst workspace. Existing scan/scoring contracts and provenance truth were preserved; file-only upload continuity was repaired and regression-tested without live credits.
 Last Completed: Implementation commit f2650fb; refreshed desktop/mobile screenshots and local performance evidence; 70 tests passed with 1 skipped; typecheck/lint/build/UI/performance gates passed. Browser QA covers six widths, axe, keyboard/focus, 44px secondary targets, dialog behavior, error/empty/missing evidence, multipart file-only continuity, reduced motion, and zero overflow. Independent Impeccable verdict: SHIP, no release blocker.

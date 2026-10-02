@@ -272,3 +272,161 @@
   margin-bottom: 8px;
   font-size: 0.84rem;
 }
+
+/* Autopilot Pipeline Tracker */
+.autopilot-pipeline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--os-navy-800);
+  border: 1px solid var(--os-border);
+  border-radius: var(--os-radius-lg);
+  padding: 16px 20px;
+  margin-bottom: 28px;
+  overflow-x: auto;
+}
+
+.pipeline-stage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--os-text-muted);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pipeline-stage.is-current {
+  color: var(--os-teal-light);
+  font-weight: 600;
+}
+
+.pipeline-stage.is-complete {
+  color: var(--os-text-primary);
+}
+
+.stage-badge {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--os-navy-700);
+  color: var(--os-text-secondary);
+  font-size: 0.7rem;
+}
+
+.pipeline-stage.is-current .stage-badge {
+  background: var(--os-teal);
+  color: var(--os-navy-900);
+  box-shadow: 0 0 10px var(--os-teal-glow);
+}
+
+.pipeline-stage.is-complete .stage-badge {
+  background: var(--os-green);
+  color: #fff;
+}
+
+/* Evidence Gap Cards */
+.gap-card {
+  background: var(--os-navy-700);
+  border: 1px solid var(--os-border);
+  border-radius: var(--os-radius);
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  position: relative;
+  transition: border-color 150ms ease;
+}
+
+.gap-card.gap-high {
+  border-left: 4px solid var(--os-red);
+}
+
+.gap-card.gap-medium {
+  border-left: 4px solid var(--os-amber);
+}
+
+.gap-card.gap-low {
+  border-left: 4px solid var(--os-teal);
+}
+
+.gap-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+/* Step Execution Table */
+.autopilot-step-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--os-border);
+  font-size: 0.82rem;
+}
+
+.autopilot-step-row:last-child {
+  border-bottom: none;
+}
+
+.step-status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+}
+
+.status-completed {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--os-green);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-skipped {
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--os-text-muted);
+  border: 1px solid var(--os-border);
+}
+
+.status-failed {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--os-red);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Before and After Grid */
+.diff-metric-card {
+  background: var(--os-navy-700);
+  border: 1px solid var(--os-border);
+  border-radius: var(--os-radius);
+  padding: 16px;
+  text-align: center;
+}
+
+.diff-metric-delta {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  margin-top: 4px;
+}
+
+.diff-metric-delta.is-positive {
+  color: var(--os-teal-light);
+}
+
+/* Replay Scrubber */
+.replay-scrubber {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--os-navy-700);
+  border-radius: var(--os-radius);
+  margin: 16px 0;
+}
