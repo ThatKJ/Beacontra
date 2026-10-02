@@ -500,14 +500,15 @@ export class BrandDnaService {
 
     // 6. Registered Product Variant Matching (Colors / Cosmetic SKU)
     for (const variant of profile.variants) {
-      if (variant.attributes.color && cleanTitle.includes(variant.attributes.color.toLowerCase())) {
+      const color = variant.attributes?.color || (variant as unknown as { color?: string }).color;
+      if (color && cleanTitle.includes(color.toLowerCase())) {
         return {
           isComparable: true,
           matchType: 'comparable_cosmetic_variant',
           confidence: 'high',
-          explanation: `Matches authorized color variant "${variant.attributes.color}" (SKU: ${variant.sku})`,
+          explanation: `Matches authorized color variant "${color}" (SKU: ${variant.sku})`,
           matchedVariantSku: variant.sku,
-          detectedAttributes: { isAccessory: false, colorVariant: variant.attributes.color },
+          detectedAttributes: { isAccessory: false, colorVariant: color },
         };
       }
     }

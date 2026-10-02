@@ -23,6 +23,7 @@ import {
   DurableEvidenceRepository,
   type EvidenceRepository,
 } from './lib/evidence-core';
+import { MarketRadarService } from './lib/market-radar';
 import type { BaseSearchParams, SerpApiEngine, SerpApiResponse } from './lib/types';
 
 
@@ -713,6 +714,43 @@ app.post('/api/evidence/migrate', async (c) => {
   const repo = getEvidenceRepository(env);
   const migratedCount = await repo.migrateFromLegacyKvCases(cache);
   return c.json({ success: true, migratedCount });
+});
+
+app.post('/api/market-radar/scan', async (c) => {
+  try {
+    const body = await c.req.json<{
+      productId: string;
+      mode?: 'quick' | 'deep';
+      allowDeepScan?: boolean;
+      location?: string;
+    }>();
+
+    if (!body.productId) {
+      return c.json({ error: 'productId is required' }, 400);
+    }
+
+    const env = c.env || ({} as Env);
+    const brandDna = getBrandDnaService(env);
+    const product = await brandDna.getProduct(body.productId);
+    if (!product) {
+      return c.json({ error: 'Product not found in Brand Vault' }, 404);
+    }
+
+    const client = createClient(env);
+    const repo = getEvidenceRepository(env);
+    const radar = new MarketRadarService(client, repo, brandDna);
+
+    const report = await radar.runRadar(product, {
+      mode: body.mode || 'quick',
+      allowDeepScan: body.allowDeepScan,
+      location: body.location,
+    });
+
+    return c.json({ data: report });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
 });
 
 export default app;
