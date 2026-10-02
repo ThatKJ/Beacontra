@@ -12,6 +12,13 @@ import {
   type UpdateCaseInput,
   type CaseStatus,
 } from './lib/evidence-desk';
+import {
+  BrandDnaService,
+  type CreateBrandInput,
+  type CreateProductInput,
+  type UpdateProductInput,
+  type UserCorrection,
+} from './lib/brand-dna';
 import type { BaseSearchParams, SerpApiEngine, SerpApiResponse } from './lib/types';
 
 
@@ -492,6 +499,149 @@ app.get('/api/cases/:caseId/report', async (c) => {
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Internal error';
     return c.text(`Report generation error: ${msg}`, 500);
+  }
+});
+
+// ==========================================
+// BRAND DNA — BRAND VAULT & SPECIFICATIONS
+// ==========================================
+
+function getBrandDnaService(env?: Env) {
+  const safeEnv = env || ({} as Env);
+  const cache = getSharedCache(safeEnv.CACHE_KV);
+  return new BrandDnaService(cache);
+}
+
+app.post('/api/brand-dna/brands', async (c) => {
+  try {
+    const body = await c.req.json<CreateBrandInput>();
+    const env = c.env || ({} as Env);
+    const service = getBrandDnaService(env);
+    const brand = await service.createBrand(body);
+    return c.json({ data: brand }, 201);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 400);
+  }
+});
+
+app.get('/api/brand-dna/brands', async (c) => {
+  try {
+    const env = c.env || ({} as Env);
+    const service = getBrandDnaService(env);
+    const brands = await service.listBrands();
+    return c.json({ data: brands, count: brands.length });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.get('/api/brand-dna/brands/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const env = c.env || ({} as Env);
+    const service = getBrandDnaService(env);
+    const brand = await service.getBrand(id);
+    if (!brand) return c.json({ error: 'Brand not found' }, 404);
+    return c.json({ data: brand });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.post('/api/brand-dna/products', async (c) => {
+  try {
+    const body = await c.req.json<CreateProductInput>();
+    const env = c.env || ({} as Env);
+    const service = getBrandDnaService(env);
+    const product = await service.createProduct(body);
+    return c.json({ data: product }, 201);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 400);
+  }
+});
+
+app.get('/api/brand-dna/products', async (c) => {
+  try {
+    const brandId = c.req.query('brandId');
+    const search = c.req.query('search') || c.req.query('q');
+    const env = c.env || ({} as Env);
+    const service = getBrandDnaService(env);
+    const products = await service.listProducts({ brandId, search });
+    return c.json({ data: products, count: products.length });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.get('/api/brand-dna/products/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const env = c.env || ({} as Env);
+    const service = getBrandDnaService(env);
+    const product = await service.getProduct(id);
+    if (!product) return c.json({ error: 'Product not found' }, 404);
+    return c.json({ data: product });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.patch('/api/brand-dna/products/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const body = await c.req.json<UpdateProductInput>();
+    const env = c.env || ({} as Env);
+    const service = getBrandDnaService(env);
+    const updated = await service.updateProduct(id, body);
+    if (!updated) return c.json({ error: 'Product not found' }, 404);
+    return c.json({ data: updated });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 400);
+  }
+});
+
+app.post('/api/brand-dna/products/:id/corrections', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const body = await c.req.json<Omit<UserCorrection, 'id' | 'createdAt'>>();
+    if (!body.listingTitle || !body.correctionType || !body.reason) {
+      return c.json({ error: 'listingTitle, correctionType, and reason are required' }, 400);
+    }
+    const env = c.env || ({} as Env);
+    const service = getBrandDnaService(env);
+    const updated = await service.addUserCorrection(id, body);
+    if (!updated) return c.json({ error: 'Product not found' }, 404);
+    return c.json({ data: updated }, 201);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
+  }
+});
+
+app.post('/api/brand-dna/products/:id/evaluate', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const body = await c.req.json<{ listingTitle: string }>();
+    if (!body.listingTitle) {
+      return c.json({ error: 'listingTitle is required' }, 400);
+    }
+    const env = c.env || ({} as Env);
+    const service = getBrandDnaService(env);
+    const product = await service.getProduct(id);
+    if (!product) return c.json({ error: 'Product not found' }, 404);
+
+    const evaluation = service.evaluateListingMatch(product, body.listingTitle);
+    return c.json({ data: evaluation });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    return c.json({ error: msg }, 500);
   }
 });
 
