@@ -213,7 +213,7 @@ try {
   await targetAtLeast("#newScanBtn");
   await targetAtLeast("#expandComparison");
   await page.locator(".brand").focus();
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 20; i++) {
     if ((await page.evaluate(() => document.activeElement?.id)) === "newScanBtn")
       break;
     await page.keyboard.press("Tab");

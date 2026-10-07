@@ -3,8 +3,8 @@
   "assets": [
     {
       "file": "index.html",
-      "rawBytes": 46986,
-      "gzipBytes": 10197
+      "rawBytes": 64898,
+      "gzipBytes": 13663
     },
     {
       "file": "styles.css",
@@ -31,36 +31,44 @@
     {
       "name": "desktop",
       "cpuSlowdown": 1,
-      "lcp": 392,
-      "layoutShifts": 0.011885285260235821,
+      "lcp": 700,
+      "layoutShifts": 0.011906454618477526,
       "longTasks": [
-        59
+        74
       ],
-      "fcp": 392,
+      "fcp": 700,
       "frameMedianMs": 16.699999999999818,
-      "frameP95Ms": 16.700000000000728,
+      "frameP95Ms": 16.799999999999727,
       "framesOver32ms": 0,
       "sampledFrames": 121,
       "requests": [
         {
-          "url": "http://localhost:8787/styles.css",
-          "transferBytes": 11191
-        },
-        {
           "url": "https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap",
           "transferBytes": 1041
+        },
+        {
+          "url": "http://localhost:8787/styles.css",
+          "transferBytes": 11191
         },
         {
           "url": "http://localhost:8787/experience.css",
           "transferBytes": 1405
         },
         {
-          "url": "http://localhost:8787/experience.js",
-          "transferBytes": 4463
+          "url": "http://localhost:8787/beacontra-os.css",
+          "transferBytes": 3206
         },
         {
           "url": "http://localhost:8787/app.js",
           "transferBytes": 9685
+        },
+        {
+          "url": "http://localhost:8787/experience.js",
+          "transferBytes": 4463
+        },
+        {
+          "url": "http://localhost:8787/beacontra-os.js",
+          "transferBytes": 11887
         },
         {
           "url": "https://www.boat-lifestyle.com/cdn/shop/files/AD141-FI_Black06_600x.jpg",
@@ -71,12 +79,10 @@
     {
       "name": "mobile-4x-cpu",
       "cpuSlowdown": 4,
-      "lcp": 488,
-      "layoutShifts": 0.05928372692307693,
-      "longTasks": [
-        119
-      ],
-      "fcp": 488,
+      "lcp": 616,
+      "layoutShifts": 0,
+      "longTasks": [],
+      "fcp": 616,
       "frameMedianMs": 16.699999999999818,
       "frameP95Ms": 16.799999999999272,
       "framesOver32ms": 0,
@@ -95,12 +101,20 @@
           "transferBytes": 1405
         },
         {
+          "url": "http://localhost:8787/beacontra-os.css",
+          "transferBytes": 3206
+        },
+        {
           "url": "http://localhost:8787/experience.js",
           "transferBytes": 4463
         },
         {
           "url": "http://localhost:8787/app.js",
           "transferBytes": 9685
+        },
+        {
+          "url": "http://localhost:8787/beacontra-os.js",
+          "transferBytes": 11887
         },
         {
           "url": "https://www.boat-lifestyle.com/cdn/shop/files/AD141-FI_Black06_600x.jpg",
@@ -110,6 +124,6 @@
     }
   ],
   "enhancementFallback": "PASS: example input works with experience.js blocked",
-  "totalRawBytes": 141972,
-  "totalGzipBytes": 35777
+  "totalRawBytes": 159884,
+  "totalGzipBytes": 39243
 }
