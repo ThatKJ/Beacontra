@@ -70,7 +70,7 @@ app.use('*', cors({
   maxAge: 86400,
 }));
 
-app.get('/health', (c) => {
+const handleHealth = (c: any) => {
   const env = c.env || ({} as Env);
   const health = getSerpApiHealthStatus(env as unknown as Record<string, unknown>);
   return c.json({
@@ -80,7 +80,10 @@ app.get('/health', (c) => {
       configured: health.configured,
     },
   });
-});
+};
+
+app.get('/health', handleHealth);
+app.get('/api/health', handleHealth);
 
 // The frontend is served by Workers Static Assets (wrangler.jsonc).
 
