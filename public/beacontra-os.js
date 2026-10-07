@@ -775,30 +775,21 @@
           const note = 'Manual review requested because price deviation and image provenance require confirmation.';
           const payload = {
             title: `Investigation: ${report.productName} on ${item.source}`,
+            productName: report.productName,
+            brand: OSState.activeProduct?.brandName || report.productName.split(' ')[0],
+            officialImageUrl: OSState.activeProduct?.canonicalImageUrl || item.imageUrl || 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df',
+            mrp: report.baseline?.mrp,
+            expectedPriceRange: report.baseline?.streetRange,
             scanId: report.scanId,
+            priority: exp.dimensions.reviewPriority === 'urgent_review' ? 'high' : 'medium',
+            initialNote: note,
+            tags: [item.source, exp.dimensions.reviewPriority || 'investigation'],
             targetProduct: {
               productName: report.productName,
-              officialImageUrl: OSState.activeProduct?.canonicalImageUrl,
-              mrp: report.baseline.mrp,
+              officialImageUrl: OSState.activeProduct?.canonicalImageUrl || item.imageUrl,
+              mrp: report.baseline?.mrp,
             },
             findingsSummary: exp.headline,
-            priority: exp.dimensions.reviewPriority === 'urgent_review' ? 'high' : 'medium',
-            evidenceItems: [
-              {
-                listing: {
-                  title: item.title,
-                  price: `₹${item.price}`,
-                  extractedPrice: item.price,
-                  seller: item.merchantName,
-                  source: item.source,
-                  url: item.url,
-                  thumbnail: item.imageUrl,
-                },
-                compositeScore: 75,
-                recommendation: exp.headline,
-              },
-            ],
-            notes: [note],
           };
           const res = await fetch('/api/cases', {
             method: 'POST',

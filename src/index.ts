@@ -398,13 +398,34 @@ function getEvidenceDeskService(env?: Env) {
 
 app.post('/api/cases', async (c) => {
   try {
-    const body = await c.req.json<CreateCaseInput>();
-    if (!body.productName) {
+    const rawBody = await c.req.json<Record<string, unknown>>();
+    const target = (rawBody.targetProduct && typeof rawBody.targetProduct === 'object')
+      ? rawBody.targetProduct as Record<string, unknown>
+      : undefined;
+
+    const productName = (rawBody.productName as string | undefined) || (target?.productName as string | undefined);
+    const officialImageUrl = (rawBody.officialImageUrl as string | undefined)
+      || (target?.officialImageUrl as string | undefined)
+      || (target?.canonicalImageUrl as string | undefined);
+
+    if (!productName) {
       return c.json({ error: 'productName is required' }, 400);
     }
-    if (!body.officialImageUrl) {
+    if (!officialImageUrl) {
       return c.json({ error: 'officialImageUrl is required' }, 400);
     }
+
+    const body: CreateCaseInput = {
+      ...(rawBody as unknown as CreateCaseInput),
+      productName,
+      officialImageUrl,
+      mrp: (rawBody.mrp as number | undefined) ?? (target?.mrp as number | undefined),
+      brand: (rawBody.brand as string | undefined) ?? (target?.brand as string | undefined),
+      expectedPriceRange: (rawBody.expectedPriceRange as { min: number; max: number } | undefined)
+        ?? (target?.expectedPriceRange as { min: number; max: number } | undefined),
+      knownAuthorizedSellers: (rawBody.knownAuthorizedSellers as string[] | undefined)
+        ?? (target?.knownAuthorizedSellers as string[] | undefined),
+    };
 
     const env = c.env || ({} as Env);
     const deskService = getEvidenceDeskService(env);
