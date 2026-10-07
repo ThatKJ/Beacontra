@@ -229,7 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(errJson.error || `Scan request failed with HTTP ${resp.status}`);
       }
 
-      const scanResult = await resp.json();
+      const rawJson = await resp.json();
+      const scanResult = rawJson.data || rawJson;
       latestScanResult = scanResult;
 
       // Render Results

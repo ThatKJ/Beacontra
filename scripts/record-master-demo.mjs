@@ -100,7 +100,7 @@ async function main() {
     `);
 
     console.log('Running automated verification suite in Terminal...');
-    await new Promise((r) => setTimeout(r, 28000));
+    await new Promise((r) => setTimeout(r, 34000));
 
     // ==========================================
     // PART 2: START BEACONTRA & LAUNCH BROWSER
@@ -194,16 +194,29 @@ async function main() {
     });
     await page.waitForTimeout(2000);
 
-    // Load example product into scanner form
-    await page.click('#loadDemoBtn');
+    // Type target product name directly (Real Indian consumer product)
+    await page.fill('#productName', 'boAt Nirvana Ion');
     await page.waitForTimeout(1000);
 
-    // Fill in expected price range and authorized sellers
-    await page.fill('#mrp', '4490');
-    await page.fill('#minPrice', '1000');
-    await page.fill('#maxPrice', '1500');
-    await page.fill('#authorizedSellers', 'Amazon, Flipkart, boAt Lifestyle, Croma, Reliance Digital, Appario Retail Private Ltd');
-    await page.waitForTimeout(2500);
+    // Enter official brand reference image URL (CDN reference photo)
+    await page.fill('#officialImageUrl', 'https://www.boat-lifestyle.com/cdn/shop/files/NION-ANC-FI_White01_600x.png');
+    await page.waitForTimeout(1500);
+
+    // Statutory printed MRP
+    await page.fill('#mrp', '7990');
+    await page.waitForTimeout(800);
+
+    // Open context details for expected price range & authorized sellers
+    await page.evaluate(() => {
+      const ctx = document.querySelector('.context');
+      if (ctx) ctx.open = true;
+    });
+    await page.waitForTimeout(800);
+
+    await page.fill('#minPrice', '1800');
+    await page.fill('#maxPrice', '2500');
+    await page.fill('#authorizedSellers', 'Amazon, Flipkart, boAt Lifestyle, Croma, Reliance Digital');
+    await page.waitForTimeout(2000);
 
     // Click START SCAN -> Triggers live POST /api/beacontra/scan
     console.log('Initiating flagship live scan (Google Shopping + Google Lens)...');
@@ -278,13 +291,19 @@ async function main() {
     // PART 7: MARKET RADAR (COMMERCIAL BASELINE)
     // ==========================================
     recordStamp('Part 7: Market Radar — Baseline Calculation & Variant Normalization');
-    const runRadarBtn = page.locator('#runRadarScanBtn');
-    await runRadarBtn.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(1000);
-    await runRadarBtn.click();
+    const baselineMeter = page.locator('#radarResultsArea .baseline-meter');
+    const isAlreadyRendering = await baselineMeter.isVisible().catch(() => false);
+    if (!isAlreadyRendering) {
+      const runRadarBtn = page.locator('#runRadarScanBtn');
+      if (await runRadarBtn.isVisible()) {
+        await runRadarBtn.scrollIntoViewIfNeeded();
+        await page.waitForTimeout(600);
+        await runRadarBtn.click();
+      }
+    }
 
-    console.log('Executing Market Radar baseline analysis...');
-    await page.locator('#radarResultsArea .baseline-meter').waitFor({ timeout: 20000 });
+    console.log('Waiting for Market Radar baseline analysis...');
+    await baselineMeter.waitFor({ timeout: 25000 });
     await page.waitForTimeout(3500);
 
     // Save snapshot to Watchtower
@@ -366,9 +385,15 @@ async function main() {
       const secondNode = page.locator('.graph-node-card').nth(1);
       if (await secondNode.isVisible()) {
         await secondNode.click();
+        await page.waitForTimeout(2000);
       }
     }
-    await page.waitForTimeout(3000);
+    // Scroll through the multi-node graph container
+    await page.evaluate(() => {
+      const scrollable = document.querySelector('#graphCanvasContainer div[style*="overflow-y: auto"]');
+      if (scrollable) scrollable.scrollBy({ top: 250, behavior: 'smooth' });
+    });
+    await page.waitForTimeout(2500);
 
     // ==========================================
     // PART 11: WATCHTOWER (HISTORICAL MONITORING)
@@ -427,6 +452,11 @@ async function main() {
     recordStamp('Part 14: Failure & Uncertainty Handling (SSRF Rejection)');
     await page.click('button[data-target="overview"]');
     await page.waitForTimeout(1000);
+    const newScanBtn = page.locator('#newScanBtn');
+    if (await newScanBtn.isVisible()) {
+      await newScanBtn.click();
+      await page.waitForTimeout(800);
+    }
     await page.evaluate(() => {
       const scanSec = document.getElementById('investigate');
       if (scanSec) scanSec.scrollIntoView({ behavior: 'smooth' });
@@ -434,11 +464,13 @@ async function main() {
     await page.waitForTimeout(1500);
 
     // Enter SSRF private IP URL
-    await page.fill('#productName', 'Test SSRF Product');
+    const prodInput = page.locator('#productName');
+    await prodInput.waitFor({ timeout: 10000 });
+    await prodInput.fill('Test SSRF Target');
     await page.fill('#officialImageUrl', 'http://169.254.169.254/latest/meta-data/');
     await page.click('#scanBtn');
     // Let the SSRF rejection remain visible
-    await page.waitForTimeout(3500);
+    await page.waitForTimeout(4000);
 
     // ==========================================
     // PART 15: SECURITY PROOF & BUDGET CONTROLS

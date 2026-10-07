@@ -1,4 +1,4 @@
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
 import { SerpApiClient, SerpApiError } from './lib/serpapi-client';
 import { getSharedCache } from './lib/cache';
@@ -70,7 +70,7 @@ app.use('*', cors({
   maxAge: 86400,
 }));
 
-const handleHealth = (c: any) => {
+const handleHealth = (c: Context) => {
   const env = c.env || ({} as Env);
   const health = getSerpApiHealthStatus(env as unknown as Record<string, unknown>);
   return c.json({

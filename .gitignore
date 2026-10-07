@@ -46,3 +46,8 @@ coverage/
 scratch/
 AGENTS.md
 .impeccable/
+
+# Media / Recordings
+*.mp4
+*.webm
+*.mov

@@ -165,6 +165,11 @@ export class WatchtowerService {
       averageComparablePrice: snapshot.stats.medianPrice ?? 0,
       listingIds: allListings.map(l => l.id),
       summary: report.summary,
+      listings: allListings,
+      productName: snapshot.productName,
+      brandId: snapshot.brandId,
+      provenanceHash: snapshot.provenanceHash,
+      stats: snapshot.stats as unknown as Record<string, unknown>,
     };
     await this.repository.saveSnapshot(repoSnap);
 
@@ -179,13 +184,16 @@ export class WatchtowerService {
     baseline: WatchtowerSnapshot,
     current: WatchtowerSnapshot
   ): SnapshotComparisonResult {
+    const baseListings = baseline.listings || [];
+    const currListings = current.listings || [];
+
     const baselineMap = new Map<string, SnapshotListingItem>();
-    for (const item of baseline.listings) {
+    for (const item of baseListings) {
       baselineMap.set(item.cleanUrl || item.id, item);
     }
 
     const currentMap = new Map<string, SnapshotListingItem>();
-    for (const item of current.listings) {
+    for (const item of currListings) {
       currentMap.set(item.cleanUrl || item.id, item);
     }
 

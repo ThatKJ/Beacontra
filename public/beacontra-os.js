@@ -59,7 +59,13 @@
     const sections = document.querySelectorAll('.os-section');
 
     if (targetId === 'overview') {
-      if (overviewEl) overviewEl.style.display = 'block';
+      if (overviewEl) {
+        overviewEl.style.display = 'block';
+        overviewEl.hidden = false;
+      }
+      const resultsSec = $('resultsSection');
+      if (resultsSec) resultsSec.hidden = true;
+      document.body.dataset.view = 'home';
       sections.forEach((s) => s.classList.remove('is-active'));
     } else {
       if (overviewEl) overviewEl.style.display = 'none';
