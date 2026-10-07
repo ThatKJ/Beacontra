@@ -757,7 +757,62 @@
             ${exp.playbook.ethicalLegalDisclaimers}
           </p>
         </div>
+
+        <div style="margin-top: 20px; display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
+          <button id="fileCaseFromModalBtn" class="cta cta-solid" style="min-height: 38px; padding: 6px 16px; font-size: 0.75rem;">
+            File to Cases Desk →
+          </button>
+        </div>
       `;
+
+      $('fileCaseFromModalBtn')?.addEventListener('click', async () => {
+        const fileBtn = $('fileCaseFromModalBtn');
+        if (fileBtn) {
+          fileBtn.disabled = true;
+          fileBtn.textContent = 'Filing Case...';
+        }
+        try {
+          const note = 'Manual review requested because price deviation and image provenance require confirmation.';
+          const payload = {
+            title: `Investigation: ${report.productName} on ${item.source}`,
+            scanId: report.scanId,
+            targetProduct: {
+              productName: report.productName,
+              officialImageUrl: OSState.activeProduct?.canonicalImageUrl,
+              mrp: report.baseline.mrp,
+            },
+            findingsSummary: exp.headline,
+            priority: exp.dimensions.reviewPriority === 'urgent_review' ? 'high' : 'medium',
+            evidenceItems: [
+              {
+                listing: {
+                  title: item.title,
+                  price: `₹${item.price}`,
+                  extractedPrice: item.price,
+                  seller: item.merchantName,
+                  source: item.source,
+                  url: item.url,
+                  thumbnail: item.imageUrl,
+                },
+                compositeScore: 75,
+                recommendation: exp.headline,
+              },
+            ],
+            notes: [note],
+          };
+          const res = await fetch('/api/cases', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          if (res.ok) {
+            modalBackdrop.setAttribute('hidden', '');
+            switchModule('cases-desk');
+          }
+        } catch (e) {
+          console.error('Failed to file case:', e);
+        }
+      });
     } catch (err) {
       modalBody.innerHTML = `<p class="hint error">Could not generate explanation: ${err.message}</p>`;
     }

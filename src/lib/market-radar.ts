@@ -151,10 +151,13 @@ export class MarketRadarService {
       product_id?: string;
     }> = [];
 
-    // 1. Primary Query: SerpApi Google Shopping
+    const brandName = product.brandName || '';
+    const queryTerm = brandName && !product.productName.toLowerCase().includes(brandName.toLowerCase())
+      ? `${brandName} ${product.productName}`.trim()
+      : product.productName;
     const queryParams: BaseSearchParams & { tbm?: string } = {
       engine: 'google_shopping',
-      q: `${product.brandId} ${product.productName}`,
+      q: queryTerm,
       location: options.location || 'India',
       gl: options.gl || 'in',
       hl: options.hl || 'en',
