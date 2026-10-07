@@ -45,6 +45,7 @@ export interface ProductIdentity {
 // 2. Marketplace Listing
 export interface MarketplaceListing {
   id: string; // deterministic "lst_<hash>"
+  targetProductId?: string; // Foreign key to TargetProductProfile if associated
   source: string; // e.g., "Amazon.in", "Flipkart"
   marketplace: string; // e.g., "amazon", "google_shopping"
   externalId?: string;

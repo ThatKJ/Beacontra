@@ -22,6 +22,9 @@ import {
 import {
   DurableEvidenceRepository,
   type EvidenceRepository,
+  generateListingId,
+  generateMerchantId,
+  sanitizeListingUrl,
 } from './lib/evidence-core';
 import { MarketRadarService } from './lib/market-radar';
 import {
@@ -304,6 +307,49 @@ app.post('/api/beacontra/scan', async (c) => {
       engine: 'beacontra_scan',
       paramsHash: result.scanId,
     });
+
+    // Also persist into DurableEvidenceRepository for Evidence Graph and Evidence Desk
+    try {
+      const repo = getEvidenceRepository(env);
+      const firstToken = input.productName.trim().split(/\s+/)[0] || 'brand';
+      const productId = `prod_${input.productName.toLowerCase().replace(/[^a-z0-9]/g, '')}`.slice(0, 32);
+      await repo.saveProduct({
+        id: productId,
+        brandId: firstToken.toLowerCase(),
+        canonicalName: input.productName,
+        canonicalImageUrls: [input.officialImageUrl],
+        mrp: input.mrp || 0,
+        currency: 'INR',
+        expectedPriceRange: input.expectedPriceRange,
+        authorizedSellers: input.knownAuthorizedSellers || [],
+        createdAt: result.createdAt,
+        updatedAt: result.createdAt,
+      });
+
+      for (const item of result.results) {
+        const lId = await generateListingId(item.listing.source, item.listing.productLink);
+        const merchantId = await generateMerchantId(item.listing.seller, item.listing.source);
+        await repo.saveListing({
+          id: lId,
+          targetProductId: productId,
+          source: item.listing.source,
+          marketplace: item.listing.source.toLowerCase().includes('amazon') ? 'amazon' : 'google_shopping',
+          title: item.listing.title,
+          url: item.listing.productLink,
+          cleanUrl: sanitizeListingUrl(item.listing.productLink),
+          extractedPrice: item.listing.extractedPrice,
+          originalPriceText: item.listing.price,
+          currency: 'INR',
+          sellerName: item.listing.seller,
+          merchantId,
+          imageUrl: item.listing.thumbnail,
+          createdAt: result.createdAt,
+          updatedAt: result.createdAt,
+        });
+      }
+    } catch {
+      // Non-blocking persistence
+    }
 
     return c.json({
       data: result,
