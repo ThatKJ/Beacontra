@@ -59,3 +59,20 @@ Stable, verified areas that should **NOT** receive additional modifications befo
 - **SSRF Security Layer (`src/lib/security.ts`)**: Fully hardened and tested against alternative octal/hex/IPv6 encodings.
 - **Credit-Budget Caps (`MAX_LENS_CALLS = 10`)**: Essential to protect the SerpApi quota.
 - **Playwright Test Runner (`scripts/ui-check.mjs`, `scripts/ui-performance.mjs`)**: Verified and aligned with the OS interface navigation.
+
+---
+
+## VERIFICATION & REPOSITORY BASELINE
+
+- **Current Active Branch:** `main` (synchronized with `feat/evidence-desk-investigation`)
+- **Final Commit SHA:** `611a96891cae4cba0af8efb7c430918b9e8c532e`
+- **Remote GitHub Match:** YES — `origin/main` and `origin/feat/evidence-desk-investigation` match local HEAD exactly.
+- **Submission Version on Main:** YES — `main` contains the complete Beacontra OS submission codebase.
+- **Actual Verified Test Results:**
+  - `npm test`: 17 passed (17 files), 158 passed | 1 skipped (live-key gated)
+  - `npm run typecheck`: 0 errors
+  - `npm run lint`: 0 errors, 0 warnings
+  - `npm run build`: 287.44 KiB compiled successfully
+  - `npm run test:ui`: 6 viewports passed (375px–1440px), 0 axe WCAG violations
+- **Remaining Blockers:** ZERO technical blockers.
+
