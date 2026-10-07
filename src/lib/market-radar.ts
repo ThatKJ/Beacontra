@@ -138,6 +138,20 @@ export class MarketRadarService {
       maxCreditsCap: allowDeep ? 3 : 1,
     };
 
+    // Ensure product identity exists in repository for Evidence Graph
+    await this.repository.saveProduct({
+      id: product.id,
+      brandId: product.brandId,
+      canonicalName: product.productName,
+      canonicalImageUrls: [product.canonicalImageUrl],
+      mrp: product.statutoryMrp || 0,
+      currency: 'INR',
+      expectedPriceRange: product.expectedPriceRange,
+      authorizedSellers: product.authorizedSellers || [],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+
     const observations: SearchObservation[] = [];
     const rawListings: Array<{
       title: string;
@@ -152,9 +166,11 @@ export class MarketRadarService {
     }> = [];
 
     const brandName = product.brandName || '';
-    const queryTerm = brandName && !product.productName.toLowerCase().includes(brandName.toLowerCase())
-      ? `${brandName} ${product.productName}`.trim()
-      : product.productName;
+    const firstWord = brandName.trim().split(/\s+/)[0]?.toLowerCase();
+    const alreadyContainsBrand = Boolean(firstWord && product.productName.toLowerCase().includes(firstWord));
+    const queryTerm = alreadyContainsBrand || !brandName
+      ? product.productName
+      : `${brandName} ${product.productName}`.trim();
     const queryParams: BaseSearchParams & { tbm?: string } = {
       engine: 'google_shopping',
       q: queryTerm,

@@ -84,10 +84,12 @@ async function main() {
   // Give screencapture 1.5s to initialize
   await new Promise((r) => setTimeout(r, 1500));
 
-  // ==========================================
-  // PART 1: PROJECT PROOF
-  // ==========================================
-  recordStamp('Part 1: Project Proof & Automated Quality Gates');
+  let context = null;
+  try {
+    // ==========================================
+    // PART 1: PROJECT PROOF
+    // ==========================================
+    recordStamp('Part 1: Project Proof & Automated Quality Gates');
   runAppleScript(`
     tell application "Terminal"
       activate
@@ -108,7 +110,7 @@ async function main() {
   // ==========================================
   recordStamp('Part 2: Launch Beacontra OS Browser');
   console.log('Launching Chromium with Beacontra Lens extension...');
-  const context = await chromium.launchPersistentContext(USER_DATA_DIR, {
+  context = await chromium.launchPersistentContext(USER_DATA_DIR, {
     headless: false,
     viewport: { width: 1400, height: 950 },
     args: [
@@ -428,9 +430,8 @@ async function main() {
   await page.click('#scanBtn');
   await page.waitForTimeout(2500);
 
-  // Reset form
-  await page.click('#loadDemoBtn');
-  await page.waitForTimeout(1500);
+  // Let the SSRF security rejection error banner remain visible on screen
+  await page.waitForTimeout(3500);
 
   // ==========================================
   // PART 17 & 18: SECURITY PROOF & BUDGET CONTROLS
@@ -486,19 +487,25 @@ async function main() {
   console.log('Running final test suite in Terminal...');
   await new Promise((r) => setTimeout(r, 16000));
 
-  // ==========================================
-  // STOP RECORDING & SAVE
-  // ==========================================
-  recordStamp('Stop Recording & Finalize Dossier');
-  console.log('[RECORDING] Sending SIGINT to screencapture...');
-  captureProc.kill('SIGINT');
+  } finally {
+    if (context) {
+      await context.close().catch(() => {});
+    }
 
-  await new Promise((resolve) => {
-    captureProc.on('exit', (code) => {
-      console.log(`[RECORDING] screencapture exited with code: ${code}`);
-      resolve(null);
+    // ==========================================
+    // STOP RECORDING & SAVE
+    // ==========================================
+    recordStamp('Stop Recording & Finalize Dossier');
+    console.log('[RECORDING] Sending SIGINT to screencapture...');
+    captureProc.kill('SIGINT');
+
+    await new Promise((resolve) => {
+      captureProc.on('exit', (code) => {
+        console.log(`[RECORDING] screencapture exited with code: ${code}`);
+        resolve(null);
+      });
     });
-  });
+  }
 
   // Verify MP4 file
   if (fs.existsSync(OUTPUT_VIDEO)) {
