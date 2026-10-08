@@ -1,4 +1,4 @@
-# Beacontra OS
+# Beacontra
 
 **Evidence-first marketplace intelligence for Indian brands.**
 
