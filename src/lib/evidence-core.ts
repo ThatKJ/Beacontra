@@ -182,7 +182,7 @@ export interface HistoricalScanSnapshot {
   averageComparablePrice: number;
   listingIds: string[];
   summary: string;
-  listings?: Record<string, unknown>[];
+  listings?: unknown[];
   productName?: string;
   brandId?: string;
   stats?: Record<string, unknown>;
