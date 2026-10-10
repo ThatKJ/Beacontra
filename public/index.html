@@ -86,8 +86,8 @@
       </div>
     </header>
     <nav class="os-module-bar" aria-label="Beacontra OS Modules">
-      <div class="wrap" style="display: flex; gap: 8px; align-items: center; width: 100%;">
-        <span class="os-tag os-tag-teal" style="margin-right: 8px;">BEACONTRA OS</span>
+      <div class="wrap" style="display: flex; gap: 8px; align-items: center; width: 100%; flex-wrap: wrap;">
+        <span class="os-tag os-tag-teal" style="margin-right: 4px;">BEACONTRA OS</span>
         <button type="button" class="os-module-btn is-active" data-target="overview">Overview</button>
         <button type="button" class="os-module-btn" data-target="brand-vault">Brand Vault <span class="os-module-badge">M1</span></button>
         <button type="button" class="os-module-btn" data-target="market-radar">Market Radar <span class="os-module-badge">M3</span></button>
@@ -95,8 +95,40 @@
         <button type="button" class="os-module-btn" data-target="watchtower">Watchtower <span class="os-module-badge">M5</span></button>
         <button type="button" class="os-module-btn" data-target="cases-desk">Cases Desk <span class="os-module-badge">M8</span></button>
         <button type="button" class="os-module-btn" data-target="investigation-autopilot">Autopilot <span class="os-module-badge">AUTO</span></button>
+        <button type="button" id="openGuidedTourBtn" class="os-module-btn" style="margin-left: auto; background: var(--signal); color: #000; font-weight: 700; border-color: var(--signal); display: inline-flex; align-items: center; gap: 6px;">
+          <span aria-hidden="true">✨</span> How To Use Beacontra
+        </button>
       </div>
     </nav>
+    <aside class="os-quickstart-banner wrap" aria-label="Beacontra Quick-Start Workflow">
+      <div class="os-qs-steps">
+        <span class="mono" style="font-size: 0.7rem; color: var(--signal); font-weight: 700; letter-spacing: 0.05em;">GUIDED WORKFLOW:</span>
+        <button type="button" class="os-qs-step-btn" data-target="brand-vault">
+          <strong>1</strong> Brand DNA
+        </button>
+        <span class="os-qs-arrow" aria-hidden="true">→</span>
+        <button type="button" class="os-qs-step-btn" data-target="market-radar">
+          <strong>2</strong> Market Radar
+        </button>
+        <span class="os-qs-arrow" aria-hidden="true">→</span>
+        <button type="button" class="os-qs-step-btn" data-target="evidence-graph">
+          <strong>3</strong> Evidence Graph
+        </button>
+        <span class="os-qs-arrow" aria-hidden="true">→</span>
+        <button type="button" class="os-qs-step-btn" data-target="watchtower">
+          <strong>4</strong> Watchtower
+        </button>
+        <span class="os-qs-arrow" aria-hidden="true">→</span>
+        <button type="button" class="os-qs-step-btn" data-target="cases-desk">
+          <strong>5</strong> Cases Desk
+        </button>
+      </div>
+      <div>
+        <button type="button" id="bannerTourBtn" class="cta cta-ghost" style="font-size: 0.72rem; padding: 4px 10px; border-color: rgba(255,255,255,0.2);">
+          Quick Interactive Tour
+        </button>
+      </div>
+    </aside>
     <main id="main">
       <div id="home">
         <!-- ════════════════════ HERO ════════════════════ -->
@@ -945,8 +977,25 @@
             </p>
           </header>
 
+          <div class="graph-toolbar">
+            <div class="graph-filters">
+              <button type="button" class="graph-filter-btn is-active" data-type="all">All (<span id="graphFilterAllCount">0</span>)</button>
+              <button type="button" class="graph-filter-btn" data-type="product">Products (<span id="graphFilterProdCount">0</span>)</button>
+              <button type="button" class="graph-filter-btn" data-type="listing">Listings (<span id="graphFilterListCount">0</span>)</button>
+              <button type="button" class="graph-filter-btn" data-type="merchant">Merchants (<span id="graphFilterMerchCount">0</span>)</button>
+              <button type="button" class="graph-filter-btn" data-type="marketplace">Marketplaces (<span id="graphFilterMktCount">0</span>)</button>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="search" id="graphSearchInput" class="graph-search-box" placeholder="Search node, seller, ID..." aria-label="Search graph nodes" />
+              <div class="graph-view-toggle">
+                <button type="button" id="graphViewNetworkBtn" class="graph-view-btn is-active">🕸️ Network</button>
+                <button type="button" id="graphViewCardsBtn" class="graph-view-btn">🗂️ Cards</button>
+              </div>
+            </div>
+          </div>
+
           <div class="graph-container">
-            <canvas id="graphCanvasContainer" class="graph-canvas"></canvas>
+            <div id="graphCanvasContainer" class="graph-canvas-container"></div>
             <aside id="graphNodeDetails" class="graph-sidebar">
               <h4 style="margin-top: 0; font-family: var(--mono); font-size: 0.85rem; color: var(--os-teal-light);">NODE INSPECTOR</h4>
               <p class="muted" style="font-size: 0.8rem;">Click any node in the graph canvas to inspect evidence provenance, source URLs, and match confidence.</p>
@@ -965,6 +1014,24 @@
               Compare genuine marketplace scan snapshots across time. Surface newly discovered listings, missing offers, drastic price drops, and seller shifts.
             </p>
           </header>
+
+          <div class="watchtower-ctrl-bar">
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+              <label for="watchtowerProductSelect" style="font-family: var(--mono); font-size: 0.76rem; color: var(--os-text-muted);">MONITORED PRODUCT:</label>
+              <select id="watchtowerProductSelect" style="background: var(--ink-3); border: 1px solid var(--line-dark); color: var(--paper); padding: 7px 12px; border-radius: 3px; font-size: 0.82rem; min-width: 260px;"></select>
+            </div>
+            <div class="watchtower-actions">
+              <button type="button" id="watchtowerSimulateBtn" class="cta cta-ghost" style="font-size: 0.78rem; padding: 7px 14px; border-color: var(--signal); color: var(--signal);">
+                <span aria-hidden="true">🧪</span> Simulate 7-Day Market Drift
+              </button>
+              <button type="button" id="watchtowerCaptureBtn" class="cta cta-solid" style="font-size: 0.78rem; padding: 7px 14px;">
+                <span aria-hidden="true">📸</span> Capture Snapshot
+              </button>
+              <button type="button" id="watchtowerRefreshBtn" class="cta cta-ghost" style="font-size: 0.78rem; padding: 7px 12px;">
+                🔄 Refresh
+              </button>
+            </div>
+          </div>
 
           <div id="watchtowerSnapshotsList"></div>
         </div>
@@ -1253,6 +1320,44 @@
           <button id="closeExplainModalBtn" type="button" class="cta cta-ghost" style="padding: 4px 10px;">Close <span aria-hidden="true">×</span></button>
         </div>
         <div id="explainModalBody"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════════ GUIDED TOUR MODAL ════════════════════ -->
+    <div id="guideTourModalBackdrop" class="os-modal-backdrop" hidden>
+      <div class="tour-modal" role="dialog" aria-modal="true" aria-labelledby="tourModalTitle">
+        <div class="tour-header">
+          <div>
+            <p class="tech" style="color: var(--signal); margin-bottom: 4px;">SYSTEM ONBOARDING & NAVIGATION GUIDE</p>
+            <h2 id="tourModalTitle" style="margin: 0; font-family: var(--display); font-size: 1.6rem; color: var(--paper);">
+              How To Use Beacontra OS
+            </h2>
+          </div>
+          <button id="closeTourModalBtn" type="button" class="cta cta-ghost" style="padding: 4px 10px;">
+            Close <span aria-hidden="true">×</span>
+          </button>
+        </div>
+
+        <div class="tour-step-indicator" id="tourStepIndicator" aria-label="Tour progress"></div>
+
+        <div id="tourStepContent" class="tour-content-body"></div>
+
+        <div class="tour-footer-nav">
+          <button type="button" id="tourPrevBtn" class="cta cta-ghost" style="padding: 6px 14px; font-size: 0.8rem;">
+            ← Previous
+          </button>
+          <span id="tourStepCountText" class="mono" style="font-size: 0.74rem; color: var(--ash);">
+            Step 1 of 7
+          </span>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" id="tourJumpBtn" class="cta cta-ghost" style="padding: 6px 14px; font-size: 0.8rem; border-color: var(--signal); color: var(--signal);">
+              🚀 Jump to Module
+            </button>
+            <button type="button" id="tourNextBtn" class="cta cta-solid" style="padding: 6px 16px; font-size: 0.8rem;">
+              Next →
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </body>

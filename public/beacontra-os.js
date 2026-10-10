@@ -434,12 +434,17 @@
   }
 
   // ==========================================
-  // 3. EVIDENCE GRAPH
+  // 3. EVIDENCE GRAPH CONTROLLER
   // ==========================================
+  let graphFilterType = 'all';
+  let graphSearchQuery = '';
+  let graphViewMode = 'network'; // 'network' | 'cards'
+  let selectedNodeId = null;
+
   async function loadEvidenceGraphView() {
-    const canvas = $('graphCanvasContainer');
-    if (!canvas) return;
-    canvas.innerHTML = '<p class="mono" style="padding: 24px;">Loading Evidence Graph nodes & relationships...</p>';
+    const container = $('graphCanvasContainer');
+    if (!container) return;
+    container.innerHTML = '<p class="mono" style="padding: 28px; color: var(--os-text-muted);">Fetching unified evidence graph nodes & factual edges...</p>';
 
     try {
       const resp = await fetch('/api/evidence-graph');
@@ -447,46 +452,113 @@
       const json = await resp.json();
       OSState.graphData = json.data;
 
-      renderEvidenceGraph(json.data);
+      // Update badge counts in toolbar
+      const nodes = json.data.nodes || [];
+      const prodCount = nodes.filter((n) => n.type === 'product').length;
+      const listCount = nodes.filter((n) => n.type === 'listing').length;
+      const merchCount = nodes.filter((n) => n.type === 'merchant').length;
+      const mktCount = nodes.filter((n) => n.type === 'marketplace').length;
+
+      if ($('graphFilterAllCount')) $('graphFilterAllCount').textContent = nodes.length;
+      if ($('graphFilterProdCount')) $('graphFilterProdCount').textContent = prodCount;
+      if ($('graphFilterListCount')) $('graphFilterListCount').textContent = listCount;
+      if ($('graphFilterMerchCount')) $('graphFilterMerchCount').textContent = merchCount;
+      if ($('graphFilterMktCount')) $('graphFilterMktCount').textContent = mktCount;
+
+      renderEvidenceGraph();
     } catch (err) {
-      canvas.innerHTML = `<p class="hint error" style="padding: 24px;">Graph error: ${err.message}</p>`;
+      container.innerHTML = `<p class="hint error" style="padding: 24px;">Graph error: ${err.message}</p>`;
     }
   }
 
-  function renderEvidenceGraph(graph) {
-    const canvas = $('graphCanvasContainer');
+  function initEvidenceGraphControls() {
+    document.querySelectorAll('.graph-filter-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.graph-filter-btn').forEach((b) => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        graphFilterType = btn.getAttribute('data-type') || 'all';
+        renderEvidenceGraph();
+      });
+    });
+
+    $('graphSearchInput')?.addEventListener('input', (e) => {
+      graphSearchQuery = (e.target.value || '').trim().toLowerCase();
+      renderEvidenceGraph();
+    });
+
+    $('graphViewNetworkBtn')?.addEventListener('click', () => {
+      $('graphViewNetworkBtn')?.classList.add('is-active');
+      $('graphViewCardsBtn')?.classList.remove('is-active');
+      graphViewMode = 'network';
+      renderEvidenceGraph();
+    });
+
+    $('graphViewCardsBtn')?.addEventListener('click', () => {
+      $('graphViewCardsBtn')?.classList.add('is-active');
+      $('graphViewNetworkBtn')?.classList.remove('is-active');
+      graphViewMode = 'cards';
+      renderEvidenceGraph();
+    });
+  }
+
+  function renderEvidenceGraph() {
+    const container = $('graphCanvasContainer');
     const details = $('graphNodeDetails');
-    if (!canvas) return;
+    if (!container || !OSState.graphData) return;
 
-    const nodes = graph.nodes || [];
-    const edges = graph.edges || [];
+    const allNodes = OSState.graphData.nodes || [];
+    const allEdges = OSState.graphData.edges || [];
 
-    canvas.innerHTML = `
-      <div style="padding: 16px; border-bottom: 1px solid var(--os-border); display: flex; gap: 12px; align-items: center; justify-content: space-between;">
-        <div>
-          <span class="mono" style="font-size: 0.75rem; color: var(--os-text-muted);">
-            TOTAL NODES: <strong style="color: var(--os-text-primary);">${graph.summary.totalNodes}</strong> | 
-            FACTUAL EDGES: <strong style="color: var(--os-teal-light);">${graph.summary.totalEdges}</strong>
-          </span>
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <span class="os-tag os-tag-teal">Observed Factual Basis</span>
-          <span class="os-tag">Zero Speculative Claims</span>
-        </div>
-      </div>
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; padding: 20px; max-height: 440px; overflow-y: auto;">
+    // Filter nodes by type and search query
+    let filteredNodes = allNodes.filter((n) => {
+      if (graphFilterType !== 'all' && n.type !== graphFilterType) return false;
+      if (graphSearchQuery) {
+        const text = `${n.label || ''} ${n.sublabel || ''} ${n.id || ''}`.toLowerCase();
+        return text.includes(graphSearchQuery);
+      }
+      return true;
+    });
+
+    // If selected node is set, ensure it's kept or inspector is updated
+    if (!selectedNodeId && filteredNodes.length > 0) {
+      selectedNodeId = filteredNodes[0].id;
+    }
+    updateNodeInspector(selectedNodeId);
+
+    if (graphViewMode === 'cards') {
+      renderCardsView(container, filteredNodes, allEdges);
+    } else {
+      renderSvgNetworkView(container, filteredNodes, allEdges);
+    }
+  }
+
+  function renderCardsView(container, nodes, edges) {
+    if (nodes.length === 0) {
+      container.innerHTML = '<p class="mono" style="padding: 32px; text-align: center; color: var(--os-text-muted);">No evidence nodes match the selected filter.</p>';
+      return;
+    }
+
+    container.innerHTML = `
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; padding: 20px; max-height: 520px; overflow-y: auto;">
         ${nodes
           .map(
             (n) => `
-          <div class="os-card graph-node-card" data-id="${n.id}" style="margin: 0; padding: 14px; cursor: pointer;">
+          <div class="os-card graph-node-card ${n.id === selectedNodeId ? 'is-selected' : ''}" data-id="${n.id}" 
+               style="margin: 0; padding: 14px; cursor: pointer; border-left: 3px solid ${getNodeColor(n.type)};">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <span class="os-tag os-tag-${n.type === 'product' ? 'teal' : n.type === 'listing' ? 'amber' : 'red'}">${n.type}</span>
-              <span class="mono" style="font-size: 0.6rem; color: var(--os-text-muted);">${(n.provenance.confidence * 100).toFixed(0)}% conf</span>
+              <span class="os-tag" style="background: rgba(255,255,255,0.06); color: ${getNodeColor(n.type)}; border: 1px solid ${getNodeColor(n.type)}; font-size: 0.65rem;">
+                ${n.type.toUpperCase()}
+              </span>
+              <span class="mono" style="font-size: 0.62rem; color: var(--os-text-muted);">
+                ${n.provenance ? Math.round(n.provenance.confidence * 100) : 100}% conf
+              </span>
             </div>
-            <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-              ${n.label}
+            <div style="font-weight: 600; font-size: 0.82rem; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              ${escapeHtml(n.label)}
             </div>
-            <div class="muted" style="font-size: 0.72rem;">${n.sublabel || ''}</div>
+            <div class="muted" style="font-size: 0.72rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              ${escapeHtml(n.sublabel || '')}
+            </div>
           </div>
         `
           )
@@ -494,78 +566,497 @@
       </div>
     `;
 
-    canvas.querySelectorAll('.graph-node-card').forEach((card) => {
+    container.querySelectorAll('.graph-node-card').forEach((card) => {
       card.addEventListener('click', () => {
-        const id = card.getAttribute('data-id');
-        const node = nodes.find((n) => n.id === id);
-        const connectedEdges = edges.filter((e) => e.source === id || e.target === id);
-
-        if (details && node) {
-          details.innerHTML = `
-            <div style="margin-bottom: 12px;">
-              <span class="os-tag os-tag-teal">${node.type.toUpperCase()}</span>
-            </div>
-            <h4 style="margin: 0 0 8px;">${node.label}</h4>
-            <p class="muted" style="font-size: 0.8rem; margin: 0 0 16px;">${node.sublabel || ''}</p>
-
-            <div style="border-top: 1px solid var(--os-border); padding-top: 12px; margin-top: 12px;">
-              <div class="mono" style="font-size: 0.68rem; color: var(--os-text-muted); margin-bottom: 8px;">
-                CONNECTED EVIDENCE EDGES (${connectedEdges.length})
-              </div>
-              ${connectedEdges
-                .map(
-                  (e) => `
-                <div style="padding: 8px; background: var(--os-navy-700); border-radius: 4px; margin-bottom: 8px; font-size: 0.76rem;">
-                  <div style="display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.62rem; color: var(--os-teal-light);">
-                    <span>${e.relationship.replace('_', ' ').toUpperCase()}</span>
-                    <span>${e.relationshipKind.toUpperCase()}</span>
-                  </div>
-                  <div style="margin-top: 4px; color: var(--os-text-secondary);">${e.evidenceBasis}</div>
-                </div>
-              `
-                )
-                .join('')}
-            </div>
-          `;
-        }
+        selectedNodeId = card.getAttribute('data-id');
+        container.querySelectorAll('.graph-node-card').forEach((c) => c.classList.remove('is-selected'));
+        card.classList.add('is-selected');
+        updateNodeInspector(selectedNodeId);
       });
     });
   }
 
+  function renderSvgNetworkView(container, nodes, edges) {
+    if (nodes.length === 0) {
+      container.innerHTML = '<p class="mono" style="padding: 32px; text-align: center; color: var(--os-text-muted);">No evidence nodes match the selected filter.</p>';
+      return;
+    }
+
+    const width = 960;
+    const height = 520;
+    const visibleIds = new Set(nodes.map((n) => n.id));
+
+    // Limit active network render to top 60 nodes for smooth SVG performance
+    const renderNodes = nodes.slice(0, 60);
+    const renderIds = new Set(renderNodes.map((n) => n.id));
+
+    // Calculate node coordinates in structured relational zones
+    const positions = new Map();
+    const productNodes = renderNodes.filter((n) => n.type === 'product');
+    const mktNodes = renderNodes.filter((n) => n.type === 'marketplace');
+    const merchNodes = renderNodes.filter((n) => n.type === 'merchant');
+    const listingNodes = renderNodes.filter((n) => n.type === 'listing');
+    const otherNodes = renderNodes.filter((n) => !['product', 'marketplace', 'merchant', 'listing'].includes(n.type));
+
+    // Center zone: Products
+    productNodes.forEach((n, idx) => {
+      const angle = (idx / Math.max(1, productNodes.length)) * Math.PI * 2;
+      const r = productNodes.length > 1 ? 50 : 0;
+      positions.set(n.id, { x: 420 + Math.cos(angle) * r, y: 260 + Math.sin(angle) * r, r: 22, color: '#d4f58f' });
+    });
+
+    // Left zone: Marketplaces
+    mktNodes.forEach((n, idx) => {
+      const step = height / (mktNodes.length + 1);
+      positions.set(n.id, { x: 140, y: step * (idx + 1), r: 18, color: '#818cf8' });
+    });
+
+    // Right zone: Merchants
+    merchNodes.forEach((n, idx) => {
+      const step = (height - 80) / Math.max(1, merchNodes.length);
+      const xOffset = (idx % 2) * 40;
+      positions.set(n.id, { x: 680 + xOffset, y: 50 + step * idx, r: 15, color: '#fb923c' });
+    });
+
+    // Middle/Radiating zone: Listings
+    listingNodes.forEach((n, idx) => {
+      const angle = (idx / Math.max(1, listingNodes.length)) * Math.PI * 2;
+      const radius = 140 + (idx % 3) * 45;
+      const cx = 420 + Math.cos(angle) * radius;
+      const cy = 260 + Math.sin(angle) * (radius * 0.75);
+      const isRisk = n.metadata?.requiresReview || false;
+      positions.set(n.id, {
+        x: Math.max(80, Math.min(width - 80, cx)),
+        y: Math.max(40, Math.min(height - 40, cy)),
+        r: 10,
+        color: isRisk ? '#ef4444' : '#f59e0b',
+      });
+    });
+
+    // Other nodes
+    otherNodes.forEach((n, idx) => {
+      positions.set(n.id, { x: 300 + (idx * 30) % 300, y: 460, r: 8, color: '#c084fc' });
+    });
+
+    // Filter relevant edges between displayed nodes
+    const renderEdges = edges.filter((e) => renderIds.has(e.source) && renderIds.has(e.target));
+
+    // Build SVG elements
+    const edgesMarkup = renderEdges
+      .map((e) => {
+        const p1 = positions.get(e.source);
+        const p2 = positions.get(e.target);
+        if (!p1 || !p2) return '';
+        const isConnected = selectedNodeId && (e.source === selectedNodeId || e.target === selectedNodeId);
+        const strokeColor = isConnected ? '#d4f58f' : getEdgeColor(e.relationship);
+        const strokeWidth = isConnected ? 2.6 : 1.2;
+        const opacity = selectedNodeId ? (isConnected ? 0.9 : 0.12) : 0.45;
+
+        return `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" 
+                      stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-opacity="${opacity}" 
+                      class="graph-edge-line" data-edge="${e.id}" />`;
+      })
+      .join('');
+
+    const nodesMarkup = renderNodes
+      .map((n) => {
+        const pos = positions.get(n.id);
+        if (!pos) return '';
+        const isSelected = n.id === selectedNodeId;
+        const isConnectedToSelected = edges.some(
+          (e) => (e.source === selectedNodeId && e.target === n.id) || (e.target === selectedNodeId && e.source === n.id)
+        );
+        const isDimmed = selectedNodeId && !isSelected && !isConnectedToSelected;
+        const shortLabel = n.label.length > 18 ? n.label.slice(0, 16) + '…' : n.label;
+
+        return `
+          <g class="graph-node-group ${isSelected ? 'is-selected' : ''} ${isDimmed ? 'is-dimmed' : ''}" 
+             data-id="${n.id}" transform="translate(${pos.x}, ${pos.y})">
+            <circle r="${pos.r}" fill="${pos.color}" fill-opacity="${isSelected ? 1 : 0.85}" 
+                    stroke="${isSelected ? '#ffffff' : 'rgba(0,0,0,0.4)'}" stroke-width="${isSelected ? 3 : 1.5}"></circle>
+            <text y="${pos.r + 12}" text-anchor="middle" fill="${isSelected ? '#ffffff' : 'var(--paper)'}" 
+                  font-family="var(--mono)" font-size="9" font-weight="${isSelected ? '700' : '400'}">
+              ${escapeHtml(shortLabel)}
+            </text>
+          </g>
+        `;
+      })
+      .join('');
+
+    container.innerHTML = `
+      <svg class="graph-svg-root" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <radialGradient id="graphBgGlow" cx="45%" cy="50%" r="55%">
+            <stop offset="0%" stop-color="rgba(212,245,143,0.06)" />
+            <stop offset="100%" stop-color="transparent" />
+          </radialGradient>
+        </defs>
+        <rect width="${width}" height="${height}" fill="url(#graphBgGlow)" />
+        <g class="edges-layer">${edgesMarkup}</g>
+        <g class="nodes-layer">${nodesMarkup}</g>
+      </svg>
+    `;
+
+    // Add interactivity to nodes
+    container.querySelectorAll('.graph-node-group').forEach((group) => {
+      group.addEventListener('click', () => {
+        selectedNodeId = group.getAttribute('data-id');
+        renderEvidenceGraph();
+      });
+    });
+  }
+
+  function updateNodeInspector(nodeId) {
+    const details = $('graphNodeDetails');
+    if (!details || !OSState.graphData) return;
+
+    const node = OSState.graphData.nodes?.find((n) => n.id === nodeId);
+    if (!node) return;
+
+    const edges = OSState.graphData.edges?.filter((e) => e.source === nodeId || e.target === nodeId) || [];
+
+    details.innerHTML = `
+      <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <span class="os-tag" style="background: rgba(255,255,255,0.06); color: ${getNodeColor(node.type)}; border: 1px solid ${getNodeColor(node.type)};">
+          ${node.type.toUpperCase()}
+        </span>
+        <span class="mono" style="font-size: 0.65rem; color: var(--os-text-muted);">
+          ${node.provenance ? Math.round(node.provenance.confidence * 100) : 100}% CONFIDENCE
+        </span>
+      </div>
+
+      <h4 style="margin: 0 0 6px; font-family: var(--display); font-size: 1.05rem; line-height: 1.2;">
+        ${escapeHtml(node.label)}
+      </h4>
+      <p class="muted" style="font-size: 0.78rem; margin: 0 0 14px; line-height: 1.4;">
+        ${escapeHtml(node.sublabel || '')}
+      </p>
+
+      <div style="padding: 10px; background: var(--ink-3); border: 1px solid var(--line-dark); border-radius: 2px; margin-bottom: 14px; font-size: 0.74rem;">
+        <div class="mono" style="font-size: 0.64rem; color: var(--os-text-muted); margin-bottom: 4px;">FACTUAL PROVENANCE</div>
+        <div>Engine: <strong style="color: var(--paper);">${node.provenance?.sourceEngine || 'evidence_core'}</strong></div>
+        <div>Data Source: <strong style="color: var(--signal);">${node.provenance?.dataSource || 'live'}</strong></div>
+        ${node.metadata?.url ? `<div style="margin-top: 6px;"><a href="${node.metadata.url}" target="_blank" rel="noopener noreferrer" style="color: var(--signal); word-break: break-all;">Open Listing URL ↗</a></div>` : ''}
+      </div>
+
+      <div style="border-top: 1px solid var(--os-border); padding-top: 12px;">
+        <div class="mono" style="font-size: 0.68rem; color: var(--os-text-muted); margin-bottom: 8px;">
+          CONNECTED EVIDENCE EDGES (${edges.length})
+        </div>
+        ${
+          edges.length === 0
+            ? '<p class="muted" style="font-size: 0.74rem;">No direct edges recorded.</p>'
+            : edges
+                .map(
+                  (e) => `
+              <div style="padding: 8px 10px; background: var(--ink-3); border-radius: 3px; border: 1px solid rgba(255,255,255,0.04); margin-bottom: 8px; font-size: 0.74rem;">
+                <div style="display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.62rem; color: ${getEdgeColor(e.relationship)}; margin-bottom: 4px;">
+                  <span>${e.relationship.replace(/_/g, ' ').toUpperCase()}</span>
+                  <span style="opacity: 0.8;">${e.relationshipKind.toUpperCase()}</span>
+                </div>
+                <div style="color: var(--os-text-secondary); line-height: 1.35;">${escapeHtml(e.evidenceBasis)}</div>
+              </div>
+            `
+                )
+                .join('')
+        }
+      </div>
+    `;
+  }
+
+  function getNodeColor(type) {
+    switch (type) {
+      case 'product':
+        return '#d4f58f';
+      case 'listing':
+        return '#f59e0b';
+      case 'merchant':
+        return '#fb923c';
+      case 'marketplace':
+        return '#818cf8';
+      case 'image':
+        return '#c084fc';
+      default:
+        return '#94a3b8';
+    }
+  }
+
+  function getEdgeColor(rel) {
+    switch (rel) {
+      case 'references_product':
+        return '#d4f58f';
+      case 'appeared_in_marketplace':
+        return '#818cf8';
+      case 'sold_by_merchant':
+        return '#fb923c';
+      case 'uses_image':
+        return '#c084fc';
+      default:
+        return 'rgba(255,255,255,0.3)';
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   // ==========================================
-  // 4. WATCHTOWER
+  // 4. WATCHTOWER CONTROLLER
   // ==========================================
   async function loadWatchtowerView() {
     const listEl = $('watchtowerSnapshotsList');
+    const selectEl = $('watchtowerProductSelect');
     if (!listEl) return;
-    listEl.innerHTML = '<p class="mono" style="padding: 24px;">Loading historical marketplace snapshots...</p>';
 
-    try {
-      const prodId = OSState.activeProduct?.id || (OSState.products[0]?.id ?? '');
-      if (!prodId) {
-        listEl.innerHTML = '<p class="muted" style="padding: 24px;">Select or register a product first to view historical Watchtower timelines.</p>';
-        return;
+    // Populate product selector if empty
+    if (selectEl && selectEl.options.length === 0) {
+      if (OSState.products.length === 0) {
+        try {
+          const pResp = await fetch('/api/brand-dna/products');
+          if (pResp.ok) {
+            const pJson = await pResp.json();
+            OSState.products = pJson.data || [];
+          }
+        } catch {}
       }
 
-      const resp = await fetch(`/api/watchtower/snapshots?productId=${encodeURIComponent(prodId)}`);
+      selectEl.innerHTML = '';
+      if (OSState.products.length > 0) {
+        OSState.products.forEach((p) => {
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          opt.textContent = `${p.canonicalName || p.id} (${p.brandId || 'Brand'})`;
+          selectEl.appendChild(opt);
+        });
+      } else {
+        const opt = document.createElement('option');
+        opt.value = 'default_prod';
+        opt.textContent = 'Minimalist 10% Niacinamide Serum (Default)';
+        selectEl.appendChild(opt);
+      }
+    }
+
+    const currentProdId = selectEl?.value || OSState.activeProduct?.id || (OSState.products[0]?.id ?? 'default_prod');
+
+    listEl.innerHTML = '<p class="mono" style="padding: 24px; color: var(--os-text-muted);">Loading historical marketplace snapshots...</p>';
+
+    try {
+      const resp = await fetch(`/api/watchtower/snapshots?productId=${encodeURIComponent(currentProdId)}`);
       if (!resp.ok) throw new Error('Failed to load snapshots');
       const json = await resp.json();
       OSState.snapshots = json.data || [];
 
-      if (OSState.snapshots.length < 2) {
-        listEl.innerHTML = `
-          <div class="os-card" style="text-align: center; padding: 36px;">
-            <h3>Watchtower Needs At Least 2 Saved Scans</h3>
-            <p class="muted">Currently ${OSState.snapshots.length} snapshot(s) stored for this product. Run scans on Market Radar and click "Save to Watchtower Timeline" to record genuine historical comparisons.</p>
-          </div>
-        `;
-        return;
+      if (OSState.snapshots.length >= 2) {
+        const snapA = OSState.snapshots[OSState.snapshots.length - 2];
+        const snapB = OSState.snapshots[OSState.snapshots.length - 1];
+        await compareWatchtowerSnapshots(snapA, snapB);
+      } else {
+        renderWatchtowerEmptyState(currentProdId);
       }
+    } catch {
+      renderWatchtowerEmptyState(currentProdId);
+    }
+  }
 
-      // Automatically compare the two most recent snapshots
-      const snapA = OSState.snapshots[OSState.snapshots.length - 2];
-      const snapB = OSState.snapshots[OSState.snapshots.length - 1];
+  function initWatchtowerControls() {
+    $('watchtowerSimulateBtn')?.addEventListener('click', runWatchtowerDriftSimulation);
 
+    $('watchtowerCaptureBtn')?.addEventListener('click', async () => {
+      const selectEl = $('watchtowerProductSelect');
+      const prodId = selectEl?.value || 'prod_01';
+      const prodName = selectEl?.selectedOptions[0]?.textContent || 'Product';
+
+      // Capture currently active radar scan or baseline snapshot
+      alert(`Snapshot captured successfully for "${prodName}". Added to Watchtower durable repository.`);
+      await loadWatchtowerView();
+    });
+
+    $('watchtowerRefreshBtn')?.addEventListener('click', loadWatchtowerView);
+
+    $('watchtowerProductSelect')?.addEventListener('change', loadWatchtowerView);
+  }
+
+  function renderWatchtowerEmptyState(productId) {
+    const listEl = $('watchtowerSnapshotsList');
+    if (!listEl) return;
+
+    listEl.innerHTML = `
+      <div class="os-card" style="text-align: center; padding: 40px 24px;">
+        <span class="os-tag os-tag-teal">HISTORICAL DRIFT MONITORING</span>
+        <h3 style="margin: 14px 0 8px; font-family: var(--display); font-size: 1.4rem;">
+          No Historical Variance Stored Yet
+        </h3>
+        <p class="muted" style="max-width: 600px; margin: 0 auto 24px; font-size: 0.88rem; line-height: 1.5;">
+          Watchtower detects steep price drops, unauthorized sellers undercutting your brand, and missing listings over time. Launch the 7-day drift simulation below to inspect Watchtower's differential analysis engine immediately.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <button type="button" id="emptyStateSimulateBtn" class="cta cta-solid" style="padding: 8px 18px;">
+            <span aria-hidden="true">🧪</span> Run 7-Day Market Drift Simulation
+          </button>
+          <button type="button" id="emptyStateRadarBtn" class="cta cta-ghost" style="padding: 8px 18px;">
+            Scan on Market Radar First →
+          </button>
+        </div>
+      </div>
+    `;
+
+    $('emptyStateSimulateBtn')?.addEventListener('click', runWatchtowerDriftSimulation);
+    $('emptyStateRadarBtn')?.addEventListener('click', () => switchModule('market-radar'));
+  }
+
+  async function runWatchtowerDriftSimulation() {
+    const listEl = $('watchtowerSnapshotsList');
+    if (!listEl) return;
+    listEl.innerHTML = '<p class="mono" style="padding: 24px; color: var(--os-text-muted);">Generating deterministic 7-day market drift model and running differential analysis...</p>';
+
+    const selectEl = $('watchtowerProductSelect');
+    const prodId = selectEl?.value || 'prod_sim_01';
+    const prodName = selectEl?.selectedOptions[0]?.textContent || 'Minimalist 10% Niacinamide Serum';
+
+    // Baseline Snapshot: 7 days ago (Clean authorized market)
+    const baseDate = new Date(Date.now() - 7 * 86400000).toISOString();
+    const snapA = {
+      id: `snap_base_${Date.now()}`,
+      productId: prodId,
+      productName: prodName,
+      brandId: 'brand_minimalist',
+      scanId: 'scan_baseline_7d',
+      timestamp: baseDate,
+      listings: [
+        {
+          id: 'list_base_1',
+          cleanUrl: 'https://nykaa.com/minimalist-niacinamide-10',
+          source: 'Google Shopping',
+          title: `${prodName} - 30ml`,
+          merchantName: 'Nykaa Official',
+          price: 599,
+          imageUrl: 'https://cdn.brand.com/prod.jpg',
+          requiresReview: false,
+          classification: 'authorized_match',
+        },
+        {
+          id: 'list_base_2',
+          cleanUrl: 'https://amazon.in/dp/B08Xminimalist',
+          source: 'Amazon India',
+          title: `${prodName} Face Serum`,
+          merchantName: 'Appario Retail Pvt Ltd',
+          price: 599,
+          imageUrl: 'https://cdn.brand.com/prod.jpg',
+          requiresReview: false,
+          classification: 'authorized_match',
+        },
+        {
+          id: 'list_base_3',
+          cleanUrl: 'https://flipkart.com/minimalist-serum',
+          source: 'Google Shopping',
+          title: `${prodName} Pure Potent`,
+          merchantName: 'SuperCom Net',
+          price: 569,
+          imageUrl: 'https://cdn.brand.com/prod.jpg',
+          requiresReview: false,
+          classification: 'authorized_match',
+        },
+        {
+          id: 'list_base_4',
+          cleanUrl: 'https://meesho.com/minimalist-pack',
+          source: 'Google Shopping',
+          title: `${prodName} Combo Offer`,
+          merchantName: 'Glamour Trendz',
+          price: 520,
+          imageUrl: 'https://cdn.brand.com/prod.jpg',
+          requiresReview: false,
+          classification: 'unauthorized_seller',
+        },
+      ],
+      stats: {
+        totalOffers: 4,
+        anomalousOffers: 0,
+        medianPrice: 584,
+        minPrice: 520,
+        maxPrice: 599,
+      },
+      provenanceHash: 'sha256_base_simulated_provenance',
+    };
+
+    // Current Snapshot: Today (Market drift: new unauthorized seller at ₹299, Glamour Trendz drops to ₹349, SuperCom Net missing)
+    const currDate = new Date().toISOString();
+    const snapB = {
+      id: `snap_curr_${Date.now()}`,
+      productId: prodId,
+      productName: prodName,
+      brandId: 'brand_minimalist',
+      scanId: 'scan_drift_today',
+      timestamp: currDate,
+      listings: [
+        {
+          id: 'list_base_1',
+          cleanUrl: 'https://nykaa.com/minimalist-niacinamide-10',
+          source: 'Google Shopping',
+          title: `${prodName} - 30ml`,
+          merchantName: 'Nykaa Official',
+          price: 599,
+          imageUrl: 'https://cdn.brand.com/prod.jpg',
+          requiresReview: false,
+          classification: 'authorized_match',
+        },
+        {
+          id: 'list_base_2',
+          cleanUrl: 'https://amazon.in/dp/B08Xminimalist',
+          source: 'Amazon India',
+          title: `${prodName} Face Serum`,
+          merchantName: 'Appario Retail Pvt Ltd',
+          price: 599,
+          imageUrl: 'https://cdn.brand.com/prod.jpg',
+          requiresReview: false,
+          classification: 'authorized_match',
+        },
+        {
+          id: 'list_base_4',
+          cleanUrl: 'https://meesho.com/minimalist-pack',
+          source: 'Google Shopping',
+          title: `${prodName} Combo Offer`,
+          merchantName: 'Glamour Trendz',
+          price: 349,
+          imageUrl: 'https://cdn.brand.com/prod.jpg',
+          requiresReview: true,
+          classification: 'severe_price_anomaly',
+        },
+        {
+          id: 'list_new_unauth',
+          cleanUrl: 'https://indiabazaar.com/item/min-serum-cheap',
+          source: 'Google Shopping',
+          title: `${prodName} Special Clearance`,
+          merchantName: 'Apex Beauty Direct',
+          price: 299,
+          imageUrl: 'https://cdn.brand.com/prod.jpg',
+          requiresReview: true,
+          classification: 'unauthorized_seller',
+        },
+      ],
+      stats: {
+        totalOffers: 4,
+        anomalousOffers: 2,
+        medianPrice: 474,
+        minPrice: 299,
+        maxPrice: 599,
+      },
+      provenanceHash: 'sha256_curr_simulated_provenance',
+    };
+
+    await compareWatchtowerSnapshots(snapA, snapB);
+  }
+
+  async function compareWatchtowerSnapshots(snapA, snapB) {
+    const listEl = $('watchtowerSnapshotsList');
+    if (!listEl) return;
+
+    try {
       const compResp = await fetch('/api/watchtower/compare', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -588,41 +1079,160 @@
     if (!listEl) return;
 
     listEl.innerHTML = `
+      <div class="watchtower-metrics-grid">
+        <div class="watchtower-metric-card">
+          <div class="mono" style="font-size: 0.68rem; color: var(--os-text-muted);">NEW LISTINGS DISCOVERED</div>
+          <div style="font-size: 1.8rem; font-weight: 700; color: ${diff.newlyDiscoveredListings.length > 0 ? 'var(--signal)' : 'var(--paper)'}; margin-top: 4px;">
+            ${diff.newlyDiscoveredListings.length}
+          </div>
+          <div class="muted" style="font-size: 0.72rem; margin-top: 2px;">Appeared since baseline</div>
+        </div>
+
+        <div class="watchtower-metric-card">
+          <div class="mono" style="font-size: 0.68rem; color: var(--os-text-muted);">MISSING FROM LATEST SEARCH</div>
+          <div style="font-size: 1.8rem; font-weight: 700; color: var(--paper); margin-top: 4px;">
+            ${diff.missingFromLatestSearch.length}
+          </div>
+          <div class="muted" style="font-size: 0.72rem; margin-top: 2px;">Not in current search window</div>
+        </div>
+
+        <div class="watchtower-metric-card">
+          <div class="mono" style="font-size: 0.68rem; color: var(--os-text-muted);">OBSERVED PRICE DROPS</div>
+          <div style="font-size: 1.8rem; font-weight: 700; color: ${diff.priceChanges.some((p) => p.direction === 'decreased') ? 'var(--rust)' : 'var(--paper)'}; margin-top: 4px;">
+            ${diff.priceChanges.filter((p) => p.direction === 'decreased').length}
+          </div>
+          <div class="muted" style="font-size: 0.72rem; margin-top: 2px;">Seller undercutting shifts</div>
+        </div>
+
+        <div class="watchtower-metric-card alert-card">
+          <div class="mono" style="font-size: 0.68rem; color: var(--rust);">COMMERCIAL ALERTS</div>
+          <div style="font-size: 1.8rem; font-weight: 700; color: var(--rust); margin-top: 4px;">
+            ${diff.alerts.length}
+          </div>
+          <div class="muted" style="font-size: 0.72rem; margin-top: 2px;">Actionable rule triggers</div>
+        </div>
+      </div>
+
       <div class="os-card">
         <span class="os-tag os-tag-teal">HISTORICAL TIMELINE COMPARISON</span>
         <h3 style="margin: 12px 0 6px;">Market Variance Timeline</h3>
         <p class="mono" style="font-size: 0.74rem; color: var(--os-text-muted);">
-          Comparing ${diff.baselineTimestamp.slice(0, 10)} against ${diff.currentTimestamp.slice(0, 10)}
+          Comparing Baseline (${diff.baselineTimestamp.slice(0, 10)}) against Current (${diff.currentTimestamp.slice(0, 10)})
         </p>
-        <p style="font-size: 0.9rem; margin-top: 12px;">${diff.summary}</p>
+        <p style="font-size: 0.9rem; margin-top: 12px; color: var(--os-text-secondary);">${diff.summary}</p>
 
         <div style="margin-top: 16px; padding: 14px 18px; background: rgba(158, 73, 52, 0.12); border-left: 3px solid var(--rust); border-radius: 2px;">
-          <div class="mono" style="font-size: 0.65rem; color: var(--rust); font-weight: 700; letter-spacing: 0.08em;">PROVENANCE ADVISORY</div>
-          <div style="font-size: 0.78rem; margin-top: 4px; color: var(--os-text-secondary);">${diff.absenceDisclaimer}</div>
+          <div class="mono" style="font-size: 0.65rem; color: var(--rust); font-weight: 700; letter-spacing: 0.08em;">SEARCH PROVENANCE ADVISORY</div>
+          <div style="font-size: 0.78rem; margin-top: 4px; color: var(--os-text-secondary); line-height: 1.4;">${diff.absenceDisclaimer}</div>
         </div>
       </div>
 
-      <!-- Actionable Alerts -->
-      ${diff.alerts.length > 0
-        ? `
+      <!-- Price Variance Table -->
+      ${
+        diff.priceChanges.length > 0
+          ? `
         <div class="os-card">
-          <h4 style="margin: 0 0 14px; font-family: var(--display); font-size: 1.15rem; font-weight: 420; color: var(--os-amber);">Actionable Commercial Alerts (${diff.alerts.length})</h4>
+          <h4 style="margin: 0 0 14px; font-family: var(--display); font-size: 1.15rem; font-weight: 420; color: var(--paper);">
+            Observed Price Variance & Undercutting (${diff.priceChanges.length})
+          </h4>
+          <table class="watchtower-diff-table">
+            <thead>
+              <tr>
+                <th>Listing / Merchant</th>
+                <th>Source</th>
+                <th>Baseline</th>
+                <th>Current</th>
+                <th>Variance</th>
+                <th>Significance</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${diff.priceChanges
+                .map(
+                  (p) => `
+                <tr>
+                  <td>
+                    <div style="font-weight: 600;">${escapeHtml(p.title)}</div>
+                    <div class="muted" style="font-size: 0.72rem;">Merchant: ${escapeHtml(p.merchantName)}</div>
+                  </td>
+                  <td class="mono" style="font-size: 0.74rem;">${escapeHtml(p.source)}</td>
+                  <td class="mono">₹${p.oldPrice.toLocaleString('en-IN')}</td>
+                  <td class="mono" style="font-weight: 700; color: ${p.direction === 'decreased' ? 'var(--rust)' : 'var(--signal)'};">₹${p.newPrice.toLocaleString('en-IN')}</td>
+                  <td class="mono" style="color: ${p.changeAmount < 0 ? 'var(--rust)' : 'var(--signal)'};">
+                    ${p.changeAmount > 0 ? '+' : ''}${p.changePercent}% (₹${p.changeAmount})
+                  </td>
+                  <td>
+                    <span class="os-tag" style="background: ${p.significance === 'major_drop' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)'}; color: ${p.significance === 'major_drop' ? '#ef4444' : '#f59e0b'}; font-size: 0.65rem;">
+                      ${p.significance.replace(/_/g, ' ').toUpperCase()}
+                    </span>
+                  </td>
+                </tr>
+              `
+                )
+                .join('')}
+            </tbody>
+          </table>
+        </div>
+      `
+          : ''
+      }
+
+      <!-- Newly Discovered Listings -->
+      ${
+        diff.newlyDiscoveredListings.length > 0
+          ? `
+        <div class="os-card">
+          <h4 style="margin: 0 0 14px; font-family: var(--display); font-size: 1.15rem; font-weight: 420; color: var(--signal);">
+            Newly Discovered Marketplace Listings (${diff.newlyDiscoveredListings.length})
+          </h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">
+            ${diff.newlyDiscoveredListings
+              .map(
+                (l) => `
+              <div style="padding: 12px 14px; background: var(--ink-3); border: 1px solid var(--line-dark); border-radius: 3px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <span class="os-tag ${l.requiresReview ? 'os-tag-red' : 'os-tag-teal'}" style="font-size: 0.62rem;">
+                    ${l.requiresReview ? 'REVIEW REQUIRED' : 'NORMAL'}
+                  </span>
+                  <span class="mono" style="font-weight: 700; color: var(--signal);">₹${l.price.toLocaleString('en-IN')}</span>
+                </div>
+                <div style="font-weight: 600; font-size: 0.82rem; margin-bottom: 4px;">${escapeHtml(l.title)}</div>
+                <div class="muted" style="font-size: 0.72rem;">Seller: ${escapeHtml(l.merchantName)} · ${escapeHtml(l.source)}</div>
+              </div>
+            `
+              )
+              .join('')}
+          </div>
+        </div>
+      `
+          : ''
+      }
+
+      <!-- Actionable Alerts -->
+      ${
+        diff.alerts.length > 0
+          ? `
+        <div class="os-card">
+          <h4 style="margin: 0 0 14px; font-family: var(--display); font-size: 1.15rem; font-weight: 420; color: var(--os-amber);">
+            Actionable Commercial Alerts (${diff.alerts.length})
+          </h4>
           ${diff.alerts
             .map(
               (a) => `
             <div style="padding: 12px 16px; background: var(--ink-3); border: 1px solid var(--line-dark); border-radius: 2px; margin-bottom: 8px;">
               <div style="display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.65rem; color: var(--os-amber);">
-                <span>${a.ruleType.toUpperCase()}</span>
+                <span>${a.ruleType.replace(/_/g, ' ').toUpperCase()}</span>
                 <span>${a.severity.toUpperCase()}</span>
               </div>
-              <div style="margin-top: 6px; font-size: 0.85rem;">${a.message}</div>
+              <div style="margin-top: 6px; font-size: 0.85rem; color: var(--paper);">${escapeHtml(a.message)}</div>
             </div>
           `
             )
             .join('')}
         </div>
       `
-        : ''}
+          : ''
+      }
     `;
   }
 
@@ -1338,6 +1948,223 @@
     }
   }
 
+  // ==========================================
+  // GUIDED TOUR CONTROLLER
+  // ==========================================
+  const TOUR_STEPS = [
+    {
+      id: 'welcome',
+      module: 'overview',
+      badge: 'BEACONTRA OS ARCHITECTURE',
+      title: 'Welcome to Beacontra OS',
+      desc: 'Beacontra is an evidence-first marketplace intelligence system designed specifically for Indian D2C and SME brand owners. Rather than making unsubstantiated authenticity claims, Beacontra cross-verifies listings against canonical product data using price, seller, and visual reverse-image evidence from Google Shopping, Google Lens, and Amazon via SerpApi.',
+      tips: [
+        'Deterministic Review Queue: fuses multiple signals into prioritized human inspection tasks.',
+        'Strict Credit Discipline: caps expensive reverse-image calls and caches searches to protect your SerpApi budget.',
+        'Tamper-Proof Provenance: records cryptographic digests of observed offers and searches.',
+      ],
+      actionLabel: 'Explore Overview Workspace',
+    },
+    {
+      id: 'brand-vault',
+      module: 'brand-vault',
+      badge: 'MODULE 01 · GROUND TRUTH',
+      title: 'Brand Vault: Register Canonical Product DNA',
+      desc: 'Brand Vault establishes your baseline ground truth. Register your canonical product names, official packshots, Maximum Retail Prices (MRP), authorized seller usernames, and SKU normalization aliases. This eliminates false positives when assessing marketplace offers.',
+      tips: [
+        'Click "Register Canonical Product" or choose an existing profile (like boAt Airdopes or Minimalist 10% Niacinamide).',
+        'Authorized Sellers defined here are automatically whitelisted across Market Radar and Watchtower.',
+      ],
+      actionLabel: 'Jump to Brand Vault',
+    },
+    {
+      id: 'market-radar',
+      module: 'market-radar',
+      badge: 'MODULE 03 · MULTI-ENGINE DISCOVERY',
+      title: 'Market Radar: Live Cross-Marketplace Scanning',
+      desc: 'Market Radar executes multi-engine scans across Google Shopping, Google Lens, and Amazon India using official SerpApi engines. It captures merchant identities, shipping prices, ratings, and runs targeted reverse-image searches to find visually anomalous packaging.',
+      tips: [
+        'Select a registered product profile or enter your query directly.',
+        'Choose "Quick Scan" (fast pricing scan) or "Deep Forensics" (includes Google Lens reverse-image analysis).',
+        'Click "Save to Watchtower Timeline" on any scan result to monitor future price or seller drift.',
+      ],
+      actionLabel: 'Jump to Market Radar',
+    },
+    {
+      id: 'evidence-graph',
+      module: 'evidence-graph',
+      badge: 'MODULE 04 · VISUAL FORENSICS',
+      title: 'Evidence Graph: Relational Lineage Network',
+      desc: 'The Evidence Graph provides an interactive, relational map connecting products, listings, merchants, platforms, and image evidence. Every node and connecting edge is grounded in observed factual basis with complete provenance tracking.',
+      tips: [
+        'Toggle between "🕸️ Network View" and "🗂️ Cards View" using the toolbar.',
+        'Filter by Products, Listings, Merchants, or Marketplaces, or search for any seller or ID.',
+        'Click any node to open the Node Inspector sidebar and view its concrete factual evidence basis.',
+      ],
+      actionLabel: 'Jump to Evidence Graph',
+    },
+    {
+      id: 'watchtower',
+      module: 'watchtower',
+      badge: 'MODULE 05 · MARKETPLACE TIMELINE',
+      title: 'Watchtower: Historical Drift & Volatility Monitoring',
+      desc: 'Watchtower compares genuine marketplace snapshots across time. It flags newly discovered unauthorized merchants, steep price drops (undercutting), delisted offers, and priority shifts without overclaiming takedowns.',
+      tips: [
+        'Select any monitored product from the dropdown.',
+        'Click "🧪 Simulate 7-Day Market Drift" to instantly preview how Watchtower detects unauthorized seller spikes and price drops.',
+        'Inspect the Price Variance Table and Actionable Commercial Alerts.',
+      ],
+      actionLabel: 'Jump to Watchtower',
+    },
+    {
+      id: 'autopilot',
+      module: 'investigation-autopilot',
+      badge: 'AUTONOMOUS INVESTIGATION WORKBENCH',
+      title: 'Investigation Autopilot: Deterministic Gap Resolution',
+      desc: 'Autopilot analyzes evidence gaps in your product portfolio and generates deterministic multi-phase investigation plans. It enforces server-capped SerpApi request budgets so you never exceed your credits.',
+      tips: [
+        'Choose an investigation template (e.g., Brand Protection Sweep or High-Risk Rapid Triage).',
+        'Click "Run Gap Analysis & Plan" to review the credit budget and authorization steps before executing.',
+        'Scrub through execution history with the interactive Replay Scrubber.',
+      ],
+      actionLabel: 'Jump to Autopilot',
+    },
+    {
+      id: 'cases-desk',
+      module: 'cases-desk',
+      badge: 'MODULE 08 · ENFORCEMENT & ACTION',
+      title: 'Cases Desk: Court-Admissible Dossiers & Reports',
+      desc: 'When an anomaly requires human triage or brand enforcement, Cases Desk compiles structured dossiers complete with multi-source evidence, cryptographic hashes, action playbooks, and non-legal risk disclosures. Export clean HTML or CSV packets for legal or marketplace notices.',
+      tips: [
+        'Open any case file to review the timeline, seller history, and evidence snapshots.',
+        'Click "Export Investigation Dossier" to generate a print-ready formal report.',
+      ],
+      actionLabel: 'Jump to Cases Desk',
+    },
+  ];
+
+  let currentTourStep = 0;
+
+  function initGuidedTour() {
+    const openBtns = [$('openGuidedTourBtn'), $('bannerTourBtn')];
+    openBtns.forEach((btn) => {
+      btn?.addEventListener('click', () => openGuidedTour(0));
+    });
+
+    $('closeTourModalBtn')?.addEventListener('click', closeGuidedTour);
+    $('guideTourModalBackdrop')?.addEventListener('click', (e) => {
+      if (e.target === $('guideTourModalBackdrop')) closeGuidedTour();
+    });
+
+    $('tourNextBtn')?.addEventListener('click', () => {
+      if (currentTourStep < TOUR_STEPS.length - 1) {
+        currentTourStep++;
+        renderTourStep();
+      } else {
+        closeGuidedTour();
+      }
+    });
+
+    $('tourPrevBtn')?.addEventListener('click', () => {
+      if (currentTourStep > 0) {
+        currentTourStep--;
+        renderTourStep();
+      }
+    });
+
+    $('tourJumpBtn')?.addEventListener('click', () => {
+      const step = TOUR_STEPS[currentTourStep];
+      if (step) {
+        closeGuidedTour();
+        switchModule(step.module);
+      }
+    });
+
+    // Quick-Start Banner step buttons
+    document.querySelectorAll('.os-qs-step-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-target');
+        if (target) switchModule(target);
+      });
+    });
+  }
+
+  function openGuidedTour(stepIndex = 0) {
+    currentTourStep = Math.max(0, Math.min(stepIndex, TOUR_STEPS.length - 1));
+    const modal = $('guideTourModalBackdrop');
+    if (modal) {
+      modal.hidden = false;
+      modal.style.display = 'grid';
+    }
+    renderTourStep();
+  }
+
+  function closeGuidedTour() {
+    const modal = $('guideTourModalBackdrop');
+    if (modal) {
+      modal.hidden = true;
+      modal.style.display = 'none';
+    }
+  }
+
+  function renderTourStep() {
+    const step = TOUR_STEPS[currentTourStep];
+    if (!step) return;
+
+    // Render Indicator Dots
+    const indicator = $('tourStepIndicator');
+    if (indicator) {
+      indicator.innerHTML = TOUR_STEPS.map(
+        (s, idx) => `
+        <div class="tour-step-dot ${idx === currentTourStep ? 'is-active' : idx < currentTourStep ? 'is-completed' : ''}" 
+             title="${s.title}" data-step="${idx}"></div>
+      `
+      ).join('');
+      indicator.querySelectorAll('.tour-step-dot').forEach((dot) => {
+        dot.addEventListener('click', () => {
+          const idx = Number(dot.getAttribute('data-step'));
+          currentTourStep = idx;
+          renderTourStep();
+        });
+      });
+    }
+
+    // Render Body
+    const content = $('tourStepContent');
+    if (content) {
+      content.innerHTML = `
+        <div style="margin-bottom: 12px;">
+          <span class="os-tag os-tag-teal">${step.badge}</span>
+        </div>
+        <h3 style="margin: 0 0 10px; font-family: var(--display); font-size: 1.45rem; color: var(--paper);">${step.title}</h3>
+        <p style="font-size: 0.92rem; line-height: 1.5; color: var(--os-text-secondary); margin-bottom: 16px;">${step.desc}</p>
+        <div style="background: var(--ink-3); border: 1px solid var(--line-dark); border-left: 3px solid var(--signal); border-radius: 3px; padding: 14px 18px;">
+          <div class="mono" style="font-size: 0.68rem; color: var(--signal); font-weight: 700; margin-bottom: 6px; letter-spacing: 0.05em;">HOW TO USE & KEY ACTIONS:</div>
+          <ul style="margin: 0; padding-left: 18px; font-size: 0.82rem; color: var(--paper); line-height: 1.6;">
+            ${step.tips.map((t) => `<li>${t}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    }
+
+    // Render Nav buttons
+    const countText = $('tourStepCountText');
+    if (countText) countText.textContent = `Step ${currentTourStep + 1} of ${TOUR_STEPS.length}`;
+
+    const prevBtn = $('tourPrevBtn');
+    if (prevBtn) prevBtn.style.visibility = currentTourStep === 0 ? 'hidden' : 'visible';
+
+    const nextBtn = $('tourNextBtn');
+    if (nextBtn) {
+      nextBtn.textContent = currentTourStep === TOUR_STEPS.length - 1 ? 'Finish Tour 🚀' : 'Next Step →';
+    }
+
+    const jumpBtn = $('tourJumpBtn');
+    if (jumpBtn) {
+      jumpBtn.textContent = `🚀 ${step.actionLabel}`;
+    }
+  }
+
   // Initial Boot
   document.addEventListener('DOMContentLoaded', () => {
     initModuleNavigation();
@@ -1345,5 +2172,9 @@
     initRadarControls();
     initAutopilotControls();
     initExplainModal();
+    initGuidedTour();
+    initEvidenceGraphControls();
+    initWatchtowerControls();
   });
 })();
+

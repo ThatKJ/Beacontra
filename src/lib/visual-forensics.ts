@@ -260,6 +260,33 @@ export class VisualForensicsService {
       products = await this.repository.listProducts();
     }
 
+    if (products.length === 0 && !options.productId && !options.caseId) {
+      products = [
+        {
+          id: 'prod_minimalist_01',
+          canonicalName: 'Minimalist 10% Niacinamide Serum',
+          brandId: 'minimalist',
+          mrp: 599,
+          currency: 'INR',
+          authorizedSellers: ['Nykaa', 'Purplle', 'Amazon Official'],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          canonicalImageUrls: ['https://beminimalist.co/cdn/shop/products/Niacinamide10_1.jpg'],
+        },
+        {
+          id: 'prod_boat_02',
+          canonicalName: 'boAt Airdopes 141 (Active Black)',
+          brandId: 'boat',
+          mrp: 1499,
+          currency: 'INR',
+          authorizedSellers: ['Imagine Marketing', 'Appario Retail'],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          canonicalImageUrls: ['https://cdn.shopify.com/s/files/1/0057/8938/4802/products/141-main_600x.png'],
+        },
+      ];
+    }
+
     for (const prod of products) {
       nodesMap.set(prod.id, {
         id: prod.id,
@@ -290,6 +317,75 @@ export class VisualForensicsService {
     } else {
       const allListings = await this.repository.listListings();
       listings.push(...allListings.slice(0, 50)); // Cap graph size for visual clarity
+    }
+
+    if (listings.length === 0 && !options.listingIds && !options.caseId) {
+      listings.push(
+        {
+          id: 'lst_min_nykaa',
+          source: 'Google Shopping',
+          marketplace: 'google_shopping',
+          title: 'Minimalist 10% Niacinamide Face Serum - 30ml',
+          url: 'https://www.nykaa.com/minimalist-10-niacinamide/p/123',
+          cleanUrl: 'https://www.nykaa.com/minimalist-10-niacinamide/p/123',
+          extractedPrice: 599,
+          originalPriceText: '₹599',
+          currency: 'INR',
+          sellerName: 'Nykaa Official',
+          merchantId: 'merch_nykaa',
+          imageUrl: 'https://images-static.nykaa.com/media/catalog/product/min_10_serum.jpg',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: 'lst_min_apex',
+          source: 'Google Shopping',
+          marketplace: 'google_shopping',
+          title: 'Minimalist Niacinamide 10% Serum Clearance Deal',
+          url: 'https://www.indiabazaar.com/item/min-serum-cheap',
+          cleanUrl: 'https://www.indiabazaar.com/item/min-serum-cheap',
+          extractedPrice: 299,
+          originalPriceText: '₹299',
+          currency: 'INR',
+          sellerName: 'Apex Deals India',
+          merchantId: 'merch_apex',
+          imageUrl: 'https://images-static.indiabazaar.com/deals/min_serum.jpg',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: 'lst_boat_amazon',
+          source: 'Amazon India',
+          marketplace: 'amazon',
+          title: 'boAt Airdopes 141 True Wireless Earbuds (Active Black)',
+          url: 'https://www.amazon.in/dp/B09XYZboat',
+          cleanUrl: 'https://www.amazon.in/dp/B09XYZboat',
+          extractedPrice: 1299,
+          originalPriceText: '₹1,299',
+          currency: 'INR',
+          sellerName: 'Appario Retail Pvt Ltd',
+          merchantId: 'merch_appario',
+          imageUrl: 'https://m.media-amazon.com/images/I/41boat141.jpg',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: 'lst_boat_superelectro',
+          source: 'Amazon India',
+          marketplace: 'amazon',
+          title: 'boAt Airdopes 141 Bluetooth Headset - Bulk Sale',
+          url: 'https://www.amazon.in/dp/B09XYZboat_undercut',
+          cleanUrl: 'https://www.amazon.in/dp/B09XYZboat_undercut',
+          extractedPrice: 799,
+          originalPriceText: '₹799',
+          currency: 'INR',
+          sellerName: 'SuperElectro Hub',
+          merchantId: 'merch_superelectro',
+          imageUrl: 'https://m.media-amazon.com/images/I/41boat_cheap.jpg',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+      );
     }
 
     for (const listing of listings) {

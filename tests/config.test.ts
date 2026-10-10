@@ -12,6 +12,7 @@ describe('Centralized SerpApi Config Layer', () => {
   const originalKey = process.env.SERPAPI_KEY;
 
   beforeEach(() => {
+    (globalThis as any).process = process;
     delete process.env.SERPAPI_API_KEY;
     delete process.env.SERPAPI_KEY;
   });

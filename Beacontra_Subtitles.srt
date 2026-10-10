@@ -1,0 +1,99 @@
+1
+00:00:00,800 --> 00:00:06,200
+Every Indian D2C brand faces an overwhelming marketplace reality.
+
+2
+00:00:06,300 --> 00:00:11,650
+Thousands of product listings across Amazon, Flipkart, and Google Shopping.
+
+3
+00:00:12,800 --> 00:00:18,500
+Unauthorized sellers, steep unauthorized discounts, and copied photography.
+
+4
+00:00:18,600 --> 00:00:25,300
+Brand teams can find listings—but they struggle to determine which ones actually deserve investigation.
+
+5
+00:00:26,600 --> 00:00:30,200
+This is Beacontra.
+
+6
+00:00:30,300 --> 00:00:37,420
+A visual and commercial investigation workspace that transforms live marketplace search and reverse-image matching into an evidence-backed review queue.
+
+7
+00:00:38,500 --> 00:00:42,200
+Everything starts in the Brand Vault.
+
+8
+00:00:42,300 --> 00:00:50,800
+Here, a brand registers its ground truth: statutory MRP, expected price bands, authorized merchants, and canonical reference photography.
+
+9
+00:00:50,900 --> 00:00:56,430
+This benchmark prevents false alarms and anchors every subsequent scan.
+
+10
+00:00:57,800 --> 00:01:03,600
+Through SerpApi Google Shopping, Beacontra scans live e-commerce offers in real time.
+
+11
+00:01:03,700 --> 00:01:11,500
+Our deterministic SKU normalizer automatically excludes non-comparable accessories like silicone covers and cables.
+
+12
+00:01:11,600 --> 00:01:21,370
+Instantly, an unauthorized listing at 1,399 rupees is flagged: an 81 percent price drop against the statutory MRP.
+
+13
+00:01:24,100 --> 00:01:29,200
+Next, Visual Forensics submits listing thumbnails to SerpApi Google Lens.
+
+14
+00:01:29,300 --> 00:01:38,200
+If Lens returns no matches, Beacontra is honest: it classifies the signal as neutral absence of evidence, never claiming counterfeit status without proof.
+
+15
+00:01:38,300 --> 00:01:47,980
+The Evidence Graph unifies every factual link—connecting brands to listings, merchants, and visual clusters.
+
+16
+00:01:50,000 --> 00:01:55,200
+Clicking Explain This Finding opens Beacontra's transparent heuristic engine.
+
+17
+00:01:55,300 --> 00:02:02,100
+It displays exact mathematical weights: price deviation, unauthorized merchant penalty, and visual confidence.
+
+18
+00:02:02,200 --> 00:02:10,520
+It even runs a counterfactual simulation—showing how review priority changes if seller authorization is verified.
+
+19
+00:02:12,000 --> 00:02:18,500
+Investigators can capture listings directly from the browser using the Beacontra Lens Chrome extension,
+
+20
+00:02:18,600 --> 00:02:22,100
+or file cases into the Cases Desk.
+
+21
+00:02:22,200 --> 00:02:28,200
+With one click, Beacontra exports a standalone, print-ready HTML dossier—
+
+22
+00:02:28,300 --> 00:02:33,980
+complete with cryptographic provenance, timestamped evidence, and defensible audit notes for legal and compliance teams.
+
+23
+00:02:36,000 --> 00:02:41,200
+SerpApi delivers the live marketplace and visual data.
+
+24
+00:02:41,300 --> 00:02:45,500
+Beacontra turns that data into evidence you can trust.
+
+25
+00:02:45,600 --> 00:02:47,260
+Every listing, a clearer signal.

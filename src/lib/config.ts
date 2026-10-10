@@ -10,8 +10,6 @@
  * - Error messages NEVER leak key values or partial fingerprints
  */
 
-import process from 'node:process';
-
 const CONFIG_ERROR_MESSAGE = 'SERPAPI_API_KEY is not configured.';
 const DEFAULT_BASE_URL = 'https://serpapi.com/search.json';
 
@@ -46,10 +44,14 @@ export function getSerpApiKey(env?: Record<string, unknown>): string {
     }
   }
 
-  // 2. Check process.env (Node / Vitest / CLI)
   try {
-    if (typeof process !== 'undefined' && process && process.env) {
-      const processKey = process.env.SERPAPI_API_KEY ?? process.env.SERPAPI_KEY;
+    const proc = (typeof process !== 'undefined'
+      ? process
+      : (globalThis as unknown as { process?: { env?: Record<string, string | undefined> } })?.process) as
+      | { env?: Record<string, string | undefined> }
+      | undefined;
+    if (proc && proc.env) {
+      const processKey = proc.env.SERPAPI_API_KEY ?? proc.env.SERPAPI_KEY;
       if (isValidKey(processKey)) {
         return processKey.trim();
       }

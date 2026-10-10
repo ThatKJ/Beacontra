@@ -163,6 +163,11 @@ async function main() {
   }
 
   // 3. Start Window-Only Screen Capture
+  if (fs.existsSync(OUTPUT_VIDEO)) {
+    fs.unlinkSync(OUTPUT_VIDEO);
+    console.log('[RECORDING] Removed previous video to allow clean overwrite.');
+  }
+
   console.log('[RECORDING] Launching targeted window screencapture...');
   const captureProc = spawn('/usr/sbin/screencapture', captureArgs);
   const startTime = Date.now();
